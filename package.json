@@ -1,0 +1,26 @@
+{
+    "author": "colder",
+    "bugs": {
+        "url": "https://github.com/cncolder/firstebook/issues"
+    },
+    "description": "my first ebook",
+    "devDependencies": {
+        "cordova": "^4.3.0",
+        "ios-sim": "^3.1.1"
+    },
+    "homepage": "https://github.com/cncolder/firstebook",
+    "license": "ISC",
+    "main": "index.js",
+    "name": "firstebook",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cncolder/firstebook.git"
+    },
+    "scripts": {
+        "start": "cordova run --target=iPhone-5",
+        "restart": "cordova run --nobuild --target=iPhone-5",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "version": "1.0.0"
+}
