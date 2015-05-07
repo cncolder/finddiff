@@ -1,12 +1,48 @@
 {
+    "apps": [
+        {
+            "env": {
+                "DEBUG": "*",
+                "DEBUG_COLORS": 1,
+                "NODE_ENV": "development",
+                "PORT": 3000
+            },
+            "env_production": {
+                "DEBUG": "",
+                "NODE_ENV": "production",
+                "PORT": 80
+            },
+            "ignore_watch": [
+                "[\\/\\\\]\\./",
+                "node_modules",
+                "public",
+                "views"
+            ],
+            "instances": "1",
+            "name": "firstebook",
+            "node_args": "--harmony",
+            "script": "server.js",
+            "watch": false
+        }
+    ],
     "author": "colder",
     "bugs": {
         "url": "https://github.com/cncolder/firstebook/issues"
     },
     "description": "my first ebook",
     "devDependencies": {
-        "cordova": "^4.3.0",
-        "ios-sim": "^3.1.1"
+        "babelify": "^6.0.2",
+        "browserify": "^9.0.8",
+        "debug": "^2.1.3",
+        "gulp": "^3.8.11",
+        "gulp-sourcemaps": "^1.5.2",
+        "gulp-util": "^3.0.4",
+        "koa": "^0.19.1",
+        "koa-logger": "^1.2.2",
+        "koa-static": "^1.4.9",
+        "phaser": "^2.3.0",
+        "vinyl-buffer": "^1.0.0",
+        "vinyl-source-stream": "^1.1.0"
     },
     "homepage": "https://github.com/cncolder/firstebook",
     "license": "ISC",
@@ -18,8 +54,8 @@
         "url": "https://github.com/cncolder/firstebook.git"
     },
     "scripts": {
-        "start": "cordova run --target=iPhone-5",
         "restart": "cordova run --nobuild --target=iPhone-5",
+        "start": "cordova run --target=iPhone-5",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "version": "1.0.0"

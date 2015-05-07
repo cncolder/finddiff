@@ -9,5 +9,9 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <preference name="Fullscreen" value="true" />
+    <preference name="Orientation" value="landscape" />
+    <preference name="DisallowOverscroll" value="true"/>
+    <preference name="BackupWebStorage" value="local"/>
     <engine name="ios" version="3.8.0" />
 </widget>

@@ -1,0 +1,23 @@
+{
+    "browser": true,
+    "browserify": true,
+    "esnext": true,
+    "freeze": true,
+    "globals": {
+        "PIXI": true,
+        "Phaser": true,
+        "Promise": true,
+        "alert": true,
+        "window": true
+    },
+    "latedef": "nofunc",
+    "maxdepth": 3,
+    "maxparams": 4,
+    "mocha": true,
+    "newcap": true,
+    "node": true,
+    "noyield": true,
+    "quotmark": "single",
+    "undef": true,
+    "unused": true
+}
