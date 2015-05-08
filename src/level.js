@@ -1,4 +1,4 @@
-var debug = require('debug')('level'); // jshint ignore:line
+const log = require('debug')('level'); // jshint ignore:line
 
 /*
 Menu
@@ -7,96 +7,113 @@ Menu
 
 import State from './state';
 
-let marginTop = 60;
-
 class Level extends State {
-  constructor(path1, path2, answer) {
+  constructor(data) {
     super();
 
-    this.assign({
-      marginTop, path1, path2, answer,
-    });
+    this.data = data;
   }
 
   init() {
-    this.game.fitScreen();
+    this.found = [false, false, false, false, false, ];
   }
 
   preload() {
-    this.load.image('img1', this.path1);
-    this.load.image('img2', this.path2);
-    this.load.image('img11', 'asset/01-16-1-1.png');
+    let prefix = this.data.prefix;
+
+    this.load.image('img1', `asset/${prefix}1.png`);
+    this.load.image('img2', `asset/${prefix}2.png`);
+
+    [1, 2].forEach(function(i) {
+      this.data.difference[i - 1].forEach(function(config, j) {
+        j += 1;
+
+        let key = `img${i}${j}`;
+        let path = `asset/${prefix}${i}${j}.png`;
+
+        this.load.image(key, path);
+      }, this);
+    }, this);
+
+    this.load.audio('found', 'asset/Bell Transition.mp3')
   }
 
   create() {
-    var img1 = this.add.image(0, this.marginTop, 'img1');
+    this.img1 = this.add.image(0, 0, 'img1');
+    this.img2 = this.add.image(this.world.centerX, 0, 'img2');
 
-    img1.inputEnabled = true;
-    img1.events.onInputDown.add(this.press, this);
+    [1, 2].forEach(function(i) {
+      this.data.difference[i - 1].forEach(function({
+        h, v
+      }, j) {
+        j += 1;
 
-    var img2 = this.add.image(this.world.centerX, this.marginTop, 'img2');
-    img2.inputEnabled = true;
-    img2.events.onInputDown.add(this.press, this);
+        let x = this[`img${i}`].position.x + this[`img${i}`].width * h;
+        let y = this[`img${i}`].position.y + this[`img${i}`].height * v;
+        let key = `img${i}${j}`;
+        let item = this[key] = this.add.image(x, y, key);
 
-    var btn11 = this.add.button(
-      20, this.marginTop + 77, 'img11', function () {
-        console.log(arguments);
-      }, this
+        if (item.width < 44 || item.height < 44) {
+          log(item.key, 'too small', item.width, item.height);
+        }
+
+        item.index = j - 1;
+
+        item.anchor.setTo(0.5, 0.5);
+
+        item.inputEnabled = true;
+        item.events.onInputDown.add(this.onInputDown, this);
+
+        item.input.enableDrag();
+        item.events.onDragStop.add(this.onDragStop, this);
+      }, this);
+    }, this);
+
+    this.add.button(
+      0, 0, 'previous', this.game.previous, this.game
     );
-    this.game.btn11 = btn11;
-
-    this.add.button(0, 0, 'previous', this.game.previous, this.game);
-    this.add.button(this.world.width - 96, 0, 'next',
-      this.game.next, this.game);
-    // this.add.button(96 + 50, 0, 'sound', this.mute, this);
-
-    this.answer.forEach(function(answer) {
-      delete answer.checked;
-    });
-
-    this.assign({
-      img1, img2,
-    });
+    this.add.button(
+      this.world.width - 96, 0, 'next', this.game.next, this.game
+    );
   }
 
-  press(el, point) {
-    var local = el.toLocal(point);
-    debug('press', local.x, local.y);
+  onDragStop(e) {
+    let l = this.img1.toLocal(e.position);
+    let h = l.x / this.img1.width;
+    let v = l.y / this.img1.height;
 
-    for (var i = 0; i < this.answer.length; i++) {
-      var answer = this.answer[i];
-
-      if (answer.checked) {
-        continue;
-      }
-
-      var x = answer[0];
-      var y = answer[1];
-      var r = answer[2];
-      var distance = local.distance({
-        x, y,
-      });
-
-      if (distance < r) {
-        var ok = this.add.image(point.x, point.y, 'ok');
-
-        ok.anchor.setTo(0.5, 0.5);
-
-        answer.checked = true;
-
-        this.sound.play('success', 1);
-
-        break;
-      }
+    if (l.x > this.world.centerX) {
+      l = this.img2.toLocal(e.position);
+      h = l.x / this.img2.width;
+      v = l.y / this.img2.height;
     }
 
-    if (this.answer.every(function(answer) {
-      return answer.checked;
-    })) {
+    log('drag', e.key, l.x, l.y, h, v);
+  }
+
+  onInputDown(e) {
+    log(e);
+
+    if (e.checked) {
+      return;
+    }
+
+    e.blendMode = PIXI.blendModes.ADD;
+    e.tint = 0xff0000;
+    this.add.tween(e).to({
+      tint: 0xee0000,
+    }, 20000, Phaser.Easing.Linear.None, true, 0, 10000, true);
+
+    this.sound.play('found', 1);
+
+    e.checked = this.found[e.index] = true;
+
+    if (this.found.every(function(found) {
+        return found;
+      })) {
       this.game.next();
     }
   }
 }
 
-export
-default Level;
+export default Level;

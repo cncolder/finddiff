@@ -10,7 +10,7 @@ var sourcemaps = require('gulp-sourcemaps');
 gulp.task('default', ['pm2:start', 'pm2:logs', 'watch']);
 
 gulp.task('watch', function() {
-  gulp.watch('src/**/*.js', ['browserify']);
+  gulp.watch('src/**/*', ['browserify']);
   gulp.watch(['test/**/*.js', '!test/browser/*'], ['mocha']);
 });
 

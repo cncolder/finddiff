@@ -1,6 +1,10 @@
 {
     "disallowSpacesInFunction": null,
     "esnext": true,
+    "excludeFiles": [
+        "node_modules/**",
+        "*.min.js"
+    ],
     "maximumLineLength": {
         "allowComments": true,
         "value": 80

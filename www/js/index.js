@@ -11,34 +11,37 @@ var _Game = require('./game');
 
 var _Game2 = _interopRequireDefault(_Game);
 
-var _Menu = require('./menu');
+var _Cover = require('./cover');
 
-var _Menu2 = _interopRequireDefault(_Menu);
+var _Cover2 = _interopRequireDefault(_Cover);
 
 var _Level = require('./level');
 
 var _Level2 = _interopRequireDefault(_Level);
 
-var debug = require('debug')('index'); // jshint ignore:line
+var _data = require('./data');
+
+var _data2 = _interopRequireDefault(_data);
+
+var log = require('debug')('index'); // jshint ignore:line
 
 require('babelify/node_modules/babel-core/polyfill');
 
 var app = window.app = new _App2['default']();
 var game = app.game = new _Game2['default']();
 
-game.state.add('menu', new _Menu2['default']());
+game.state.add('cover', new _Cover2['default'](_data2['default'].cover));
 
-game.state.add('level1', new _Level2['default']('asset/01-16-1.jpg', 'asset/01-16-2.jpg', [[64, 154, 80], [227, 202, 30], [355, 185, 80], [247, 395, 25], [429, 285, 22]]));
+_data2['default'].levels.forEach(function (level, index) {
+  var key = 'level' + (index + 1);
 
-game.state.add('level2', new _Level2['default']('asset/01-18-1.jpg', 'asset/01-18-2.jpg', [[109, 63, 40], [411, 193, 50], [131, 356, 30], [306, 412, 30], [381, 418, 22]]));
+  game.state.add(key, new _Level2['default'](level));
+  game.levels.push(key);
+});
 
-for (var i = 1; i <= 2; i++) {
-  game.levels.push('level' + i);
-}
+game.state.start('cover');
 
-game.state.start('menu');
-
-},{"./app":88,"./game":89,"./level":90,"./menu":91,"babelify/node_modules/babel-core/polyfill":84,"debug":85}],2:[function(require,module,exports){
+},{"./app":88,"./cover":89,"./data":90,"./game":91,"./level":92,"babelify/node_modules/babel-core/polyfill":84,"debug":85}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3903,6 +3906,8 @@ module.exports = exports['default'];
 },{"debug":85}],89:[function(require,module,exports){
 'use strict';
 
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -3914,7 +3919,290 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== 'fun
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var debug = require('debug')('game'); // jshint ignore:line
+// jshint ignore:line
+
+/*
+Menu
+  the menu and cover of game.
+*/
+
+var _State2 = require('./state');
+
+var _State3 = _interopRequireDefault(_State2);
+
+var log = require('debug')('index');
+var Cover = (function (_State) {
+  function Cover(data) {
+    _classCallCheck(this, Cover);
+
+    _get(Object.getPrototypeOf(Cover.prototype), 'constructor', this).call(this);
+
+    this.data = data;
+  }
+
+  _inherits(Cover, _State);
+
+  _createClass(Cover, [{
+    key: 'init',
+    value: function init() {
+      this.game.fitScreen();
+      this.stage.backgroundColor = this.data.backgroundColor;
+    }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      var prefix = this.data.prefix;
+
+      this.data.images.forEach(function (_ref) {
+        var i = _ref.i;
+
+        this.load.image('img' + i, 'asset/' + prefix + '' + i + '.png');
+      }, this);
+
+      // this.load.image('bg', 'asset/bg.png');
+      this.load.image('bubble', 'asset/bubble.png');
+      this.load.image('previous', 'asset/previous.png');
+      this.load.image('next', 'asset/next.png');
+      // this.load.image('sound', 'asset/sound.png');
+
+      this.load.audio('bg', 'asset/romanesca.mp3');
+      this.load.audio('water', 'asset/Water Lake.mp3');
+      this.load.audio('whale', 'asset/Whale Sounds.mp3');
+      this.load.audio('sweep', 'asset/Sweep Motion.mp3');
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      this.data.images.forEach(function (_ref2) {
+        var i = _ref2.i;
+        var h = _ref2.h;
+        var v = _ref2.v;
+
+        var x = this.world.width * h;
+        var y = this.world.height * v;
+        var item = this['img' + i] = this.add.image(x, y, 'img' + i);
+
+        item.anchor.setTo(0.5, 0.5);
+
+        item.inputEnabled = true;
+        item.events.onInputDown.add(this.onInputDown, this);
+        item.input.enableDrag();
+        item.events.onDragStop.add(this.onDragStop, this);
+      }, this);
+
+      // find difference
+      this.img2.events.onInputDown.add(this.game.next, this.game);
+
+      // rainbow
+      this.img4.sendToBack();
+
+      // girl and fish, up down animate, like swiming.
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
+        var img = this['img' + i];
+        var duration = this.rnd.between(1000, 2000); // animate speed
+        var distance = this.rnd.between(3, 5); // animate offset
+
+        this.add.tween(img).to({
+          y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+      }, this);
+
+      this.bubble();
+
+      // background music loop
+      if (!this.backgroundMusic) {
+        this.backgroundMusic = this.sound.play('bg', 0.5, true);
+        this.sound.play('water', 0.2, true);
+      }
+      this.sound.play('whale', 0.4);
+      // this.sound.mute = true;
+
+      // begin
+      // this.add.button(
+      //   this.world.width - 96, 0, 'next', this.game.next, this.game
+      // );
+      // this.add.button(96 + 50, 0, 'sound', this.mute, this);
+    }
+  }, {
+    key: 'bubble',
+
+    // bubble up with explore.
+    value: function bubble() {
+      var emitter = this.add.emitter(this.world.centerX, this.world.height, 15);
+
+      emitter.width = this.world.width;
+      emitter.makeParticles('bubble');
+      emitter.minParticleScale = 0.1;
+      emitter.maxParticleScale = 1;
+      emitter.setYSpeed(-300, -500);
+      emitter.setXSpeed(-5, 5);
+      emitter.minRotation = 0;
+      emitter.maxRotation = 0;
+      emitter.start(false, 2500, 200, 0);
+    }
+  }, {
+    key: 'onInputDown',
+    value: function onInputDown(e) {
+      if (e.key == 'img4') {
+        this.sound.play('whale', 0.6);
+      }
+
+      if (e.key == 'img8') {
+        this.sound.play('sweep', 0.6);
+      }
+    }
+  }, {
+    key: 'onDragStop',
+    value: function onDragStop(e) {
+      var _e$position = e.position;
+      var x = _e$position.x;
+      var y = _e$position.y;
+
+      var h = x / this.world.width;
+      var v = y / this.world.height;
+
+      log('drag', e.key, x, y, h, v);
+    }
+  }, {
+    key: 'mute',
+    value: function mute() {
+      this.sound.mute = !this.sound.mute;
+    }
+  }]);
+
+  return Cover;
+})(_State3['default']);
+
+exports['default'] = Cover;
+module.exports = exports['default'];
+
+},{"./state":93,"debug":85}],90:[function(require,module,exports){
+module.exports={
+    "cover": {
+        "backgroundColor": "#aaddf2",
+        "images": [
+            {
+                "h": 0.5,
+                "i": 1,
+                "v": 0.19
+            },
+            {
+                "h": 0.5,
+                "i": 2,
+                "v": 0.4
+            },
+            {
+                "h": 0.5,
+                "i": 3,
+                "v": 0.56
+            },
+            {
+                "h": 0.388,
+                "i": 4,
+                "v": 0.177
+            },
+            {
+                "h": 0.7,
+                "i": 5,
+                "v": 0.24
+            },
+            {
+                "h": 0.8,
+                "i": 6,
+                "v": 0.24
+            },
+            {
+                "h": 0.45,
+                "i": 7,
+                "v": 0.46
+            },
+            {
+                "h": 0.15,
+                "i": 8,
+                "v": 0.6
+            },
+            {
+                "h": 0.83,
+                "i": 9,
+                "v": 0.62
+            }
+        ],
+        "prefix": "100"
+    },
+    "levels": [
+        {
+            "difference": [
+                [],
+                [
+                    {
+                        "h": 0.691,
+                        "v": 0.276
+                    },
+                    {
+                        "h": 0.632,
+                        "v": 0.443
+                    },
+                    {
+                        "h": 0.465,
+                        "v": 0.514
+                    },
+                    {
+                        "h": 0.649,
+                        "v": 0.690
+                    },
+                    {
+                        "h": 0.302,
+                        "v": 0.792
+                    }
+                ]
+            ],
+            "prefix": "101"
+        },
+        {
+            "difference": [
+                [],
+                [
+                    {
+                        "h": 0.128,
+                        "v": 0.164
+                    },
+                    {
+                        "h": 0.252,
+                        "v": 0.523
+                    },
+                    {
+                        "h": 0.585,
+                        "v": 0.5
+                    },
+                    {
+                        "h": 0.546,
+                        "v": 0.665
+                    },
+                    {
+                        "h": 0.671,
+                        "v": 0.799
+                    }
+                ]
+            ],
+            "prefix": "110"
+        }
+    ]
+}
+
+},{}],91:[function(require,module,exports){
+'use strict';
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var log = require('debug')('game'); // jshint ignore:line
 
 /*
 Phaser game
@@ -3928,6 +4216,7 @@ var Game = (function (_Phaser$Game) {
     _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768);
 
     this.levels = [];
+    this.fadeColor = 16777215;
   }
 
   _inherits(Game, _Phaser$Game);
@@ -3948,23 +4237,43 @@ var Game = (function (_Phaser$Game) {
     key: 'previous',
     value: function previous() {
       if (this.state.current == this.levels[0]) {
-        this.state.start('menu');
+        this.fade('cover');
       } else {
         var index = this.levels.indexOf(this.state.current);
 
-        this.state.start(this.levels[index - 1]);
+        this.fade(this.levels[index - 1]);
       }
     }
   }, {
     key: 'next',
     value: function next() {
-      if (this.state.current == 'menu') {
-        this.state.start(this.levels[0]);
+      if (this.state.current == 'cover') {
+        this.fade(this.levels[0]);
       } else {
         var index = this.levels.indexOf(this.state.current);
 
-        this.state.start(this.levels[index + 1]);
+        this.fade(this.levels[index + 1]);
       }
+    }
+  }, {
+    key: 'fade',
+
+    // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
+    value: function fade(state) {
+      var mask = this.add.graphics(0, 0);
+
+      mask.beginFill(this.fadeColor, 1);
+      mask.drawRect(0, 0, this.width, this.height);
+      mask.alpha = 0;
+      mask.endFill();
+
+      this.add.tween(mask).to({
+        alpha: 0.5 }, 200, Phaser.Easing.Default, true).onComplete.addOnce(function (graphic, tween) {
+        this.state.start(state);
+        // tween.to({
+        //   alpha: 0,
+        // }, 500, Phaser.Easing.Default, true, 500);
+      }, this);
     }
   }]);
 
@@ -3974,7 +4283,7 @@ var Game = (function (_Phaser$Game) {
 exports['default'] = Game;
 module.exports = exports['default'];
 
-},{"debug":85}],90:[function(require,module,exports){
+},{"debug":85}],92:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -4001,18 +4310,14 @@ var _State2 = require('./state');
 
 var _State3 = _interopRequireDefault(_State2);
 
-var debug = require('debug')('level');
-
-var marginTop = 60;
-
+var log = require('debug')('level');
 var Level = (function (_State) {
-  function Level(path1, path2, answer) {
+  function Level(data) {
     _classCallCheck(this, Level);
 
     _get(Object.getPrototypeOf(Level.prototype), 'constructor', this).call(this);
 
-    this.assign({
-      marginTop: marginTop, path1: path1, path2: path2, answer: answer });
+    this.data = data;
   }
 
   _inherits(Level, _State);
@@ -4020,77 +4325,101 @@ var Level = (function (_State) {
   _createClass(Level, [{
     key: 'init',
     value: function init() {
-      this.game.fitScreen();
+      this.found = [false, false, false, false, false];
     }
   }, {
     key: 'preload',
     value: function preload() {
-      this.load.image('img1', this.path1);
-      this.load.image('img2', this.path2);
-      this.load.image('img11', 'asset/01-16-1-1.png');
+      var prefix = this.data.prefix;
+
+      this.load.image('img1', 'asset/' + prefix + '1.png');
+      this.load.image('img2', 'asset/' + prefix + '2.png');
+
+      [1, 2].forEach(function (i) {
+        this.data.difference[i - 1].forEach(function (config, j) {
+          j += 1;
+
+          var key = 'img' + i + '' + j;
+          var path = 'asset/' + prefix + '' + i + '' + j + '.png';
+
+          this.load.image(key, path);
+        }, this);
+      }, this);
+
+      this.load.audio('found', 'asset/Bell Transition.mp3');
     }
   }, {
     key: 'create',
     value: function create() {
-      var img1 = this.add.image(0, this.marginTop, 'img1');
+      this.img1 = this.add.image(0, 0, 'img1');
+      this.img2 = this.add.image(this.world.centerX, 0, 'img2');
 
-      img1.inputEnabled = true;
-      img1.events.onInputDown.add(this.press, this);
+      [1, 2].forEach(function (i) {
+        this.data.difference[i - 1].forEach(function (_ref, j) {
+          var h = _ref.h;
+          var v = _ref.v;
 
-      var img2 = this.add.image(this.world.centerX, this.marginTop, 'img2');
-      img2.inputEnabled = true;
-      img2.events.onInputDown.add(this.press, this);
+          j += 1;
 
-      var btn11 = this.add.button(20, this.marginTop + 77, 'img11', function () {
-        console.log(arguments);
+          var x = this['img' + i].position.x + this['img' + i].width * h;
+          var y = this['img' + i].position.y + this['img' + i].height * v;
+          var key = 'img' + i + '' + j;
+          var item = this[key] = this.add.image(x, y, key);
+
+          if (item.width < 44 || item.height < 44) {
+            log(item.key, 'too small', item.width, item.height);
+          }
+
+          item.index = j - 1;
+
+          item.anchor.setTo(0.5, 0.5);
+
+          item.inputEnabled = true;
+          item.events.onInputDown.add(this.onInputDown, this);
+
+          item.input.enableDrag();
+          item.events.onDragStop.add(this.onDragStop, this);
+        }, this);
       }, this);
-      this.game.btn11 = btn11;
 
       this.add.button(0, 0, 'previous', this.game.previous, this.game);
       this.add.button(this.world.width - 96, 0, 'next', this.game.next, this.game);
-      // this.add.button(96 + 50, 0, 'sound', this.mute, this);
-
-      this.answer.forEach(function (answer) {
-        delete answer.checked;
-      });
-
-      this.assign({
-        img1: img1, img2: img2 });
     }
   }, {
-    key: 'press',
-    value: function press(el, point) {
-      var local = el.toLocal(point);
-      debug('press', local.x, local.y);
+    key: 'onDragStop',
+    value: function onDragStop(e) {
+      var l = this.img1.toLocal(e.position);
+      var h = l.x / this.img1.width;
+      var v = l.y / this.img1.height;
 
-      for (var i = 0; i < this.answer.length; i++) {
-        var answer = this.answer[i];
-
-        if (answer.checked) {
-          continue;
-        }
-
-        var x = answer[0];
-        var y = answer[1];
-        var r = answer[2];
-        var distance = local.distance({
-          x: x, y: y });
-
-        if (distance < r) {
-          var ok = this.add.image(point.x, point.y, 'ok');
-
-          ok.anchor.setTo(0.5, 0.5);
-
-          answer.checked = true;
-
-          this.sound.play('success', 1);
-
-          break;
-        }
+      if (l.x > this.world.centerX) {
+        l = this.img2.toLocal(e.position);
+        h = l.x / this.img2.width;
+        v = l.y / this.img2.height;
       }
 
-      if (this.answer.every(function (answer) {
-        return answer.checked;
+      log('drag', e.key, l.x, l.y, h, v);
+    }
+  }, {
+    key: 'onInputDown',
+    value: function onInputDown(e) {
+      log(e);
+
+      if (e.checked) {
+        return;
+      }
+
+      e.blendMode = PIXI.blendModes.ADD;
+      e.tint = 16711680;
+      this.add.tween(e).to({
+        tint: 15597568 }, 20000, Phaser.Easing.Linear.None, true, 0, 10000, true);
+
+      this.sound.play('found', 1);
+
+      e.checked = this.found[e.index] = true;
+
+      if (this.found.every(function (found) {
+        return found;
       })) {
         this.game.next();
       }
@@ -4103,105 +4432,7 @@ var Level = (function (_State) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./state":92,"debug":85}],91:[function(require,module,exports){
-'use strict';
-
-var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-// jshint ignore:line
-
-/*
-Menu
-  the menu and cover of game.
-*/
-
-var _State2 = require('./state');
-
-var _State3 = _interopRequireDefault(_State2);
-
-var debug = require('debug')('index');
-var Menu = (function (_State) {
-  function Menu() {
-    _classCallCheck(this, Menu);
-
-    if (_State != null) {
-      _State.apply(this, arguments);
-    }
-  }
-
-  _inherits(Menu, _State);
-
-  _createClass(Menu, [{
-    key: 'init',
-    value: function init() {
-      this.game.fitScreen();
-    }
-  }, {
-    key: 'preload',
-    value: function preload() {
-      this.load.image('background', 'asset/cover.jpg');
-      this.load.image('bubble', 'asset/bubble.png');
-      this.load.image('previous', 'asset/previous.png');
-      this.load.image('next', 'asset/next.png');
-      // this.load.image('sound', 'asset/sound.png');
-      this.load.image('ok', 'asset/ok.png');
-
-      this.load.audio('background', 'asset/romanesca.mp3');
-      this.load.audio('success', 'asset/success.mp3');
-    }
-  }, {
-    key: 'create',
-    value: function create() {
-      this.add.image(0, 0, 'background');
-
-      var emitter = this.add.emitter(this.world.centerX, this.world.height, 20);
-
-      emitter.width = this.world.width;
-
-      emitter.makeParticles('bubble');
-
-      emitter.minParticleScale = 0.1;
-      emitter.maxParticleScale = 1;
-
-      emitter.setYSpeed(-300, -500);
-      emitter.setXSpeed(-5, 5);
-
-      emitter.minRotation = 0;
-      emitter.maxRotation = 0;
-
-      emitter.start(false, 2500, 50, 0);
-
-      if (!this.backgroundMusic) {
-        this.backgroundMusic = this.sound.play('background', 0.5, true);
-      }
-      // this.sound.mute = true;
-
-      this.add.button(this.world.width - 96, 0, 'next', this.game.next, this.game);
-      // this.add.button(96 + 50, 0, 'sound', this.mute, this);
-    }
-  }, {
-    key: 'mute',
-    value: function mute() {
-      this.sound.mute = !this.sound.mute;
-    }
-  }]);
-
-  return Menu;
-})(_State3['default']);
-
-exports['default'] = Menu;
-module.exports = exports['default'];
-
-},{"./state":92,"debug":85}],92:[function(require,module,exports){
+},{"./state":93,"debug":85}],93:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -4211,7 +4442,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var debug = require('debug')('state'); // jshint ignore:line
+var log = require('debug')('state'); // jshint ignore:line
 
 /*
 State
@@ -4227,6 +4458,19 @@ var State = (function () {
     key: 'assign',
     value: function assign(obj) {
       Object.assign(this, obj);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      if (!navigator.isCocoonJS) {
+        if (!this.time.advancedTiming) {
+          this.time.advancedTiming = true;
+        }
+
+        var fps = this.game.time.fps;
+
+        this.game.debug.text('fps:' + fps, 0, 12);
+      }
     }
   }]);
 

@@ -1,4 +1,4 @@
-var debug = require('debug')('game'); // jshint ignore:line
+const log = require('debug')('game'); // jshint ignore:line
 
 /*
 Phaser game
@@ -10,6 +10,7 @@ class Game extends Phaser.Game {
     super(1024, 768);
 
     this.levels = [];
+    this.fadeColor = 0xffffff;
   }
 
   fitScreen() {
@@ -25,24 +26,43 @@ class Game extends Phaser.Game {
 
   previous() {
     if (this.state.current == this.levels[0]) {
-      this.state.start('menu');
+      this.fade('cover');
     } else {
       var index = this.levels.indexOf(this.state.current);
 
-      this.state.start(this.levels[index - 1]);
+      this.fade(this.levels[index - 1]);
     }
   }
 
   next() {
-    if (this.state.current == 'menu') {
-      this.state.start(this.levels[0]);
+    if (this.state.current == 'cover') {
+      this.fade(this.levels[0]);
     } else {
       var index = this.levels.indexOf(this.state.current);
 
-      this.state.start(this.levels[index + 1]);
+      this.fade(this.levels[index + 1]);
     }
+  }
+
+  // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
+  fade(state) {
+    let mask = this.add.graphics(0, 0);
+
+    mask.beginFill(this.fadeColor, 1);
+    mask.drawRect(0, 0, this.width, this.height);
+    mask.alpha = 0;
+    mask.endFill();
+
+    this.add.tween(mask).to({
+        alpha: 0.5,
+      }, 200, Phaser.Easing.Default, true)
+      .onComplete.addOnce(function(graphic, tween) {
+        this.state.start(state);
+        // tween.to({
+        //   alpha: 0,
+        // }, 500, Phaser.Easing.Default, true, 500);
+      }, this);
   }
 }
 
-export
-default Game;
+export default Game;
