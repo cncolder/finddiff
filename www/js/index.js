@@ -3922,16 +3922,16 @@ Object.defineProperty(exports, '__esModule', {
 // jshint ignore:line
 
 /*
-Menu
-  the menu and cover of game.
+Cover
+  the cover of magic seabed world.
 */
 
-var _State2 = require('./state');
+var _Seabed2 = require('./seabed');
 
-var _State3 = _interopRequireDefault(_State2);
+var _Seabed3 = _interopRequireDefault(_Seabed2);
 
-var log = require('debug')('index');
-var Cover = (function (_State) {
+var log = require('debug')('cover');
+var Cover = (function (_Seabed) {
   function Cover(data) {
     _classCallCheck(this, Cover);
 
@@ -3940,17 +3940,20 @@ var Cover = (function (_State) {
     this.data = data;
   }
 
-  _inherits(Cover, _State);
+  _inherits(Cover, _Seabed);
 
   _createClass(Cover, [{
     key: 'init',
     value: function init() {
-      this.game.fitScreen();
+      _get(Object.getPrototypeOf(Cover.prototype), 'init', this).call(this);
+
       this.stage.backgroundColor = this.data.backgroundColor;
     }
   }, {
     key: 'preload',
     value: function preload() {
+      _get(Object.getPrototypeOf(Cover.prototype), 'preload', this).call(this);
+
       var prefix = this.data.prefix;
 
       this.data.images.forEach(function (_ref) {
@@ -3958,21 +3961,12 @@ var Cover = (function (_State) {
 
         this.load.image('img' + i, 'asset/' + prefix + '' + i + '.png');
       }, this);
-
-      // this.load.image('bg', 'asset/bg.png');
-      this.load.image('bubble', 'asset/bubble.png');
-      this.load.image('previous', 'asset/previous.png');
-      this.load.image('next', 'asset/next.png');
-      // this.load.image('sound', 'asset/sound.png');
-
-      this.load.audio('bg', 'asset/romanesca.ogg');
-      this.load.audio('water', 'asset/Water Lake.ogg');
-      this.load.audio('whale', 'asset/Whale Sounds.ogg');
-      this.load.audio('sweep', 'asset/Sweep Motion.ogg');
     }
   }, {
     key: 'create',
     value: function create() {
+      _get(Object.getPrototypeOf(Cover.prototype), 'create', this).call(this);
+
       this.data.images.forEach(function (_ref2) {
         var i = _ref2.i;
         var h = _ref2.h;
@@ -4070,12 +4064,12 @@ var Cover = (function (_State) {
   }]);
 
   return Cover;
-})(_State3['default']);
+})(_Seabed3['default']);
 
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./state":93,"debug":85}],90:[function(require,module,exports){
+},{"./seabed":93,"debug":85}],90:[function(require,module,exports){
 module.exports={
     "cover": {
         "backgroundColor": "#aaddf2",
@@ -4130,8 +4124,26 @@ module.exports={
     },
     "levels": [
         {
+            "code": "101",
             "difference": [
-                [],
+                [
+                    {
+                        "h": 0.745,
+                        "v": 0.249
+                    },
+                    {
+                        "h": 0.625,
+                        "v": 0.449
+                    },
+                    {
+                        "h": 0.465,
+                        "v": 0.514
+                    },
+                    {
+                        "h": 0.646,
+                        "v": 0.692
+                    }
+                ],
                 [
                     {
                         "h": 0.691,
@@ -4154,12 +4166,34 @@ module.exports={
                         "v": 0.792
                     }
                 ]
-            ],
-            "prefix": "101"
+            ]
         },
         {
+            "code": "102",
             "difference": [
-                [],
+                [
+                    {
+                        "h": 0.212,
+                        "v": 0.4
+                    },
+                    {
+                        "h": 0.303,
+                        "v": 0.517
+                    },
+                    {
+                        "h": 0.56,
+                        "v": 0.468
+                    },
+                    {},
+                    {
+                        "h": 0.588,
+                        "v": 0.564
+                    },
+                    {
+                        "h": 0.154,
+                        "v": 0.858
+                    }
+                ],
                 [
                     {
                         "h": 0.223,
@@ -4186,10 +4220,148 @@ module.exports={
                         "v": 0.856
                     }
                 ]
-            ],
-            "prefix": "102"
+            ]
         },
         {
+            "code": "103",
+            "difference": [
+                [
+                    {
+                        "h": 0.523,
+                        "v": 0.337
+                    },
+                    {
+                        "h": 0.936,
+                        "v": 0.366
+                    },
+                    {},
+                    {
+                        "h": 0.815,
+                        "v": 0.706
+                    },
+                    {
+                        "h": 0.616,
+                        "v": 0.922
+                    }
+                ],
+                [
+                    {
+                        "h": 0.523,
+                        "v": 0.339
+                    },
+                    {
+                        "h": 0.932,
+                        "v": 0.379
+                    },
+                    {
+                        "h": 0.109,
+                        "v": 0.712
+                    },
+                    {
+                        "h": 0.815,
+                        "v": 0.706
+                    },
+                    {
+                        "h": 0.602,
+                        "v": 0.908
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "104",
+            "difference": [
+                [
+                    {
+                        "h": 0.286,
+                        "v": 0.195
+                    },
+                    {
+                        "h": 0.135,
+                        "v": 0.324
+                    },
+                    {
+                        "h": 0.269,
+                        "v": 0.48
+                    },
+                    {
+                        "h": 0.751,
+                        "v": 0.543
+                    },
+                    {
+                        "h": 0.421,
+                        "v": 0.669
+                    }
+                ],
+                [
+                    {
+                        "h": 0.293,
+                        "v": 0.195
+                    },
+                    {
+                        "h": 0.138,
+                        "v": 0.32
+                    },
+                    {
+                        "h": 0.226,
+                        "v": 0.486
+                    },
+                    {
+                        "h": 0.751,
+                        "v": 0.53
+                    },
+                    {
+                        "h": 0.865,
+                        "v": 0.785
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "105",
+            "difference": [
+                [
+                    {
+                        "h": 0.816,
+                        "v": 0.311
+                    },
+                    {
+                        "h": 0.595,
+                        "v": 0.568
+                    },
+                    {
+                        "h": 0.064,
+                        "v": 0.872
+                    },
+                    {
+                        "h": 0.563,
+                        "v": 0.905
+                    },
+                    {
+                        "h": 0.912,
+                        "v": 0.877
+                    }
+                ],
+                [
+                    {},
+                    {
+                        "h": 0.545,
+                        "v": 0.589
+                    },
+                    {},
+                    {
+                        "h": 0.57,
+                        "v": 0.902
+                    },
+                    {
+                        "h": 0.911,
+                        "v": 0.877
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "110",
             "difference": [
                 [],
                 [
@@ -4214,8 +4386,7 @@ module.exports={
                         "v": 0.799
                     }
                 ]
-            ],
-            "prefix": "110"
+            ]
         }
     ]
 }
@@ -4329,16 +4500,16 @@ Object.defineProperty(exports, '__esModule', {
 // jshint ignore:line
 
 /*
-Menu
-  The cover and menu of game.
+Level
+  The level of magic seabed world.
 */
 
-var _State2 = require('./state');
+var _Seabed2 = require('./seabed');
 
-var _State3 = _interopRequireDefault(_State2);
+var _Seabed3 = _interopRequireDefault(_Seabed2);
 
 var log = require('debug')('level');
-var Level = (function (_State) {
+var Level = (function (_Seabed) {
   function Level(data) {
     _classCallCheck(this, Level);
 
@@ -4347,33 +4518,45 @@ var Level = (function (_State) {
     this.data = data;
   }
 
-  _inherits(Level, _State);
+  _inherits(Level, _Seabed);
 
   _createClass(Level, [{
     key: 'init',
     value: function init() {
+      _get(Object.getPrototypeOf(Level.prototype), 'init', this).call(this);
+
       var difference = this.data.difference;
       var length = Math.max(difference[0].length, difference[1].length);
       var found = this.found = [];
 
       for (var i = 0; i < length; i++) {
-        found.push(false);
+        found.push({
+          items: [] });
       }
     }
   }, {
     key: 'preload',
     value: function preload() {
-      var prefix = this.data.prefix;
+      _get(Object.getPrototypeOf(Level.prototype), 'preload', this).call(this);
 
-      this.load.image('img1', 'asset/' + prefix + '1.png');
-      this.load.image('img2', 'asset/' + prefix + '2.png');
+      var code = this.data.code;
+
+      this.load.image('img1', 'asset/' + code + '1.png');
+      this.load.image('img2', 'asset/' + code + '2.png');
 
       [1, 2].forEach(function (i) {
-        this.data.difference[i - 1].forEach(function (config, j) {
+        this.data.difference[i - 1].forEach(function (_ref, j) {
+          var h = _ref.h;
+          var v = _ref.v;
+
+          if (!h) {
+            return;
+          }
+
           j += 1;
 
           var key = 'img' + i + '' + j;
-          var path = 'asset/' + prefix + '' + i + '' + j + '.png';
+          var path = 'asset/' + code + '' + i + '' + j + '.png';
 
           this.load.image(key, path);
         }, this);
@@ -4384,13 +4567,19 @@ var Level = (function (_State) {
   }, {
     key: 'create',
     value: function create() {
+      _get(Object.getPrototypeOf(Level.prototype), 'create', this).call(this);
+
       this.img1 = this.add.image(0, 0, 'img1');
       this.img2 = this.add.image(this.world.centerX, 0, 'img2');
 
       [1, 2].forEach(function (i) {
-        this.data.difference[i - 1].forEach(function (_ref, j) {
-          var h = _ref.h;
-          var v = _ref.v;
+        this.data.difference[i - 1].forEach(function (_ref2, j) {
+          var h = _ref2.h;
+          var v = _ref2.v;
+
+          if (!h) {
+            return;
+          }
 
           j += 1;
 
@@ -4400,6 +4589,7 @@ var Level = (function (_State) {
           var item = this[key] = this.add.image(x, y, key);
 
           item.index = j - 1;
+          this.found[item.index].items[i - 1] = item;
 
           item.anchor.setTo(0.5, 0.5);
 
@@ -4409,7 +4599,7 @@ var Level = (function (_State) {
           }
 
           item.inputEnabled = true;
-          item.events.onInputDown.add(this.onInputDown, this);
+          item.events.onInputUp.add(this.onInputUp, this);
 
           item.input.enableDrag();
           item.events.onDragStop.add(this.onDragStop, this);
@@ -4435,42 +4625,118 @@ var Level = (function (_State) {
       log('drag', e.key, l.x, l.y, h, v);
     }
   }, {
-    key: 'onInputDown',
-    value: function onInputDown(e) {
+    key: 'onInputUp',
+    value: function onInputUp(e) {
       log(e);
 
-      if (e.checked) {
+      var found = this.found[e.index];
+
+      if (found.checked) {
         return;
       }
 
+      found.checked = true;
+
+      // shine and scale animate for both item.
+      found.items.forEach(function (item) {
+        if (item) {
+          this.shine(item);
+        }
+      }, this);
+
+      // play a success sound.
+      this.sound.play('found', 1);
+
+      // if all answer found then goto next level.
+      if (this.found.every(function (found) {
+        return found.checked;
+      })) {
+        this.game.next();
+      }
+    }
+  }, {
+    key: 'shine',
+    value: function shine(e) {
       e.blendMode = PIXI.blendModes.ADD;
       // e.tint = 0xff0000;
       // this.add.tween(e).to({
       //   tint: 0xee0000,
       // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
+
+      var x = undefined,
+          y = undefined;
+      // small item scale with a large factor.
+      x = y = (e.width + e.height) / 2 > 50 ? 1.2 : 1.5;
+
+      // scale large
       this.add.tween(e.scale).to({
-        x: 1.2,
-        y: 1.2 }, 1000, Phaser.Easing.Default, true, 0, -1, true);
-
-      this.sound.play('found', 1);
-
-      e.checked = this.found[e.index] = true;
-
-      if (this.found.every(function (found) {
-        return found;
-      })) {
-        this.game.next();
-      }
+        x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true);
     }
   }]);
 
   return Level;
-})(_State3['default']);
+})(_Seabed3['default']);
 
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./state":93,"debug":85}],93:[function(require,module,exports){
+},{"./seabed":93,"debug":85}],93:[function(require,module,exports){
+'use strict';
+
+var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+// jshint ignore:line
+
+/*
+Seabed
+  the magic seabed world.
+*/
+
+var _State2 = require('./state');
+
+var _State3 = _interopRequireDefault(_State2);
+
+var log = require('debug')('seabed');
+var Seabed = (function (_State) {
+  function Seabed() {
+    _classCallCheck(this, Seabed);
+
+    _get(Object.getPrototypeOf(Seabed.prototype), 'constructor', this).call(this);
+  }
+
+  _inherits(Seabed, _State);
+
+  _createClass(Seabed, [{
+    key: 'preload',
+    value: function preload() {
+      _get(Object.getPrototypeOf(Seabed.prototype), 'preload', this).call(this);
+
+      this.load.image('bubble', 'asset/bubble.png');
+
+      this.load.audio('bg', 'asset/romanesca.ogg');
+      this.load.audio('water', 'asset/Water Lake.ogg');
+      this.load.audio('whale', 'asset/Whale Sounds.ogg');
+    }
+  }]);
+
+  return Seabed;
+})(_State3['default']);
+
+exports['default'] = Seabed;
+module.exports = exports['default'];
+
+},{"./state":94,"debug":85}],94:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -4493,10 +4759,25 @@ var State = (function () {
   }
 
   _createClass(State, [{
-    key: 'assign',
-    value: function assign(obj) {
-      Object.assign(this, obj);
+    key: 'init',
+    value: function init() {
+      this.game.fitScreen();
     }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      this.load.image('previous', 'asset/previous.png');
+      this.load.image('next', 'asset/next.png');
+      // this.load.image('sound', 'asset/sound.png');
+
+      this.load.audio('sweep', 'asset/Sweep Motion.ogg');
+    }
+  }, {
+    key: 'create',
+    value: function create() {}
+  }, {
+    key: 'update',
+    value: function update() {}
   }, {
     key: 'render',
     value: function render() {
@@ -4509,6 +4790,11 @@ var State = (function () {
 
         this.game.debug.text('fps:' + fps, 0, 12);
       }
+    }
+  }, {
+    key: 'assign',
+    value: function assign(obj) {
+      Object.assign(this, obj);
     }
   }]);
 

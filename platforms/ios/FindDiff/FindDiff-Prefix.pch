@@ -17,7 +17,7 @@
  under the License.
  */
 //
-// Prefix header for all source files of the 'FirstEBook' target in the 'FirstEBook' project
+// Prefix header for all source files of the 'FindDiff' target in the 'FindDiff' project
 //
 
 #ifdef __OBJC__

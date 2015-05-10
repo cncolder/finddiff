@@ -8,9 +8,21 @@ State
 class State {
   constructor() {}
 
-  assign(obj) {
-    Object.assign(this, obj);
+  init() {
+    this.game.fitScreen();
   }
+
+  preload() {
+    this.load.image('previous', 'asset/previous.png');
+    this.load.image('next', 'asset/next.png');
+    // this.load.image('sound', 'asset/sound.png');
+
+    this.load.audio('sweep', 'asset/Sweep Motion.ogg');
+  }
+
+  create() {}
+
+  update() {}
 
   render() {
     if (!navigator.isCocoonJS) {
@@ -22,6 +34,10 @@ class State {
 
       this.game.debug.text(`fps:${fps}`, 0, 12);
     }
+  }
+
+  assign(obj) {
+    Object.assign(this, obj);
   }
 }
 

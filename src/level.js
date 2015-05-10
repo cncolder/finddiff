@@ -1,13 +1,13 @@
 const log = require('debug')('level'); // jshint ignore:line
 
 /*
-Menu
-  The cover and menu of game.
+Level
+  The level of magic seabed world.
 */
 
-import State from './state';
+import Seabed from './seabed';
 
-class Level extends State {
+class Level extends Seabed {
   constructor(data) {
     super();
 
@@ -15,27 +15,39 @@ class Level extends State {
   }
 
   init() {
+    super.init();
+
     let difference = this.data.difference;
     let length = Math.max(difference[0].length, difference[1].length);
     let found = this.found = [];
 
     for (var i = 0; i < length; i++) {
-      found.push(false);
+      found.push({
+        items: [],
+      });
     }
   }
 
   preload() {
-    let prefix = this.data.prefix;
+    super.preload();
 
-    this.load.image('img1', `asset/${prefix}1.png`);
-    this.load.image('img2', `asset/${prefix}2.png`);
+    let code = this.data.code;
+
+    this.load.image('img1', `asset/${code}1.png`);
+    this.load.image('img2', `asset/${code}2.png`);
 
     [1, 2].forEach(function(i) {
-      this.data.difference[i - 1].forEach(function(config, j) {
+      this.data.difference[i - 1].forEach(function({
+        h, v
+      }, j) {
+        if (!h) {
+          return;
+        }
+
         j += 1;
 
         let key = `img${i}${j}`;
-        let path = `asset/${prefix}${i}${j}.png`;
+        let path = `asset/${code}${i}${j}.png`;
 
         this.load.image(key, path);
       }, this);
@@ -45,6 +57,8 @@ class Level extends State {
   }
 
   create() {
+    super.create();
+
     this.img1 = this.add.image(0, 0, 'img1');
     this.img2 = this.add.image(this.world.centerX, 0, 'img2');
 
@@ -52,6 +66,10 @@ class Level extends State {
       this.data.difference[i - 1].forEach(function({
         h, v
       }, j) {
+        if (!h) {
+          return;
+        }
+
         j += 1;
 
         let x = this[`img${i}`].position.x + this[`img${i}`].width * h;
@@ -60,6 +78,7 @@ class Level extends State {
         let item = this[key] = this.add.image(x, y, key);
 
         item.index = j - 1;
+        this.found[item.index].items[i - 1] = item;
 
         item.anchor.setTo(0.5, 0.5);
 
@@ -69,7 +88,7 @@ class Level extends State {
         }
 
         item.inputEnabled = true;
-        item.events.onInputDown.add(this.onInputDown, this);
+        item.events.onInputUp.add(this.onInputUp, this);
 
         item.input.enableDrag();
         item.events.onDragStop.add(this.onDragStop, this);
@@ -98,32 +117,50 @@ class Level extends State {
     log('drag', e.key, l.x, l.y, h, v);
   }
 
-  onInputDown(e) {
+  onInputUp(e) {
     log(e);
 
-    if (e.checked) {
+    let found = this.found[e.index];
+
+    if (found.checked) {
       return;
     }
 
+    found.checked = true;
+
+    // shine and scale animate for both item.
+    found.items.forEach(function(item) {
+      if (item) {
+        this.shine(item);
+      }
+    }, this);
+
+    // play a success sound.
+    this.sound.play('found', 1);
+
+    // if all answer found then goto next level.
+    if (this.found.every(function(found) {
+        return found.checked;
+      })) {
+      this.game.next();
+    }
+  }
+
+  shine(e) {
     e.blendMode = PIXI.blendModes.ADD;
     // e.tint = 0xff0000;
     // this.add.tween(e).to({
     //   tint: 0xee0000,
     // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
+
+    let x, y;
+    // small item scale with a large factor.
+    x = y = (e.width + e.height) / 2 > 50 ? 1.2 : 1.5;
+
+    // scale large
     this.add.tween(e.scale).to({
-      x: 1.2,
-      y: 1.2,
+      x, y,
     }, 1000, Phaser.Easing.Default, true, 0, -1, true);
-
-    this.sound.play('found', 1);
-
-    e.checked = this.found[e.index] = true;
-
-    if (this.found.every(function(found) {
-        return found;
-      })) {
-      this.game.next();
-    }
   }
 }
 

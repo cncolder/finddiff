@@ -1,13 +1,13 @@
-const log = require('debug')('index'); // jshint ignore:line
+const log = require('debug')('cover'); // jshint ignore:line
 
 /*
-Menu
-  the menu and cover of game.
+Cover
+  the cover of magic seabed world.
 */
 
-import State from './state';
+import Seabed from './seabed';
 
-class Cover extends State {
+class Cover extends Seabed {
   constructor(data) {
     super();
 
@@ -15,11 +15,14 @@ class Cover extends State {
   }
 
   init() {
-    this.game.fitScreen();
+    super.init();
+
     this.stage.backgroundColor = this.data.backgroundColor;
   }
 
   preload() {
+    super.preload();
+
     let prefix = this.data.prefix;
 
     this.data.images.forEach(function({
@@ -27,20 +30,11 @@ class Cover extends State {
     }) {
       this.load.image(`img${i}`, `asset/${prefix}${i}.png`);
     }, this);
-
-    // this.load.image('bg', 'asset/bg.png');
-    this.load.image('bubble', 'asset/bubble.png');
-    this.load.image('previous', 'asset/previous.png');
-    this.load.image('next', 'asset/next.png');
-    // this.load.image('sound', 'asset/sound.png');
-
-    this.load.audio('bg', 'asset/romanesca.ogg');
-    this.load.audio('water', 'asset/Water Lake.ogg');
-    this.load.audio('whale', 'asset/Whale Sounds.ogg');
-    this.load.audio('sweep', 'asset/Sweep Motion.ogg');
   }
 
   create() {
+    super.create();
+
     this.data.images.forEach(function({
       i, h, v
     }) {
