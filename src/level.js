@@ -15,7 +15,13 @@ class Level extends State {
   }
 
   init() {
-    this.found = [false, false, false, false, false, ];
+    let difference = this.data.difference;
+    let length = Math.max(difference[0].length, difference[1].length);
+    let found = this.found = [];
+
+    for (var i = 0; i < length; i++) {
+      found.push(false);
+    }
   }
 
   preload() {
@@ -35,7 +41,7 @@ class Level extends State {
       }, this);
     }, this);
 
-    this.load.audio('found', 'asset/Bell Transition.mp3')
+    this.load.audio('found', 'asset/Bell Transition.ogg');
   }
 
   create() {
@@ -53,13 +59,14 @@ class Level extends State {
         let key = `img${i}${j}`;
         let item = this[key] = this.add.image(x, y, key);
 
-        if (item.width < 44 || item.height < 44) {
-          log(item.key, 'too small', item.width, item.height);
-        }
-
         item.index = j - 1;
 
         item.anchor.setTo(0.5, 0.5);
+
+        // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+        if ((item.width + item.height) / 2 < 44) {
+          item.hitArea = new Phaser.Circle(0, 0, 44);
+        }
 
         item.inputEnabled = true;
         item.events.onInputDown.add(this.onInputDown, this);
@@ -99,10 +106,14 @@ class Level extends State {
     }
 
     e.blendMode = PIXI.blendModes.ADD;
-    e.tint = 0xff0000;
-    this.add.tween(e).to({
-      tint: 0xee0000,
-    }, 20000, Phaser.Easing.Linear.None, true, 0, 10000, true);
+    // e.tint = 0xff0000;
+    // this.add.tween(e).to({
+    //   tint: 0xee0000,
+    // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
+    this.add.tween(e.scale).to({
+      x: 1.2,
+      y: 1.2,
+    }, 1000, Phaser.Easing.Default, true, 0, -1, true);
 
     this.sound.play('found', 1);
 

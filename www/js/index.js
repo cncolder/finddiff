@@ -3965,10 +3965,10 @@ var Cover = (function (_State) {
       this.load.image('next', 'asset/next.png');
       // this.load.image('sound', 'asset/sound.png');
 
-      this.load.audio('bg', 'asset/romanesca.mp3');
-      this.load.audio('water', 'asset/Water Lake.mp3');
-      this.load.audio('whale', 'asset/Whale Sounds.mp3');
-      this.load.audio('sweep', 'asset/Sweep Motion.mp3');
+      this.load.audio('bg', 'asset/romanesca.ogg');
+      this.load.audio('water', 'asset/Water Lake.ogg');
+      this.load.audio('whale', 'asset/Whale Sounds.ogg');
+      this.load.audio('sweep', 'asset/Sweep Motion.ogg');
     }
   }, {
     key: 'create',
@@ -3986,7 +3986,7 @@ var Cover = (function (_State) {
 
         item.inputEnabled = true;
         item.events.onInputDown.add(this.onInputDown, this);
-        item.input.enableDrag();
+        // item.input.enableDrag();
         item.events.onDragStop.add(this.onDragStop, this);
       }, this);
 
@@ -4147,7 +4147,7 @@ module.exports={
                     },
                     {
                         "h": 0.649,
-                        "v": 0.690
+                        "v": 0.69
                     },
                     {
                         "h": 0.302,
@@ -4156,6 +4156,38 @@ module.exports={
                 ]
             ],
             "prefix": "101"
+        },
+        {
+            "difference": [
+                [],
+                [
+                    {
+                        "h": 0.223,
+                        "v": 0.402
+                    },
+                    {
+                        "h": 0.294,
+                        "v": 0.505
+                    },
+                    {
+                        "h": 0.577,
+                        "v": 0.466
+                    },
+                    {
+                        "h": 0.961,
+                        "v": 0.56
+                    },
+                    {
+                        "h": 0.6,
+                        "v": 0.562
+                    },
+                    {
+                        "h": 0.161,
+                        "v": 0.856
+                    }
+                ]
+            ],
+            "prefix": "102"
         },
         {
             "difference": [
@@ -4224,13 +4256,9 @@ var Game = (function (_Phaser$Game) {
   _createClass(Game, [{
     key: 'fitScreen',
     value: function fitScreen() {
+      // this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
       this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
       this.scale.setUserScale(window.innerWidth / this.world.width);
-
-      // var hscale = window.innerWidth / this.world.width;
-      // var vscale = window.innerHeight / this.world.height;
-      // this.scale.setUserScale(Math.min(hscale, vscale));
-
       this.scale.pageAlignHorizontally = this.scale.pageAlignVertically = true;
     }
   }, {
@@ -4270,9 +4298,8 @@ var Game = (function (_Phaser$Game) {
       this.add.tween(mask).to({
         alpha: 0.5 }, 200, Phaser.Easing.Default, true).onComplete.addOnce(function (graphic, tween) {
         this.state.start(state);
-        // tween.to({
-        //   alpha: 0,
-        // }, 500, Phaser.Easing.Default, true, 500);
+        tween.to({
+          alpha: 0 }, 500, Phaser.Easing.Default, true, 500);
       }, this);
     }
   }]);
@@ -4325,7 +4352,13 @@ var Level = (function (_State) {
   _createClass(Level, [{
     key: 'init',
     value: function init() {
-      this.found = [false, false, false, false, false];
+      var difference = this.data.difference;
+      var length = Math.max(difference[0].length, difference[1].length);
+      var found = this.found = [];
+
+      for (var i = 0; i < length; i++) {
+        found.push(false);
+      }
     }
   }, {
     key: 'preload',
@@ -4346,7 +4379,7 @@ var Level = (function (_State) {
         }, this);
       }, this);
 
-      this.load.audio('found', 'asset/Bell Transition.mp3');
+      this.load.audio('found', 'asset/Bell Transition.ogg');
     }
   }, {
     key: 'create',
@@ -4366,13 +4399,14 @@ var Level = (function (_State) {
           var key = 'img' + i + '' + j;
           var item = this[key] = this.add.image(x, y, key);
 
-          if (item.width < 44 || item.height < 44) {
-            log(item.key, 'too small', item.width, item.height);
-          }
-
           item.index = j - 1;
 
           item.anchor.setTo(0.5, 0.5);
+
+          // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+          if ((item.width + item.height) / 2 < 44) {
+            item.hitArea = new Phaser.Circle(0, 0, 44);
+          }
 
           item.inputEnabled = true;
           item.events.onInputDown.add(this.onInputDown, this);
@@ -4410,9 +4444,13 @@ var Level = (function (_State) {
       }
 
       e.blendMode = PIXI.blendModes.ADD;
-      e.tint = 16711680;
-      this.add.tween(e).to({
-        tint: 15597568 }, 20000, Phaser.Easing.Linear.None, true, 0, 10000, true);
+      // e.tint = 0xff0000;
+      // this.add.tween(e).to({
+      //   tint: 0xee0000,
+      // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
+      this.add.tween(e.scale).to({
+        x: 1.2,
+        y: 1.2 }, 1000, Phaser.Easing.Default, true, 0, -1, true);
 
       this.sound.play('found', 1);
 

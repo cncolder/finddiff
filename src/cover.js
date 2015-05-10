@@ -34,10 +34,10 @@ class Cover extends State {
     this.load.image('next', 'asset/next.png');
     // this.load.image('sound', 'asset/sound.png');
 
-    this.load.audio('bg', 'asset/romanesca.mp3');
-    this.load.audio('water', 'asset/Water Lake.mp3');
-    this.load.audio('whale', 'asset/Whale Sounds.mp3');
-    this.load.audio('sweep', 'asset/Sweep Motion.mp3');
+    this.load.audio('bg', 'asset/romanesca.ogg');
+    this.load.audio('water', 'asset/Water Lake.ogg');
+    this.load.audio('whale', 'asset/Whale Sounds.ogg');
+    this.load.audio('sweep', 'asset/Sweep Motion.ogg');
   }
 
   create() {
@@ -52,7 +52,7 @@ class Cover extends State {
 
       item.inputEnabled = true;
       item.events.onInputDown.add(this.onInputDown, this);
-      item.input.enableDrag();
+      // item.input.enableDrag();
       item.events.onDragStop.add(this.onDragStop, this);
     }, this);
 

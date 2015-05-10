@@ -1,4 +1,4 @@
-var log = require('debug')('index'); // jshint ignore:line
+const log = require('debug')('index'); // jshint ignore:line
 
 require('babelify/node_modules/babel-core/polyfill');
 
@@ -8,8 +8,8 @@ import Cover from './cover';
 import Level from './level';
 import data from './data';
 
-var app = window.app = new App();
-var game = app.game = new Game();
+let app = window.app = new App();
+let game = app.game = new Game();
 
 game.state.add('cover', new Cover(data.cover));
 

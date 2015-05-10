@@ -14,13 +14,9 @@ class Game extends Phaser.Game {
   }
 
   fitScreen() {
+    // this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
     this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
     this.scale.setUserScale(window.innerWidth / this.world.width);
-
-    // var hscale = window.innerWidth / this.world.width;
-    // var vscale = window.innerHeight / this.world.height;
-    // this.scale.setUserScale(Math.min(hscale, vscale));
-
     this.scale.pageAlignHorizontally = this.scale.pageAlignVertically = true;
   }
 
@@ -58,9 +54,9 @@ class Game extends Phaser.Game {
       }, 200, Phaser.Easing.Default, true)
       .onComplete.addOnce(function(graphic, tween) {
         this.state.start(state);
-        // tween.to({
-        //   alpha: 0,
-        // }, 500, Phaser.Easing.Default, true, 500);
+        tween.to({
+          alpha: 0,
+        }, 500, Phaser.Easing.Default, true, 500);
       }, this);
   }
 }

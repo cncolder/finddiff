@@ -19,7 +19,7 @@
                 "views"
             ],
             "instances": "1",
-            "name": "firstebook",
+            "name": "finddiff",
             "node_args": "--harmony",
             "script": "server.js",
             "watch": false
@@ -27,9 +27,9 @@
     ],
     "author": "colder",
     "bugs": {
-        "url": "https://github.com/cncolder/firstebook/issues"
+        "url": "https://github.com/cncolder/finddiff/issues"
     },
-    "description": "my first ebook",
+    "description": "A children book to find difference between two images.",
     "devDependencies": {
         "babelify": "^6.0.2",
         "browserify": "^9.0.8",
@@ -44,14 +44,14 @@
         "vinyl-buffer": "^1.0.0",
         "vinyl-source-stream": "^1.1.0"
     },
-    "homepage": "https://github.com/cncolder/firstebook",
+    "homepage": "https://github.com/cncolder/finddiff",
     "license": "ISC",
     "main": "index.js",
-    "name": "firstebook",
+    "name": "finddiff",
     "private": true,
     "repository": {
         "type": "git",
-        "url": "https://github.com/cncolder/firstebook.git"
+        "url": "https://github.com/cncolder/finddiff.git"
     },
     "scripts": {
         "restart": "cordova run --nobuild --target=iPhone-5",

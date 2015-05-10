@@ -54,7 +54,7 @@ gulp.task('pm2:stop', function(cb) {
 });
 
 gulp.task('pm2:logs', function(cb) {
-  child.spawn('pm2', ['logs', 'firstebook'], {
+  child.spawn('pm2', ['logs', 'finddiff'], {
     stdio: 'inherit',
   })
     .on('exit', cb);
