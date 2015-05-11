@@ -23,12 +23,12 @@ class Cover extends Seabed {
   preload() {
     super.preload();
 
-    let prefix = this.data.prefix;
+    let code = this.data.code;
 
     this.data.images.forEach(function({
       i
     }) {
-      this.load.image(`img${i}`, `asset/${prefix}${i}.png`);
+      this.load.image(`img${i}`, `asset/${code}${i}.png`);
     }, this);
   }
 
@@ -45,18 +45,21 @@ class Cover extends Seabed {
       item.anchor.setTo(0.5, 0.5);
 
       item.inputEnabled = true;
-      item.events.onInputDown.add(this.onInputDown, this);
-      // item.input.enableDrag();
+      item.events.onInputUp.add(this.onInputUp, this);
       item.events.onDragStop.add(this.onDragStop, this);
+
+      if (process.JS_ENV == 'development') {
+        item.input.enableDrag();
+      }
     }, this);
 
     // find difference
-    this.img2.events.onInputDown.add(this.game.next, this.game);
+    this.img2.events.onInputUp.add(this.game.next, this.game);
 
     // rainbow
     this.img4.sendToBack();
 
-    // girl and fish, up down animate, like swiming.
+    // up down animate, like swiming.
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function(i) {
       let img = this[`img${i}`];
       let duration = this.rnd.between(1000, 2000); // animate speed
@@ -84,7 +87,7 @@ class Cover extends Seabed {
     // this.add.button(96 + 50, 0, 'sound', this.mute, this);
   }
 
-  // bubble up with explore.
+  // bubble pop up with explore effect.
   bubble() {
     let emitter = this.add.emitter(this.world.centerX, this.world.height, 15);
 
@@ -99,11 +102,13 @@ class Cover extends Seabed {
     emitter.start(false, 2500, 200, 0);
   }
 
-  onInputDown(e) {
+  onInputUp(e) {
+    // whale roar sound
     if (e.key == 'img4') {
       this.sound.play('whale', 0.6);
     }
 
+    // submarine sound
     if (e.key == 'img8') {
       this.sound.play('sweep', 0.6);
     }

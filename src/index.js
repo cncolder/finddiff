@@ -1,3 +1,6 @@
+process.JS_ENV =
+  location.host == 'localhost:3000' ? 'development' : 'production';
+
 const log = require('debug')('index'); // jshint ignore:line
 
 require('babelify/node_modules/babel-core/polyfill');
@@ -8,12 +11,13 @@ import Cover from './cover';
 import Level from './level';
 import data from './data';
 
+
 let app = window.app = new App();
 let game = app.game = new Game();
 
-game.state.add('cover', new Cover(data.cover));
+game.state.add('cover', new Cover(data.seabed.cover));
 
-data.levels.forEach(function(level, index) {
+data.seabed.levels.forEach(function(level, index) {
   let key = `level${index + 1}`;
 
   game.state.add(key, new Level(level));

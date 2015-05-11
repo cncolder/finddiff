@@ -62,6 +62,15 @@ class Level extends Seabed {
     this.img1 = this.add.image(0, 0, 'img1');
     this.img2 = this.add.image(this.world.centerX, 0, 'img2');
 
+    // a crab indicator for game progress.
+    let crab = this.crab = this.add.image(
+      this.world.centerX,
+      this.img1.top + this.img1.height,
+      'img7'
+    );
+    crab.anchor.setTo(0.5, 0.5);
+    crab.scale.setTo(0.5, 0.5);
+
     [1, 2].forEach(function(i) {
       this.data.difference[i - 1].forEach(function({
         h, v
@@ -89,9 +98,11 @@ class Level extends Seabed {
 
         item.inputEnabled = true;
         item.events.onInputUp.add(this.onInputUp, this);
-
-        item.input.enableDrag();
         item.events.onDragStop.add(this.onDragStop, this);
+
+        if (process.JS_ENV == 'development') {
+          item.input.enableDrag();
+        }
       }, this);
     }, this);
 
@@ -103,24 +114,24 @@ class Level extends Seabed {
     );
   }
 
-  onDragStop(e) {
-    let l = this.img1.toLocal(e.position);
+  onDragStop(image) {
+    let l = this.img1.toLocal(image.position);
     let h = l.x / this.img1.width;
     let v = l.y / this.img1.height;
 
     if (l.x > this.world.centerX) {
-      l = this.img2.toLocal(e.position);
+      l = this.img2.toLocal(image.position);
       h = l.x / this.img2.width;
       v = l.y / this.img2.height;
     }
 
-    log('drag', e.key, l.x, l.y, h, v);
+    log('drag', image.key, l.x, l.y, h, v);
   }
 
-  onInputUp(e) {
-    log(e);
+  onInputUp(image) {
+    log(image);
 
-    let found = this.found[e.index];
+    let found = this.found[image.index];
 
     if (found.checked) {
       return;
@@ -138,6 +149,13 @@ class Level extends Seabed {
     // play a success sound.
     this.sound.play('found', 1);
 
+    // game progress.
+    let checked = this.found.filter(function(found) {
+      return found.checked;
+    }).length;
+
+    this.progress(checked / this.found.length);
+
     // if all answer found then goto next level.
     if (this.found.every(function(found) {
         return found.checked;
@@ -146,21 +164,30 @@ class Level extends Seabed {
     }
   }
 
-  shine(e) {
-    e.blendMode = PIXI.blendModes.ADD;
-    // e.tint = 0xff0000;
-    // this.add.tween(e).to({
+  shine(image) {
+    image.blendMode = PIXI.blendModes.ADD;
+    // image.tint = 0xff0000;
+    // this.add.tween(image).to({
     //   tint: 0xee0000,
     // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
 
     let x, y;
     // small item scale with a large factor.
-    x = y = (e.width + e.height) / 2 > 50 ? 1.2 : 1.5;
+    x = y = (image.width + image.height) / 2 < 44 ? 1.4 : 1.2;
 
     // scale large
-    this.add.tween(e.scale).to({
+    this.add.tween(image.scale).to({
       x, y,
     }, 1000, Phaser.Easing.Default, true, 0, -1, true);
+  }
+
+  progress(percent) {
+    let x = this.crab.x;
+    let y = this.img1.bottom - this.img1.height * percent;
+
+    this.add.tween(this.crab).to({
+      x, y,
+    }, 1000, Phaser.Easing.Elastic.Out, true);
   }
 }
 

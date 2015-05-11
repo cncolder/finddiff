@@ -1,4 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -23,6 +24,8 @@ var _data = require('./data');
 
 var _data2 = _interopRequireDefault(_data);
 
+process.JS_ENV = location.host == 'localhost:3000' ? 'development' : 'production';
+
 var log = require('debug')('index'); // jshint ignore:line
 
 require('babelify/node_modules/babel-core/polyfill');
@@ -30,9 +33,9 @@ require('babelify/node_modules/babel-core/polyfill');
 var app = window.app = new _App2['default']();
 var game = app.game = new _Game2['default']();
 
-game.state.add('cover', new _Cover2['default'](_data2['default'].cover));
+game.state.add('cover', new _Cover2['default'](_data2['default'].seabed.cover));
 
-_data2['default'].levels.forEach(function (level, index) {
+_data2['default'].seabed.levels.forEach(function (level, index) {
   var key = 'level' + (index + 1);
 
   game.state.add(key, new _Level2['default'](level));
@@ -41,7 +44,9 @@ _data2['default'].levels.forEach(function (level, index) {
 
 game.state.start('cover');
 
-},{"./app":88,"./cover":89,"./data":90,"./game":91,"./level":92,"babelify/node_modules/babel-core/polyfill":84,"debug":85}],2:[function(require,module,exports){
+}).call(this,require('_process'))
+
+},{"./app":89,"./cover":90,"./data":91,"./game":92,"./level":93,"_process":85,"babelify/node_modules/babel-core/polyfill":84,"debug":86}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3344,6 +3349,66 @@ module.exports = require('./modules/$').core;
 module.exports = require("./lib/babel/polyfill");
 
 },{"./lib/babel/polyfill":2}],85:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    draining = true;
+    var currentQueue;
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        var i = -1;
+        while (++i < len) {
+            currentQueue[i]();
+        }
+        len = queue.length;
+    }
+    draining = false;
+}
+process.nextTick = function (fun) {
+    queue.push(fun);
+    if (!draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],86:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -3520,7 +3585,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":86}],86:[function(require,module,exports){
+},{"./debug":87}],87:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -3719,7 +3784,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":87}],87:[function(require,module,exports){
+},{"ms":88}],88:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -3844,7 +3909,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -3903,7 +3968,8 @@ var App = (function () {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"debug":85}],89:[function(require,module,exports){
+},{"debug":86}],90:[function(require,module,exports){
+(function (process){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -3954,12 +4020,12 @@ var Cover = (function (_Seabed) {
     value: function preload() {
       _get(Object.getPrototypeOf(Cover.prototype), 'preload', this).call(this);
 
-      var prefix = this.data.prefix;
+      var code = this.data.code;
 
       this.data.images.forEach(function (_ref) {
         var i = _ref.i;
 
-        this.load.image('img' + i, 'asset/' + prefix + '' + i + '.png');
+        this.load.image('img' + i, 'asset/' + code + '' + i + '.png');
       }, this);
     }
   }, {
@@ -3979,18 +4045,21 @@ var Cover = (function (_Seabed) {
         item.anchor.setTo(0.5, 0.5);
 
         item.inputEnabled = true;
-        item.events.onInputDown.add(this.onInputDown, this);
-        // item.input.enableDrag();
+        item.events.onInputUp.add(this.onInputUp, this);
         item.events.onDragStop.add(this.onDragStop, this);
+
+        if (process.JS_ENV == 'development') {
+          item.input.enableDrag();
+        }
       }, this);
 
       // find difference
-      this.img2.events.onInputDown.add(this.game.next, this.game);
+      this.img2.events.onInputUp.add(this.game.next, this.game);
 
       // rainbow
       this.img4.sendToBack();
 
-      // girl and fish, up down animate, like swiming.
+      // up down animate, like swiming.
       [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
         var img = this['img' + i];
         var duration = this.rnd.between(1000, 2000); // animate speed
@@ -4019,7 +4088,7 @@ var Cover = (function (_Seabed) {
   }, {
     key: 'bubble',
 
-    // bubble up with explore.
+    // bubble pop up with explore effect.
     value: function bubble() {
       var emitter = this.add.emitter(this.world.centerX, this.world.height, 15);
 
@@ -4034,12 +4103,14 @@ var Cover = (function (_Seabed) {
       emitter.start(false, 2500, 200, 0);
     }
   }, {
-    key: 'onInputDown',
-    value: function onInputDown(e) {
+    key: 'onInputUp',
+    value: function onInputUp(e) {
+      // whale roar sound
       if (e.key == 'img4') {
         this.sound.play('whale', 0.6);
       }
 
+      // submarine sound
       if (e.key == 'img8') {
         this.sound.play('sweep', 0.6);
       }
@@ -4069,329 +4140,333 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./seabed":93,"debug":85}],90:[function(require,module,exports){
+}).call(this,require('_process'))
+
+},{"./seabed":94,"_process":85,"debug":86}],91:[function(require,module,exports){
 module.exports={
-    "cover": {
-        "backgroundColor": "#aaddf2",
-        "images": [
+    "seabed": {
+        "cover": {
+            "backgroundColor": "#aaddf2",
+            "code": "100",
+            "images": [
+                {
+                    "h": 0.5,
+                    "i": 1,
+                    "v": 0.19
+                },
+                {
+                    "h": 0.5,
+                    "i": 2,
+                    "v": 0.4
+                },
+                {
+                    "h": 0.5,
+                    "i": 3,
+                    "v": 0.56
+                },
+                {
+                    "h": 0.388,
+                    "i": 4,
+                    "v": 0.177
+                },
+                {
+                    "h": 0.7,
+                    "i": 5,
+                    "v": 0.24
+                },
+                {
+                    "h": 0.8,
+                    "i": 6,
+                    "v": 0.24
+                },
+                {
+                    "h": 0.45,
+                    "i": 7,
+                    "v": 0.46
+                },
+                {
+                    "h": 0.15,
+                    "i": 8,
+                    "v": 0.6
+                },
+                {
+                    "h": 0.83,
+                    "i": 9,
+                    "v": 0.62
+                }
+            ]
+        },
+        "levels": [
             {
-                "h": 0.5,
-                "i": 1,
-                "v": 0.19
+                "code": "101",
+                "difference": [
+                    [
+                        {
+                            "h": 0.745,
+                            "v": 0.249
+                        },
+                        {
+                            "h": 0.625,
+                            "v": 0.449
+                        },
+                        {
+                            "h": 0.465,
+                            "v": 0.514
+                        },
+                        {
+                            "h": 0.646,
+                            "v": 0.692
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.691,
+                            "v": 0.276
+                        },
+                        {
+                            "h": 0.632,
+                            "v": 0.443
+                        },
+                        {
+                            "h": 0.465,
+                            "v": 0.514
+                        },
+                        {
+                            "h": 0.649,
+                            "v": 0.69
+                        },
+                        {
+                            "h": 0.302,
+                            "v": 0.792
+                        }
+                    ]
+                ]
             },
             {
-                "h": 0.5,
-                "i": 2,
-                "v": 0.4
+                "code": "102",
+                "difference": [
+                    [
+                        {
+                            "h": 0.212,
+                            "v": 0.4
+                        },
+                        {
+                            "h": 0.303,
+                            "v": 0.517
+                        },
+                        {
+                            "h": 0.56,
+                            "v": 0.468
+                        },
+                        {},
+                        {
+                            "h": 0.588,
+                            "v": 0.564
+                        },
+                        {
+                            "h": 0.154,
+                            "v": 0.858
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.223,
+                            "v": 0.402
+                        },
+                        {
+                            "h": 0.294,
+                            "v": 0.505
+                        },
+                        {
+                            "h": 0.577,
+                            "v": 0.466
+                        },
+                        {
+                            "h": 0.961,
+                            "v": 0.56
+                        },
+                        {
+                            "h": 0.6,
+                            "v": 0.562
+                        },
+                        {
+                            "h": 0.161,
+                            "v": 0.856
+                        }
+                    ]
+                ]
             },
             {
-                "h": 0.5,
-                "i": 3,
-                "v": 0.56
+                "code": "103",
+                "difference": [
+                    [
+                        {
+                            "h": 0.523,
+                            "v": 0.337
+                        },
+                        {
+                            "h": 0.936,
+                            "v": 0.366
+                        },
+                        {},
+                        {
+                            "h": 0.815,
+                            "v": 0.706
+                        },
+                        {
+                            "h": 0.616,
+                            "v": 0.922
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.523,
+                            "v": 0.339
+                        },
+                        {
+                            "h": 0.932,
+                            "v": 0.379
+                        },
+                        {
+                            "h": 0.109,
+                            "v": 0.712
+                        },
+                        {
+                            "h": 0.815,
+                            "v": 0.706
+                        },
+                        {
+                            "h": 0.602,
+                            "v": 0.908
+                        }
+                    ]
+                ]
             },
             {
-                "h": 0.388,
-                "i": 4,
-                "v": 0.177
+                "code": "104",
+                "difference": [
+                    [
+                        {
+                            "h": 0.286,
+                            "v": 0.195
+                        },
+                        {
+                            "h": 0.135,
+                            "v": 0.324
+                        },
+                        {
+                            "h": 0.269,
+                            "v": 0.48
+                        },
+                        {
+                            "h": 0.751,
+                            "v": 0.543
+                        },
+                        {
+                            "h": 0.421,
+                            "v": 0.669
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.293,
+                            "v": 0.195
+                        },
+                        {
+                            "h": 0.138,
+                            "v": 0.32
+                        },
+                        {
+                            "h": 0.226,
+                            "v": 0.486
+                        },
+                        {
+                            "h": 0.751,
+                            "v": 0.53
+                        },
+                        {
+                            "h": 0.865,
+                            "v": 0.785
+                        }
+                    ]
+                ]
             },
             {
-                "h": 0.7,
-                "i": 5,
-                "v": 0.24
+                "code": "105",
+                "difference": [
+                    [
+                        {
+                            "h": 0.816,
+                            "v": 0.311
+                        },
+                        {
+                            "h": 0.595,
+                            "v": 0.568
+                        },
+                        {
+                            "h": 0.064,
+                            "v": 0.872
+                        },
+                        {
+                            "h": 0.563,
+                            "v": 0.905
+                        },
+                        {
+                            "h": 0.912,
+                            "v": 0.877
+                        }
+                    ],
+                    [
+                        {},
+                        {
+                            "h": 0.545,
+                            "v": 0.589
+                        },
+                        {},
+                        {
+                            "h": 0.57,
+                            "v": 0.902
+                        },
+                        {
+                            "h": 0.911,
+                            "v": 0.877
+                        }
+                    ]
+                ]
             },
             {
-                "h": 0.8,
-                "i": 6,
-                "v": 0.24
-            },
-            {
-                "h": 0.45,
-                "i": 7,
-                "v": 0.46
-            },
-            {
-                "h": 0.15,
-                "i": 8,
-                "v": 0.6
-            },
-            {
-                "h": 0.83,
-                "i": 9,
-                "v": 0.62
+                "code": "110",
+                "difference": [
+                    [],
+                    [
+                        {
+                            "h": 0.128,
+                            "v": 0.164
+                        },
+                        {
+                            "h": 0.252,
+                            "v": 0.523
+                        },
+                        {
+                            "h": 0.585,
+                            "v": 0.5
+                        },
+                        {
+                            "h": 0.546,
+                            "v": 0.665
+                        },
+                        {
+                            "h": 0.671,
+                            "v": 0.799
+                        }
+                    ]
+                ]
             }
-        ],
-        "prefix": "100"
-    },
-    "levels": [
-        {
-            "code": "101",
-            "difference": [
-                [
-                    {
-                        "h": 0.745,
-                        "v": 0.249
-                    },
-                    {
-                        "h": 0.625,
-                        "v": 0.449
-                    },
-                    {
-                        "h": 0.465,
-                        "v": 0.514
-                    },
-                    {
-                        "h": 0.646,
-                        "v": 0.692
-                    }
-                ],
-                [
-                    {
-                        "h": 0.691,
-                        "v": 0.276
-                    },
-                    {
-                        "h": 0.632,
-                        "v": 0.443
-                    },
-                    {
-                        "h": 0.465,
-                        "v": 0.514
-                    },
-                    {
-                        "h": 0.649,
-                        "v": 0.69
-                    },
-                    {
-                        "h": 0.302,
-                        "v": 0.792
-                    }
-                ]
-            ]
-        },
-        {
-            "code": "102",
-            "difference": [
-                [
-                    {
-                        "h": 0.212,
-                        "v": 0.4
-                    },
-                    {
-                        "h": 0.303,
-                        "v": 0.517
-                    },
-                    {
-                        "h": 0.56,
-                        "v": 0.468
-                    },
-                    {},
-                    {
-                        "h": 0.588,
-                        "v": 0.564
-                    },
-                    {
-                        "h": 0.154,
-                        "v": 0.858
-                    }
-                ],
-                [
-                    {
-                        "h": 0.223,
-                        "v": 0.402
-                    },
-                    {
-                        "h": 0.294,
-                        "v": 0.505
-                    },
-                    {
-                        "h": 0.577,
-                        "v": 0.466
-                    },
-                    {
-                        "h": 0.961,
-                        "v": 0.56
-                    },
-                    {
-                        "h": 0.6,
-                        "v": 0.562
-                    },
-                    {
-                        "h": 0.161,
-                        "v": 0.856
-                    }
-                ]
-            ]
-        },
-        {
-            "code": "103",
-            "difference": [
-                [
-                    {
-                        "h": 0.523,
-                        "v": 0.337
-                    },
-                    {
-                        "h": 0.936,
-                        "v": 0.366
-                    },
-                    {},
-                    {
-                        "h": 0.815,
-                        "v": 0.706
-                    },
-                    {
-                        "h": 0.616,
-                        "v": 0.922
-                    }
-                ],
-                [
-                    {
-                        "h": 0.523,
-                        "v": 0.339
-                    },
-                    {
-                        "h": 0.932,
-                        "v": 0.379
-                    },
-                    {
-                        "h": 0.109,
-                        "v": 0.712
-                    },
-                    {
-                        "h": 0.815,
-                        "v": 0.706
-                    },
-                    {
-                        "h": 0.602,
-                        "v": 0.908
-                    }
-                ]
-            ]
-        },
-        {
-            "code": "104",
-            "difference": [
-                [
-                    {
-                        "h": 0.286,
-                        "v": 0.195
-                    },
-                    {
-                        "h": 0.135,
-                        "v": 0.324
-                    },
-                    {
-                        "h": 0.269,
-                        "v": 0.48
-                    },
-                    {
-                        "h": 0.751,
-                        "v": 0.543
-                    },
-                    {
-                        "h": 0.421,
-                        "v": 0.669
-                    }
-                ],
-                [
-                    {
-                        "h": 0.293,
-                        "v": 0.195
-                    },
-                    {
-                        "h": 0.138,
-                        "v": 0.32
-                    },
-                    {
-                        "h": 0.226,
-                        "v": 0.486
-                    },
-                    {
-                        "h": 0.751,
-                        "v": 0.53
-                    },
-                    {
-                        "h": 0.865,
-                        "v": 0.785
-                    }
-                ]
-            ]
-        },
-        {
-            "code": "105",
-            "difference": [
-                [
-                    {
-                        "h": 0.816,
-                        "v": 0.311
-                    },
-                    {
-                        "h": 0.595,
-                        "v": 0.568
-                    },
-                    {
-                        "h": 0.064,
-                        "v": 0.872
-                    },
-                    {
-                        "h": 0.563,
-                        "v": 0.905
-                    },
-                    {
-                        "h": 0.912,
-                        "v": 0.877
-                    }
-                ],
-                [
-                    {},
-                    {
-                        "h": 0.545,
-                        "v": 0.589
-                    },
-                    {},
-                    {
-                        "h": 0.57,
-                        "v": 0.902
-                    },
-                    {
-                        "h": 0.911,
-                        "v": 0.877
-                    }
-                ]
-            ]
-        },
-        {
-            "code": "110",
-            "difference": [
-                [],
-                [
-                    {
-                        "h": 0.128,
-                        "v": 0.164
-                    },
-                    {
-                        "h": 0.252,
-                        "v": 0.523
-                    },
-                    {
-                        "h": 0.585,
-                        "v": 0.5
-                    },
-                    {
-                        "h": 0.546,
-                        "v": 0.665
-                    },
-                    {
-                        "h": 0.671,
-                        "v": 0.799
-                    }
-                ]
-            ]
-        }
-    ]
+        ]
+    }
 }
 
-},{}],91:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -4481,7 +4556,8 @@ var Game = (function (_Phaser$Game) {
 exports['default'] = Game;
 module.exports = exports['default'];
 
-},{"debug":85}],92:[function(require,module,exports){
+},{"debug":86}],93:[function(require,module,exports){
+(function (process){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -4572,6 +4648,11 @@ var Level = (function (_Seabed) {
       this.img1 = this.add.image(0, 0, 'img1');
       this.img2 = this.add.image(this.world.centerX, 0, 'img2');
 
+      // a crab indicator for game progress.
+      var crab = this.crab = this.add.image(this.world.centerX, this.img1.top + this.img1.height, 'img7');
+      crab.anchor.setTo(0.5, 0.5);
+      crab.scale.setTo(0.5, 0.5);
+
       [1, 2].forEach(function (i) {
         this.data.difference[i - 1].forEach(function (_ref2, j) {
           var h = _ref2.h;
@@ -4600,9 +4681,11 @@ var Level = (function (_Seabed) {
 
           item.inputEnabled = true;
           item.events.onInputUp.add(this.onInputUp, this);
-
-          item.input.enableDrag();
           item.events.onDragStop.add(this.onDragStop, this);
+
+          if (process.JS_ENV == 'development') {
+            item.input.enableDrag();
+          }
         }, this);
       }, this);
 
@@ -4611,25 +4694,25 @@ var Level = (function (_Seabed) {
     }
   }, {
     key: 'onDragStop',
-    value: function onDragStop(e) {
-      var l = this.img1.toLocal(e.position);
+    value: function onDragStop(image) {
+      var l = this.img1.toLocal(image.position);
       var h = l.x / this.img1.width;
       var v = l.y / this.img1.height;
 
       if (l.x > this.world.centerX) {
-        l = this.img2.toLocal(e.position);
+        l = this.img2.toLocal(image.position);
         h = l.x / this.img2.width;
         v = l.y / this.img2.height;
       }
 
-      log('drag', e.key, l.x, l.y, h, v);
+      log('drag', image.key, l.x, l.y, h, v);
     }
   }, {
     key: 'onInputUp',
-    value: function onInputUp(e) {
-      log(e);
+    value: function onInputUp(image) {
+      log(image);
 
-      var found = this.found[e.index];
+      var found = this.found[image.index];
 
       if (found.checked) {
         return;
@@ -4647,6 +4730,13 @@ var Level = (function (_Seabed) {
       // play a success sound.
       this.sound.play('found', 1);
 
+      // game progress.
+      var checked = this.found.filter(function (found) {
+        return found.checked;
+      }).length;
+
+      this.progress(checked / this.found.length);
+
       // if all answer found then goto next level.
       if (this.found.every(function (found) {
         return found.checked;
@@ -4656,21 +4746,30 @@ var Level = (function (_Seabed) {
     }
   }, {
     key: 'shine',
-    value: function shine(e) {
-      e.blendMode = PIXI.blendModes.ADD;
-      // e.tint = 0xff0000;
-      // this.add.tween(e).to({
+    value: function shine(image) {
+      image.blendMode = PIXI.blendModes.ADD;
+      // image.tint = 0xff0000;
+      // this.add.tween(image).to({
       //   tint: 0xee0000,
       // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
 
       var x = undefined,
           y = undefined;
       // small item scale with a large factor.
-      x = y = (e.width + e.height) / 2 > 50 ? 1.2 : 1.5;
+      x = y = (image.width + image.height) / 2 < 44 ? 1.4 : 1.2;
 
       // scale large
-      this.add.tween(e.scale).to({
+      this.add.tween(image.scale).to({
         x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true);
+    }
+  }, {
+    key: 'progress',
+    value: function progress(percent) {
+      var x = this.crab.x;
+      var y = this.img1.bottom - this.img1.height * percent;
+
+      this.add.tween(this.crab).to({
+        x: x, y: y }, 1000, Phaser.Easing.Elastic.Out, true);
     }
   }]);
 
@@ -4680,7 +4779,9 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./seabed":93,"debug":85}],93:[function(require,module,exports){
+}).call(this,require('_process'))
+
+},{"./seabed":94,"_process":85,"debug":86}],94:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -4736,7 +4837,7 @@ var Seabed = (function (_State) {
 exports['default'] = Seabed;
 module.exports = exports['default'];
 
-},{"./state":94,"debug":85}],94:[function(require,module,exports){
+},{"./state":95,"debug":86}],95:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -4804,7 +4905,7 @@ var State = (function () {
 exports['default'] = State;
 module.exports = exports['default'];
 
-},{"debug":85}]},{},[1])
+},{"debug":86}]},{},[1])
 
 
 //# sourceMappingURL=index.js.map
