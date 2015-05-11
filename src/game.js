@@ -52,12 +52,12 @@ class Game extends Phaser.Game {
     this.add.tween(mask).to({
         alpha: 0.5,
       }, 200, Phaser.Easing.Default, true)
-      .onComplete.addOnce(function(graphic, tween) {
+      .onComplete.addOnce((graphic, tween) => {
         this.state.start(state);
         tween.to({
           alpha: 0,
         }, 500, Phaser.Easing.Default, true, 500);
-      }, this);
+      });
   }
 }
 

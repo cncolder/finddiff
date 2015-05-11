@@ -17,7 +17,7 @@ let game = app.game = new Game();
 
 game.state.add('cover', new Cover(data.seabed.cover));
 
-data.seabed.levels.forEach(function(level, index) {
+data.seabed.levels.forEach((level, index) => {
   let key = `level${index + 1}`;
 
   game.state.add(key, new Level(level));

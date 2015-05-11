@@ -25,19 +25,19 @@ class Cover extends Seabed {
 
     let code = this.data.code;
 
-    this.data.images.forEach(function({
+    this.data.images.forEach(({
       i
-    }) {
+    }) => {
       this.load.image(`img${i}`, `asset/${code}${i}.png`);
-    }, this);
+    });
   }
 
   create() {
     super.create();
 
-    this.data.images.forEach(function({
+    this.data.images.forEach(({
       i, h, v
-    }) {
+    }) => {
       let x = this.world.width * h;
       let y = this.world.height * v;
       let item = this[`img${i}`] = this.add.image(x, y, `img${i}`);
@@ -51,7 +51,7 @@ class Cover extends Seabed {
       if (process.JS_ENV == 'development') {
         item.input.enableDrag();
       }
-    }, this);
+    });
 
     // find difference
     this.img2.events.onInputUp.add(this.game.next, this.game);
@@ -60,7 +60,7 @@ class Cover extends Seabed {
     this.img4.sendToBack();
 
     // up down animate, like swiming.
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function(i) {
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
       let img = this[`img${i}`];
       let duration = this.rnd.between(1000, 2000); // animate speed
       let distance = this.rnd.between(3, 5); // animate offset
@@ -68,7 +68,7 @@ class Cover extends Seabed {
       this.add.tween(img).to({
         y: img.position.y + distance,
       }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
-    }, this);
+    });
 
     this.bubble();
 

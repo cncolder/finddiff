@@ -3919,7 +3919,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var debug = require('debug')('app'); // jshint ignore:line
+var log = require('debug')('app'); // jshint ignore:line
 
 /*
 Cordova
@@ -3958,7 +3958,7 @@ var App = (function () {
   }, {
     key: 'receivedEvent',
     value: function receivedEvent(id) {
-      debug('Received Event:', id);
+      log('Received Event:', id);
     }
   }]);
 
@@ -4018,6 +4018,8 @@ var Cover = (function (_Seabed) {
   }, {
     key: 'preload',
     value: function preload() {
+      var _this = this;
+
       _get(Object.getPrototypeOf(Cover.prototype), 'preload', this).call(this);
 
       var code = this.data.code;
@@ -4025,12 +4027,14 @@ var Cover = (function (_Seabed) {
       this.data.images.forEach(function (_ref) {
         var i = _ref.i;
 
-        this.load.image('img' + i, 'asset/' + code + '' + i + '.png');
-      }, this);
+        _this.load.image('img' + i, 'asset/' + code + '' + i + '.png');
+      });
     }
   }, {
     key: 'create',
     value: function create() {
+      var _this2 = this;
+
       _get(Object.getPrototypeOf(Cover.prototype), 'create', this).call(this);
 
       this.data.images.forEach(function (_ref2) {
@@ -4038,20 +4042,20 @@ var Cover = (function (_Seabed) {
         var h = _ref2.h;
         var v = _ref2.v;
 
-        var x = this.world.width * h;
-        var y = this.world.height * v;
-        var item = this['img' + i] = this.add.image(x, y, 'img' + i);
+        var x = _this2.world.width * h;
+        var y = _this2.world.height * v;
+        var item = _this2['img' + i] = _this2.add.image(x, y, 'img' + i);
 
         item.anchor.setTo(0.5, 0.5);
 
         item.inputEnabled = true;
-        item.events.onInputUp.add(this.onInputUp, this);
-        item.events.onDragStop.add(this.onDragStop, this);
+        item.events.onInputUp.add(_this2.onInputUp, _this2);
+        item.events.onDragStop.add(_this2.onDragStop, _this2);
 
         if (process.JS_ENV == 'development') {
           item.input.enableDrag();
         }
-      }, this);
+      });
 
       // find difference
       this.img2.events.onInputUp.add(this.game.next, this.game);
@@ -4061,13 +4065,13 @@ var Cover = (function (_Seabed) {
 
       // up down animate, like swiming.
       [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
-        var img = this['img' + i];
-        var duration = this.rnd.between(1000, 2000); // animate speed
-        var distance = this.rnd.between(3, 5); // animate offset
+        var img = _this2['img' + i];
+        var duration = _this2.rnd.between(1000, 2000); // animate speed
+        var distance = _this2.rnd.between(3, 5); // animate offset
 
-        this.add.tween(img).to({
+        _this2.add.tween(img).to({
           y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
-      }, this);
+      });
 
       this.bubble();
 
@@ -4709,12 +4713,12 @@ module.exports={
                     ],
                     [
                         {
-                            "h": 0.224,
-                            "v": 0.528
+                            "h": 0.515,
+                            "v": 0.323
                         },
                         {
-                            "h": 0.515,
-                            "v": 0.322
+                            "h": 0.226,
+                            "v": 0.528
                         },
                         {
                             "h": 0.483,
@@ -4873,6 +4877,8 @@ var Game = (function (_Phaser$Game) {
 
     // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
     value: function fade(state) {
+      var _this = this;
+
       var mask = this.add.graphics(0, 0);
 
       mask.beginFill(this.fadeColor, 1);
@@ -4882,10 +4888,10 @@ var Game = (function (_Phaser$Game) {
 
       this.add.tween(mask).to({
         alpha: 0.5 }, 200, Phaser.Easing.Default, true).onComplete.addOnce(function (graphic, tween) {
-        this.state.start(state);
+        _this.state.start(state);
         tween.to({
           alpha: 0 }, 500, Phaser.Easing.Default, true, 500);
-      }, this);
+      });
     }
   }]);
 
@@ -4952,6 +4958,8 @@ var Level = (function (_Seabed) {
   }, {
     key: 'preload',
     value: function preload() {
+      var _this = this;
+
       _get(Object.getPrototypeOf(Level.prototype), 'preload', this).call(this);
 
       var code = this.data.code;
@@ -4960,7 +4968,7 @@ var Level = (function (_Seabed) {
       this.load.image('img2', 'asset/' + code + '2.png');
 
       [1, 2].forEach(function (i) {
-        this.data.difference[i - 1].forEach(function (_ref, j) {
+        _this.data.difference[i - 1].forEach(function (_ref, j) {
           var h = _ref.h;
           var v = _ref.v;
 
@@ -4973,15 +4981,17 @@ var Level = (function (_Seabed) {
           var key = 'img' + i + '' + j;
           var path = 'asset/' + code + '' + i + '' + j + '.png';
 
-          this.load.image(key, path);
-        }, this);
-      }, this);
+          _this.load.image(key, path);
+        });
+      });
 
       this.loadAudioOnce('found', 'asset/Bell Transition.ogg');
     }
   }, {
     key: 'create',
     value: function create() {
+      var _this2 = this;
+
       _get(Object.getPrototypeOf(Level.prototype), 'create', this).call(this);
 
       this.img1 = this.add.image(0, 0, 'img1');
@@ -5008,7 +5018,7 @@ var Level = (function (_Seabed) {
       crab.scale.setTo(0.5, 0.5);
 
       [1, 2].forEach(function (i) {
-        this.data.difference[i - 1].forEach(function (_ref2, j) {
+        _this2.data.difference[i - 1].forEach(function (_ref2, j) {
           var h = _ref2.h;
           var v = _ref2.v;
 
@@ -5018,13 +5028,13 @@ var Level = (function (_Seabed) {
 
           j += 1;
 
-          var x = this['img' + i].position.x + this['img' + i].width * h;
-          var y = this['img' + i].position.y + this['img' + i].height * v;
+          var x = _this2['img' + i].position.x + _this2['img' + i].width * h;
+          var y = _this2['img' + i].position.y + _this2['img' + i].height * v;
           var key = 'img' + i + '' + j;
-          var item = this[key] = this.add.image(x, y, key);
+          var item = _this2[key] = _this2.add.image(x, y, key);
 
           item.index = j - 1;
-          this.found[item.index].items[i - 1] = item;
+          _this2.found[item.index].items[i - 1] = item;
 
           item.anchor.setTo(0.5, 0.5);
 
@@ -5034,14 +5044,14 @@ var Level = (function (_Seabed) {
           }
 
           item.inputEnabled = true;
-          item.events.onInputUp.add(this.onInputUp, this);
-          item.events.onDragStop.add(this.onDragStop, this);
+          item.events.onInputUp.add(_this2.onInputUp, _this2);
+          item.events.onDragStop.add(_this2.onDragStop, _this2);
 
           if (process.JS_ENV == 'development') {
             item.input.enableDrag();
           }
-        }, this);
-      }, this);
+        });
+      });
 
       this.add.button(0, 0, 'previous', this.game.previous, this.game);
       this.add.button(this.world.width - 96, 0, 'next', this.game.next, this.game);
@@ -5064,6 +5074,8 @@ var Level = (function (_Seabed) {
   }, {
     key: 'onInputUp',
     value: function onInputUp(image) {
+      var _this3 = this;
+
       log(image);
 
       var found = this.found[image.index];
@@ -5077,9 +5089,9 @@ var Level = (function (_Seabed) {
       // shine and scale animate for both item.
       found.items.forEach(function (item) {
         if (item) {
-          this.shine(item);
+          _this3.shine(item);
         }
-      }, this);
+      });
 
       // play a success sound.
       this.sound.play('found', 1);
@@ -5110,7 +5122,7 @@ var Level = (function (_Seabed) {
       var x = undefined,
           y = undefined;
       // small item scale with a large factor.
-      x = y = (image.width + image.height) / 2 < 44 ? 1.4 : 1.2;
+      x = y = (image.width + image.height) / 2 < 44 ? 1.4 : (image.width + image.height) / 2 < 100 ? 1.2 : (image.width + image.height) / 2 < 200 ? 1.05 : 1.01;
 
       // scale large
       this.add.tween(image.scale).to({

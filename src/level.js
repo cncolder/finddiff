@@ -36,10 +36,10 @@ class Level extends Seabed {
     this.load.image('img1', `asset/${code}1.png`);
     this.load.image('img2', `asset/${code}2.png`);
 
-    [1, 2].forEach(function(i) {
-      this.data.difference[i - 1].forEach(function({
+    [1, 2].forEach(i => {
+      this.data.difference[i - 1].forEach(({
         h, v
-      }, j) {
+      }, j) => {
         if (!h) {
           return;
         }
@@ -50,8 +50,8 @@ class Level extends Seabed {
         let path = `asset/${code}${i}${j}.png`;
 
         this.load.image(key, path);
-      }, this);
-    }, this);
+      });
+    });
 
     this.loadAudioOnce('found', 'asset/Bell Transition.ogg');
   }
@@ -87,10 +87,10 @@ class Level extends Seabed {
     crab.anchor.setTo(0.5, 0.5);
     crab.scale.setTo(0.5, 0.5);
 
-    [1, 2].forEach(function(i) {
-      this.data.difference[i - 1].forEach(function({
+    [1, 2].forEach(i => {
+      this.data.difference[i - 1].forEach(({
         h, v
-      }, j) {
+      }, j) => {
         if (!h) {
           return;
         }
@@ -119,8 +119,8 @@ class Level extends Seabed {
         if (process.JS_ENV == 'development') {
           item.input.enableDrag();
         }
-      }, this);
-    }, this);
+      });
+    });
 
     this.add.button(
       0, 0, 'previous', this.game.previous, this.game
@@ -156,26 +156,22 @@ class Level extends Seabed {
     found.checked = true;
 
     // shine and scale animate for both item.
-    found.items.forEach(function(item) {
+    found.items.forEach(item => {
       if (item) {
         this.shine(item);
       }
-    }, this);
+    });
 
     // play a success sound.
     this.sound.play('found', 1);
 
     // game progress.
-    let checked = this.found.filter(function(found) {
-      return found.checked;
-    }).length;
+    let checked = this.found.filter(found => found.checked).length;
 
     this.progress(checked / this.found.length);
 
     // if all answer found then goto next level.
-    if (this.found.every(function(found) {
-        return found.checked;
-      })) {
+    if (this.found.every(found => found.checked)) {
       this.game.next();
     }
   }
@@ -189,7 +185,14 @@ class Level extends Seabed {
 
     let x, y;
     // small item scale with a large factor.
-    x = y = (image.width + image.height) / 2 < 44 ? 1.4 : 1.2;
+    x = y =
+      (image.width + image.height) / 2 < 44 ?
+      1.4 :
+      (image.width + image.height) / 2 < 100 ?
+      1.2 :
+      (image.width + image.height) / 2 < 200 ?
+      1.05 :
+      1.01;
 
     // scale large
     this.add.tween(image.scale).to({

@@ -1,4 +1,4 @@
-var debug = require('debug')('app'); // jshint ignore:line
+const log = require('debug')('app'); // jshint ignore:line
 
 /*
 Cordova
@@ -28,9 +28,8 @@ class App {
   }
 
   receivedEvent(id) {
-    debug('Received Event:', id);
+    log('Received Event:', id);
   }
 }
 
-export
-default App;
+export default App;
