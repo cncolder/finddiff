@@ -4435,6 +4435,162 @@ module.exports={
                 ]
             },
             {
+                "code": "106",
+                "difference": [
+                    [
+                        {},
+                        {},
+                        {
+                            "h": 0.538,
+                            "v": 0.436
+                        },
+                        {
+                            "h": 0.699,
+                            "v": 0.793
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.137,
+                            "v": 0.131
+                        },
+                        {
+                            "h": 0.606,
+                            "v": 0.096
+                        },
+                        {},
+                        {
+                            "h": 0.698,
+                            "v": 0.793
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "107",
+                "difference": [
+                    [
+                        {
+                            "h": 0.238,
+                            "v": 0.106
+                        },
+                        {
+                            "h": 0.423,
+                            "v": 0.265
+                        },
+                        {
+                            "h": 0.688,
+                            "v": 0.404
+                        },
+                        {},
+                        {
+                            "h": 0.855,
+                            "v": 0.724
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.237,
+                            "v": 0.106
+                        },
+                        {},
+                        {
+                            "h": 0.686,
+                            "v": 0.405
+                        },
+                        {
+                            "h": 0.257,
+                            "v": 0.526
+                        },
+                        {
+                            "h": 0.826,
+                            "v": 0.705
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "108",
+                "difference": [
+                    [
+                        {
+                            "h": 0.397,
+                            "v": 0.22
+                        },
+                        {},
+                        {},
+                        {
+                            "h": 0.169,
+                            "v": 0.621
+                        },
+                        {
+                            "h": 0.843,
+                            "v": 0.899
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.38,
+                            "v": 0.212
+                        },
+                        {
+                            "h": 0.247,
+                            "v": 0.411
+                        },
+                        {
+                            "h": 0.56,
+                            "v": 0.603
+                        },
+                        {},
+                        {
+                            "h": 0.842,
+                            "v": 0.888
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "109",
+                "difference": [
+                    [
+                        {
+                            "h": 0.171,
+                            "v": 0.184
+                        },
+                        {
+                            "h": 0.859,
+                            "v": 0.441
+                        },
+                        {
+                            "h": 0.57,
+                            "v": 0.871
+                        },
+                        {
+                            "h": 0.638,
+                            "v": 0.861
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.093,
+                            "v": 0.218
+                        },
+                        {
+                            "h": 0.857,
+                            "v": 0.44
+                        },
+                        {
+                            "h": 0.576,
+                            "v": 0.874
+                        },
+                        {
+                            "h": 0.652,
+                            "v": 0.86
+                        }
+                    ]
+                ]
+            },
+            {
                 "code": "110",
                 "difference": [
                     [],
@@ -4458,6 +4614,189 @@ module.exports={
                         {
                             "h": 0.671,
                             "v": 0.799
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "111",
+                "difference": [
+                    [
+                        {
+                            "h": 0.126,
+                            "v": 0.307
+                        },
+                        {},
+                        {},
+                        {
+                            "h": 0.929,
+                            "v": 0.752
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.125,
+                            "v": 0.309
+                        },
+                        {
+                            "h": 0.253,
+                            "v": 0.588
+                        },
+                        {
+                            "h": 0.097,
+                            "v": 0.74
+                        },
+                        {
+                            "h": 0.931,
+                            "v": 0.753
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "112",
+                "difference": [
+                    [
+                        {
+                            "h": 0.1,
+                            "v": 0.254
+                        },
+                        {},
+                        {},
+                        {
+                            "h": 0.445,
+                            "v": 0.856
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.1,
+                            "v": 0.254
+                        },
+                        {
+                            "h": 0.896,
+                            "v": 0.339
+                        },
+                        {
+                            "h": 0.059,
+                            "v": 0.506
+                        },
+                        {
+                            "h": 0.445,
+                            "v": 0.828
+                        },
+                        {
+                            "h": 0.682,
+                            "v": 0.817
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "113",
+                "difference": [
+                    [
+                        {},
+                        {
+                            "h": 0.184,
+                            "v": 0.527
+                        },
+                        {},
+                        {
+                            "h": 0.606,
+                            "v": 0.87
+                        }
+                    ],
+                    [
+                        {
+                            "h": 0.224,
+                            "v": 0.528
+                        },
+                        {
+                            "h": 0.515,
+                            "v": 0.322
+                        },
+                        {
+                            "h": 0.483,
+                            "v": 0.67
+                        },
+                        {
+                            "h": 0.606,
+                            "v": 0.863
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "114",
+                "difference": [
+                    [
+                        {
+                            "h": 0.51,
+                            "v": 0.316
+                        },
+                        {},
+                        {
+                            "h": 0.222,
+                            "v": 0.681
+                        },
+                        {
+                            "h": 0.294,
+                            "v": 0.73
+                        },
+                        {}
+                    ],
+                    [
+                        {
+                            "h": 0.513,
+                            "v": 0.316
+                        },
+                        {
+                            "h": 0.574,
+                            "v": 0.528
+                        },
+                        {
+                            "h": 0.223,
+                            "v": 0.683
+                        },
+                        {
+                            "h": 0.294,
+                            "v": 0.732
+                        },
+                        {
+                            "h": 0.635,
+                            "v": 0.806
+                        }
+                    ]
+                ]
+            },
+            {
+                "code": "115",
+                "difference": [
+                    [
+                        {
+                            "h": 0.212,
+                            "v": 0.089
+                        },
+                        {
+                            "h": 0.823,
+                            "v": 0.156
+                        }
+                    ],
+                    [
+                        {},
+                        {},
+                        {
+                            "h": 0.078,
+                            "v": 0.433
+                        },
+                        {
+                            "h": 0.877,
+                            "v": 0.524
+                        },
+                        {
+                            "h": 0.293,
+                            "v": 0.833
                         }
                     ]
                 ]
@@ -4638,7 +4977,7 @@ var Level = (function (_Seabed) {
         }, this);
       }, this);
 
-      this.load.audio('found', 'asset/Bell Transition.ogg');
+      this.loadAudioOnce('found', 'asset/Bell Transition.ogg');
     }
   }, {
     key: 'create',
@@ -4647,6 +4986,21 @@ var Level = (function (_Seabed) {
 
       this.img1 = this.add.image(0, 0, 'img1');
       this.img2 = this.add.image(this.world.centerX, 0, 'img2');
+
+      // show level number
+      var level = parseInt(this.data.code) - 100;
+      var text = this.add.text(this.world.centerX, 25, ' ' + level + ' ', {
+        align: 'center',
+        font: 'Arial',
+        fontWeight: 'bold',
+        fontSize: 40 });
+      text.anchor.setTo(0.5);
+      text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
+
+      var grd = text.context.createLinearGradient(0, 0, 0, text.height);
+      grd.addColorStop(0, '#8ED6FF');
+      grd.addColorStop(1, '#004CB3');
+      text.fill = grd;
 
       // a crab indicator for game progress.
       var crab = this.crab = this.add.image(this.world.centerX, this.img1.top + this.img1.height, 'img7');
@@ -4823,11 +5177,11 @@ var Seabed = (function (_State) {
     value: function preload() {
       _get(Object.getPrototypeOf(Seabed.prototype), 'preload', this).call(this);
 
-      this.load.image('bubble', 'asset/bubble.png');
+      this.loadImageOnce('bubble', 'asset/bubble.png');
 
-      this.load.audio('bg', 'asset/romanesca.ogg');
-      this.load.audio('water', 'asset/Water Lake.ogg');
-      this.load.audio('whale', 'asset/Whale Sounds.ogg');
+      this.loadAudioOnce('bg', 'asset/romanesca.ogg');
+      this.loadAudioOnce('water', 'asset/Water Lake.ogg');
+      this.loadAudioOnce('whale', 'asset/Whale Sounds.ogg');
     }
   }]);
 
@@ -4867,11 +5221,11 @@ var State = (function () {
   }, {
     key: 'preload',
     value: function preload() {
-      this.load.image('previous', 'asset/previous.png');
-      this.load.image('next', 'asset/next.png');
+      this.loadImageOnce('previous', 'asset/previous.png');
+      this.loadImageOnce('next', 'asset/next.png');
       // this.load.image('sound', 'asset/sound.png');
 
-      this.load.audio('sweep', 'asset/Sweep Motion.ogg');
+      this.loadAudioOnce('sweep', 'asset/Sweep Motion.ogg');
     }
   }, {
     key: 'create',
@@ -4896,6 +5250,20 @@ var State = (function () {
     key: 'assign',
     value: function assign(obj) {
       Object.assign(this, obj);
+    }
+  }, {
+    key: 'loadImageOnce',
+    value: function loadImageOnce(key, path) {
+      if (!this.cache.checkImageKey(key)) {
+        this.load.image(key, path);
+      }
+    }
+  }, {
+    key: 'loadAudioOnce',
+    value: function loadAudioOnce(key, path) {
+      if (!this.cache.checkSoundKey(key)) {
+        this.load.audio(key, path);
+      }
     }
   }]);
 

@@ -15,11 +15,11 @@ class Seabed extends State {
   preload() {
     super.preload();
 
-    this.load.image('bubble', 'asset/bubble.png');
+    this.loadImageOnce('bubble', 'asset/bubble.png');
 
-    this.load.audio('bg', 'asset/romanesca.ogg');
-    this.load.audio('water', 'asset/Water Lake.ogg');
-    this.load.audio('whale', 'asset/Whale Sounds.ogg');
+    this.loadAudioOnce('bg', 'asset/romanesca.ogg');
+    this.loadAudioOnce('water', 'asset/Water Lake.ogg');
+    this.loadAudioOnce('whale', 'asset/Whale Sounds.ogg');
   }
 }
 

@@ -13,11 +13,11 @@ class State {
   }
 
   preload() {
-    this.load.image('previous', 'asset/previous.png');
-    this.load.image('next', 'asset/next.png');
+    this.loadImageOnce('previous', 'asset/previous.png');
+    this.loadImageOnce('next', 'asset/next.png');
     // this.load.image('sound', 'asset/sound.png');
 
-    this.load.audio('sweep', 'asset/Sweep Motion.ogg');
+    this.loadAudioOnce('sweep', 'asset/Sweep Motion.ogg');
   }
 
   create() {}
@@ -38,6 +38,18 @@ class State {
 
   assign(obj) {
     Object.assign(this, obj);
+  }
+
+  loadImageOnce(key, path) {
+    if (!this.cache.checkImageKey(key)) {
+      this.load.image(key, path);
+    }
+  }
+
+  loadAudioOnce(key, path) {
+    if (!this.cache.checkSoundKey(key)) {
+      this.load.audio(key, path);
+    }
   }
 }
 

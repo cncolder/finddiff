@@ -53,7 +53,7 @@ class Level extends Seabed {
       }, this);
     }, this);
 
-    this.load.audio('found', 'asset/Bell Transition.ogg');
+    this.loadAudioOnce('found', 'asset/Bell Transition.ogg');
   }
 
   create() {
@@ -61,6 +61,22 @@ class Level extends Seabed {
 
     this.img1 = this.add.image(0, 0, 'img1');
     this.img2 = this.add.image(this.world.centerX, 0, 'img2');
+
+    // show level number
+    let level = parseInt(this.data.code) - 100;
+    let text = this.add.text(this.world.centerX, 25, ` ${level} `, {
+      align: 'center',
+      font: 'Arial',
+      fontWeight: 'bold',
+      fontSize: 40,
+    });
+    text.anchor.setTo(0.5);
+    text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
+
+    let grd = text.context.createLinearGradient(0, 0, 0, text.height);
+    grd.addColorStop(0, '#8ED6FF');
+    grd.addColorStop(1, '#004CB3');
+    text.fill = grd;
 
     // a crab indicator for game progress.
     let crab = this.crab = this.add.image(
