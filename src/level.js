@@ -145,8 +145,6 @@ class Level extends Seabed {
   }
 
   onInputUp(image) {
-    log(image);
-
     let found = this.found[image.index];
 
     if (found.checked) {
@@ -183,14 +181,15 @@ class Level extends Seabed {
     //   tint: 0xee0000,
     // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
 
+    let d = (image.width + image.height) / 2;
     let x, y;
     // small item scale with a large factor.
     x = y =
-      (image.width + image.height) / 2 < 44 ?
+      d < 44 ?
       1.4 :
-      (image.width + image.height) / 2 < 100 ?
+      d < 100 ?
       1.2 :
-      (image.width + image.height) / 2 < 200 ?
+      d < 200 ?
       1.05 :
       1.01;
 
