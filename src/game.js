@@ -13,6 +13,10 @@ class Game extends Phaser.Game {
     this.fadeColor = 0xffffff;
   }
 
+  get env() {
+    return process.env.BROWSER_ENV;
+  }
+
   fitScreen() {
     // this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
     this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;

@@ -53,7 +53,7 @@ class Level extends Seabed {
       });
     });
 
-    this.loadAudioOnce('found', 'asset/Bell Transition.ogg');
+    this.loadAudioOnce('bell', 'asset/Bell Transition.mp3');
   }
 
   create() {
@@ -116,7 +116,7 @@ class Level extends Seabed {
         item.events.onInputUp.add(this.onInputUp, this);
         item.events.onDragStop.add(this.onDragStop, this);
 
-        if (process.JS_ENV == 'development') {
+        if (this.env == 'development') {
           item.input.enableDrag();
         }
       });
@@ -161,7 +161,7 @@ class Level extends Seabed {
     });
 
     // play a success sound.
-    this.sound.play('found', 1);
+    this.sound.play('bell', 1);
 
     // game progress.
     let checked = this.found.filter(found => found.checked).length;

@@ -16,8 +16,6 @@ class State {
     this.loadImageOnce('previous', 'asset/previous.png');
     this.loadImageOnce('next', 'asset/next.png');
     // this.load.image('sound', 'asset/sound.png');
-
-    this.loadAudioOnce('sweep', 'asset/Sweep Motion.ogg');
   }
 
   create() {}
@@ -25,7 +23,7 @@ class State {
   update() {}
 
   render() {
-    if (!navigator.isCocoonJS) {
+    if (this.env == 'development' && !navigator.isCocoonJS) {
       if (!this.time.advancedTiming) {
         this.time.advancedTiming = true;
       }
@@ -34,6 +32,10 @@ class State {
 
       this.game.debug.text(`fps:${fps}`, 0, 12);
     }
+  }
+
+  get env() {
+    return this.game.env;
   }
 
   assign(obj) {

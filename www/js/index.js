@@ -24,7 +24,7 @@ var _data = require('./data');
 
 var _data2 = _interopRequireDefault(_data);
 
-process.JS_ENV = location.host == 'localhost:3000' ? 'development' : 'production';
+process.env.BROWSER_ENV = location.host == 'localhost:3000' ? 'development' : 'production';
 
 var log = require('debug')('index'); // jshint ignore:line
 
@@ -3943,7 +3943,9 @@ var App = (function () {
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     value: function bindEvents() {
-      document.addEventListener('deviceready', this.onDeviceReady, false);
+      document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+      document.addEventListener('pause', this.onPause.bind(this), false);
+      document.addEventListener('resume', this.onResume.bind(this), false);
     }
   }, {
     key: 'onDeviceReady',
@@ -3953,7 +3955,27 @@ var App = (function () {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     value: function onDeviceReady() {
+      log('ready');
+
       this.receivedEvent('deviceready');
+    }
+  }, {
+    key: 'onPause',
+    value: function onPause() {
+      log('pause');
+
+      if (this.game) {
+        this.game.sound.mute = true;
+      }
+    }
+  }, {
+    key: 'onResume',
+    value: function onResume() {
+      log('resume');
+
+      if (this.game) {
+        this.game.sound.mute = false;
+      }
     }
   }, {
     key: 'receivedEvent',
@@ -3969,7 +3991,6 @@ exports['default'] = App;
 module.exports = exports['default'];
 
 },{"debug":86}],90:[function(require,module,exports){
-(function (process){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -4052,7 +4073,7 @@ var Cover = (function (_Seabed) {
         item.events.onInputUp.add(_this2.onInputUp, _this2);
         item.events.onDragStop.add(_this2.onDragStop, _this2);
 
-        if (process.JS_ENV == 'development') {
+        if (_this2.env == 'development') {
           item.input.enableDrag();
         }
       });
@@ -4144,9 +4165,7 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-}).call(this,require('_process'))
-
-},{"./seabed":94,"_process":85,"debug":86}],91:[function(require,module,exports){
+},{"./seabed":94,"debug":86}],91:[function(require,module,exports){
 module.exports={
     "seabed": {
         "cover": {
@@ -4985,6 +5004,7 @@ module.exports={
 }
 
 },{}],92:[function(require,module,exports){
+(function (process){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -5018,6 +5038,11 @@ var Game = (function (_Phaser$Game) {
   _inherits(Game, _Phaser$Game);
 
   _createClass(Game, [{
+    key: 'env',
+    get: function () {
+      return process.env.BROWSER_ENV;
+    }
+  }, {
     key: 'fitScreen',
     value: function fitScreen() {
       // this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
@@ -5076,8 +5101,9 @@ var Game = (function (_Phaser$Game) {
 exports['default'] = Game;
 module.exports = exports['default'];
 
-},{"debug":86}],93:[function(require,module,exports){
-(function (process){
+}).call(this,require('_process'))
+
+},{"_process":85,"debug":86}],93:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -5160,7 +5186,7 @@ var Level = (function (_Seabed) {
         });
       });
 
-      this.loadAudioOnce('found', 'asset/Bell Transition.ogg');
+      this.loadAudioOnce('bell', 'asset/Bell Transition.mp3');
     }
   }, {
     key: 'create',
@@ -5222,7 +5248,7 @@ var Level = (function (_Seabed) {
           item.events.onInputUp.add(_this2.onInputUp, _this2);
           item.events.onDragStop.add(_this2.onDragStop, _this2);
 
-          if (process.JS_ENV == 'development') {
+          if (_this2.env == 'development') {
             item.input.enableDrag();
           }
         });
@@ -5267,7 +5293,7 @@ var Level = (function (_Seabed) {
       });
 
       // play a success sound.
-      this.sound.play('found', 1);
+      this.sound.play('bell', 1);
 
       // game progress.
       var checked = this.found.filter(function (found) {
@@ -5319,9 +5345,7 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-}).call(this,require('_process'))
-
-},{"./seabed":94,"_process":85,"debug":86}],94:[function(require,module,exports){
+},{"./seabed":94,"debug":86}],94:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -5365,9 +5389,10 @@ var Seabed = (function (_State) {
 
       this.loadImageOnce('bubble', 'asset/bubble.png');
 
-      this.loadAudioOnce('bg', 'asset/romanesca.ogg');
-      this.loadAudioOnce('water', 'asset/Water Lake.ogg');
-      this.loadAudioOnce('whale', 'asset/Whale Sounds.ogg');
+      this.loadAudioOnce('bg', 'asset/romanesca.mp3');
+      this.loadAudioOnce('water', 'asset/Water Lake.mp3');
+      this.loadAudioOnce('whale', 'asset/Whale Sounds.mp3');
+      this.loadAudioOnce('sweep', 'asset/Sweep Motion.mp3');
     }
   }]);
 
@@ -5410,8 +5435,6 @@ var State = (function () {
       this.loadImageOnce('previous', 'asset/previous.png');
       this.loadImageOnce('next', 'asset/next.png');
       // this.load.image('sound', 'asset/sound.png');
-
-      this.loadAudioOnce('sweep', 'asset/Sweep Motion.ogg');
     }
   }, {
     key: 'create',
@@ -5422,7 +5445,7 @@ var State = (function () {
   }, {
     key: 'render',
     value: function render() {
-      if (!navigator.isCocoonJS) {
+      if (this.env == 'development' && !navigator.isCocoonJS) {
         if (!this.time.advancedTiming) {
           this.time.advancedTiming = true;
         }
@@ -5431,6 +5454,11 @@ var State = (function () {
 
         this.game.debug.text('fps:' + fps, 0, 12);
       }
+    }
+  }, {
+    key: 'env',
+    get: function () {
+      return this.game.env;
     }
   }, {
     key: 'assign',

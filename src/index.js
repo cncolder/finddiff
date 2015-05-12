@@ -1,4 +1,4 @@
-process.JS_ENV =
+process.env.BROWSER_ENV =
   location.host == 'localhost:3000' ? 'development' : 'production';
 
 const log = require('debug')('index'); // jshint ignore:line
@@ -10,7 +10,6 @@ import Game from './game';
 import Cover from './cover';
 import Level from './level';
 import data from './data';
-
 
 let app = window.app = new App();
 let game = app.game = new Game();

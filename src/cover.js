@@ -48,7 +48,7 @@ class Cover extends Seabed {
       item.events.onInputUp.add(this.onInputUp, this);
       item.events.onDragStop.add(this.onDragStop, this);
 
-      if (process.JS_ENV == 'development') {
+      if (this.env == 'development') {
         item.input.enableDrag();
       }
     });
