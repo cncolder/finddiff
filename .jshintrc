@@ -4,12 +4,15 @@
     "esnext": true,
     "freeze": true,
     "globals": {
+        "Connection": true,
         "Media": true,
         "PIXI": true,
         "Phaser": true,
         "Promise": true,
         "alert": true,
         "cordova": true,
+        "device": true,
+        "fetch": true,
         "window": true
     },
     "latedef": "nofunc",

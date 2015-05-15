@@ -9,6 +9,8 @@
     </author>
     <content src="index.html"/>
     <access origin="*"/>
+    <allow-navigation href="*"/>
+    <allow-intent href="*"/>
     <preference name="Orientation" value="landscape"/>
     <preference name="Fullscreen" value="true"/>
     <preference name="DisallowOverscroll" value="true"/>
@@ -22,6 +24,11 @@
     <plugin name="cordova-plugin-file" spec="^2.0.0"/>
     <plugin name="cordova-plugin-media" spec="^1.0.0"/>
     <plugin name="cordova-plugin-splashscreen" spec="^2.0.0"/>
+    <plugin name="cordova-plugin-whitelist" spec="^1.0.0"/>
+    <plugin name="cordova-plugin-network-information" spec="^1.0.0"/>
+    <plugin name="cordova-plugin-inappbrowser" spec="^1.0.0"/>
+    <plugin name="cordova-plugin-globalization" spec="^1.0.0"/>
+    <plugin name="org.binarypark.cordova.plugins.version" spec="^0.1.0"/>
     <icon src="res/icon.png"/>
     <platform name="ios">
         <icon height="180" src="res/ios/icon-60@3x.png" width="180"/>

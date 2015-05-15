@@ -1,0 +1,32 @@
+{
+    "version": "0.1.0",
+    "name": "org.binarypark.cordova.plugins.version",
+    "cordova_name": "getAppVersion",
+    "description": "Read the version of the App from config.xml and make it available in js",
+    "license": "MIT",
+    "repo": "https://github.com/Binarypark/cordova_app_version_plugin.git",
+    "issue": "https://github.com/Binarypark/cordova_app_version_plugin/issues",
+    "keywords": [
+        "cordova",
+        "appversion",
+        "version"
+    ],
+    "platforms": [
+        "android",
+        "amazon-fireos",
+        "ubuntu",
+        "ios",
+        "blackberry10",
+        "wp7",
+        "wp8",
+        "windows8",
+        "windows",
+        "browser"
+    ],
+    "engines": [
+        {
+            "name": "cordova",
+            "version": ">=3.0.0"
+        }
+    ]
+}

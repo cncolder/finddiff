@@ -3,6 +3,7 @@ process.env.BROWSER_ENV = location.host == 'localhost:3000' ?
 
 require('babelify/node_modules/babel-core/polyfill');
 
+import fetch from 'whatwg-fetch'; // jshint ignore:line
 import log from './log'; // jshint ignore:line
 import App from './app';
 import Game from './game';
@@ -12,6 +13,8 @@ import data from './data';
 
 let app = window.app = new App();
 let game = app.game = new Game();
+
+game.app = app;
 
 game.state.add('cover', new Cover(data.seabed.cover), true);
 
