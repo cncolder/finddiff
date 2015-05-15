@@ -4,15 +4,16 @@
     "esnext": true,
     "freeze": true,
     "globals": {
+        "Media": true,
         "PIXI": true,
         "Phaser": true,
         "Promise": true,
         "alert": true,
+        "cordova": true,
         "window": true
     },
     "latedef": "nofunc",
     "maxdepth": 3,
-    "maxparams": 4,
     "mocha": true,
     "newcap": true,
     "node": true,

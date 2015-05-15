@@ -4,6 +4,12 @@
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
+var _log = require('./log');
+
+var _log2 = _interopRequireDefault(_log);
+
+// jshint ignore:line
+
 var _App = require('./app');
 
 var _App2 = _interopRequireDefault(_App);
@@ -26,8 +32,6 @@ var _data2 = _interopRequireDefault(_data);
 
 process.env.BROWSER_ENV = location.host == 'localhost:3000' ? 'development' : 'production';
 
-var log = require('debug')('index'); // jshint ignore:line
-
 require('babelify/node_modules/babel-core/polyfill');
 
 var app = window.app = new _App2['default']();
@@ -46,7 +50,7 @@ game.state.start('cover');
 
 }).call(this,require('_process'))
 
-},{"./app":89,"./cover":90,"./data":91,"./game":92,"./level":93,"_process":85,"babelify/node_modules/babel-core/polyfill":84,"debug":86}],2:[function(require,module,exports){
+},{"./app":86,"./cover":87,"./data":88,"./game":89,"./level":90,"./log":91,"_process":85,"babelify/node_modules/babel-core/polyfill":84}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3409,507 +3413,6 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],86:[function(require,module,exports){
-
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = require('./debug');
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-
-/**
- * Use chrome.storage.local if we are in an app
- */
-
-var storage;
-
-if (typeof chrome !== 'undefined' && typeof chrome.storage !== 'undefined')
-  storage = chrome.storage.local;
-else
-  storage = localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  return ('WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  return JSON.stringify(v);
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      storage.removeItem('debug');
-    } else {
-      storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    r = storage.debug;
-  } catch(e) {}
-  return r;
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-},{"./debug":87}],87:[function(require,module,exports){
-
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = debug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = require('ms');
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lowercased letter, i.e. "n".
- */
-
-exports.formatters = {};
-
-/**
- * Previously assigned color.
- */
-
-var prevColor = 0;
-
-/**
- * Previous log timestamp.
- */
-
-var prevTime;
-
-/**
- * Select a color.
- *
- * @return {Number}
- * @api private
- */
-
-function selectColor() {
-  return exports.colors[prevColor++ % exports.colors.length];
-}
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
- * @api public
- */
-
-function debug(namespace) {
-
-  // define the `disabled` version
-  function disabled() {
-  }
-  disabled.enabled = false;
-
-  // define the `enabled` version
-  function enabled() {
-
-    var self = enabled;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms = curr - (prevTime || curr);
-    self.diff = ms;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
-
-    var args = Array.prototype.slice.call(arguments);
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %o
-      args = ['%o'].concat(args);
-    }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
-      }
-      return match;
-    });
-
-    if ('function' === typeof exports.formatArgs) {
-      args = exports.formatArgs.apply(self, args);
-    }
-    var logFn = enabled.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-  enabled.enabled = true;
-
-  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-  fn.namespace = namespace;
-
-  return fn;
-}
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
-  }
-}
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-function disable() {
-  exports.enable('');
-}
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Coerce `val`.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-
-},{"ms":88}],88:[function(require,module,exports){
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} options
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options){
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
-  return options.long
-    ? long(val)
-    : short(val);
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-  if (!match) return;
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
-    || ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-  return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-},{}],89:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
@@ -3919,8 +3422,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var log = require('debug')('app'); // jshint ignore:line
-
 /*
 Cordova
   webview shell.
@@ -3946,6 +3447,7 @@ var App = (function () {
       document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
       document.addEventListener('pause', this.onPause.bind(this), false);
       document.addEventListener('resume', this.onResume.bind(this), false);
+      document.addEventListener('backbutton', this.onBackKeyDown.bind(this), false);
     }
   }, {
     key: 'onDeviceReady',
@@ -3955,14 +3457,14 @@ var App = (function () {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     value: function onDeviceReady() {
-      log('ready');
+      console.log('ready');
 
       this.receivedEvent('deviceready');
     }
   }, {
     key: 'onPause',
     value: function onPause() {
-      log('pause');
+      console.log('pause');
 
       if (this.game) {
         this.game.sound.mute = true;
@@ -3971,16 +3473,29 @@ var App = (function () {
   }, {
     key: 'onResume',
     value: function onResume() {
-      log('resume');
+      console.log('resume');
 
       if (this.game) {
         this.game.sound.mute = false;
       }
     }
   }, {
+    key: 'onBackKeyDown',
+    value: function onBackKeyDown() {
+      console.log('backbutton');
+
+      navigator.notification.confirm('Quit?', // message
+      function (buttonIndex) {
+        console.log(buttonIndex);
+      }
+      // 'Game Over',           // title
+      // ['Restart','Exit']     // buttonLabels
+      );
+    }
+  }, {
     key: 'receivedEvent',
     value: function receivedEvent(id) {
-      log('Received Event:', id);
+      console.log('Received Event:', id);
     }
   }]);
 
@@ -3990,10 +3505,12 @@ var App = (function () {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"debug":86}],90:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
@@ -4006,8 +3523,6 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== 'fun
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-// jshint ignore:line
-
 /*
 Cover
   the cover of magic seabed world.
@@ -4017,7 +3532,6 @@ var _Seabed2 = require('./seabed');
 
 var _Seabed3 = _interopRequireDefault(_Seabed2);
 
-var log = require('debug')('cover');
 var Cover = (function (_Seabed) {
   function Cover(data) {
     _classCallCheck(this, Cover);
@@ -4034,7 +3548,11 @@ var Cover = (function (_Seabed) {
     value: function init() {
       _get(Object.getPrototypeOf(Cover.prototype), 'init', this).call(this);
 
+      this.game.onPause.add(this.onPause, this);
+      this.game.onResume.add(this.onResume, this);
+
       this.stage.backgroundColor = this.data.backgroundColor;
+      // alert(`mp3? ${this.game.device.mp3}`);
     }
   }, {
     key: 'preload',
@@ -4090,19 +3608,23 @@ var Cover = (function (_Seabed) {
         var duration = _this2.rnd.between(1000, 2000); // animate speed
         var distance = _this2.rnd.between(3, 5); // animate offset
 
-        _this2.add.tween(img).to({
-          y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+        _this2.swimingTweens = _this2.swimingTweens || [];
+        _this2.swimingTweens.push(_this2.add.tween(img).to({
+          y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
       });
 
       this.bubble();
 
-      // background music loop
-      if (!this.backgroundMusic) {
-        this.backgroundMusic = this.sound.play('bg', 0.5, true);
-        this.sound.play('water', 0.2, true);
+      // background music
+      if (!this.music) {
+        var bg = this.playAudio('bg', 0.5, true);
+        var water = this.playAudio('water', 0.2, true);
+        var whale = this.playAudio('whale', 0.4);
+        var sweep = this.playAudio('sweep', 0.6);
+
+        this.music = {
+          bg: bg, water: water, whale: whale, sweep: sweep };
       }
-      this.sound.play('whale', 0.4);
-      // this.sound.mute = true;
 
       // begin
       // this.add.button(
@@ -4115,7 +3637,7 @@ var Cover = (function (_Seabed) {
 
     // bubble pop up with explore effect.
     value: function bubble() {
-      var emitter = this.add.emitter(this.world.centerX, this.world.height, 15);
+      var emitter = this.bubbleEmitter = this.add.emitter(this.world.centerX, this.world.height, 15);
 
       emitter.width = this.world.width;
       emitter.makeParticles('bubble');
@@ -4132,12 +3654,12 @@ var Cover = (function (_Seabed) {
     value: function onInputUp(e) {
       // whale roar sound
       if (e.key == 'img4') {
-        this.sound.play('whale', 0.6);
+        this.music.whale.play();
       }
 
       // submarine sound
       if (e.key == 'img8') {
-        this.sound.play('sweep', 0.6);
+        this.music.sweep.play();
       }
     }
   }, {
@@ -4150,7 +3672,29 @@ var Cover = (function (_Seabed) {
       var h = x / this.world.width;
       var v = y / this.world.height;
 
-      log('drag', e.key, x, y, h, v);
+      console.log('drag', e.key, x, y, h, v);
+    }
+  }, {
+    key: 'onPause',
+    value: function onPause() {
+      Object.entries(this.music || {}).forEach(function (_ref3) {
+        var _ref32 = _slicedToArray(_ref3, 2);
+
+        var key = _ref32[0];
+        var value = _ref32[1];
+        return value.pause();
+      });
+    }
+  }, {
+    key: 'onResume',
+    value: function onResume() {
+      Object.entries(this.music || {}).forEach(function (_ref4) {
+        var _ref42 = _slicedToArray(_ref4, 2);
+
+        var key = _ref42[0];
+        var value = _ref42[1];
+        return value.resume();
+      });
     }
   }, {
     key: 'mute',
@@ -4165,7 +3709,7 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./seabed":94,"debug":86}],91:[function(require,module,exports){
+},{"./seabed":92}],88:[function(require,module,exports){
 module.exports={
     "seabed": {
         "cover": {
@@ -5003,7 +4547,7 @@ module.exports={
     }
 }
 
-},{}],92:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -5018,8 +4562,6 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== 'fun
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var log = require('debug')('game'); // jshint ignore:line
-
 /*
 Phaser game
   it will handle cordova deviceready event by itself.
@@ -5103,7 +4645,7 @@ module.exports = exports['default'];
 
 }).call(this,require('_process'))
 
-},{"_process":85,"debug":86}],93:[function(require,module,exports){
+},{"_process":85}],90:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -5119,8 +4661,6 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== 'fun
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-// jshint ignore:line
-
 /*
 Level
   The level of magic seabed world.
@@ -5130,7 +4670,6 @@ var _Seabed2 = require('./seabed');
 
 var _Seabed3 = _interopRequireDefault(_Seabed2);
 
-var log = require('debug')('level');
 var Level = (function (_Seabed) {
   function Level(data) {
     _classCallCheck(this, Level);
@@ -5186,7 +4725,7 @@ var Level = (function (_Seabed) {
         });
       });
 
-      this.loadAudioOnce('bell', 'asset/Bell Transition.mp3');
+      this.loadAudio('bell', 'asset/Bell Transition.mp3');
     }
   }, {
     key: 'create',
@@ -5258,6 +4797,26 @@ var Level = (function (_Seabed) {
       this.add.button(this.world.width - 96, 0, 'next', this.game.next, this.game);
     }
   }, {
+    key: 'shine',
+    value: function shine(image) {
+      image.blendMode = PIXI.blendModes.ADD;
+      // image.tint = 0xff0000;
+      // this.add.tween(image).to({
+      //   tint: 0xee0000,
+      // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
+
+      var d = (image.width + image.height) / 2;
+      var x = undefined,
+          y = undefined;
+      // small item scale with a large factor.
+      x = y = d < 44 ? 1.4 : d < 100 ? 1.2 : d < 200 ? 1.05 : 1.01;
+
+      // scale large
+      this.shineTweens = this.shineTweens || [];
+      this.shineTweens.push(this.add.tween(image.scale).to({
+        x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true));
+    }
+  }, {
     key: 'onDragStop',
     value: function onDragStop(image) {
       var l = this.img1.toLocal(image.position);
@@ -5270,7 +4829,7 @@ var Level = (function (_Seabed) {
         v = l.y / this.img2.height;
       }
 
-      log('drag', image.key, l.x, l.y, h, v);
+      console.log('drag', image.key, l.x, l.y, h, v);
     }
   }, {
     key: 'onInputUp',
@@ -5293,14 +4852,17 @@ var Level = (function (_Seabed) {
       });
 
       // play a success sound.
-      this.sound.play('bell', 1);
+      this.playAudio('bell');
 
       // game progress.
       var checked = this.found.filter(function (found) {
         return found.checked;
       }).length;
+      var x = this.crab.x;
+      var y = this.img1.bottom - this.img1.height * checked / this.found.length;
 
-      this.progress(checked / this.found.length);
+      this.add.tween(this.crab).to({
+        x: x, y: y }, 1000, Phaser.Easing.Elastic.Out, true);
 
       // if all answer found then goto next level.
       if (this.found.every(function (found) {
@@ -5308,34 +4870,6 @@ var Level = (function (_Seabed) {
       })) {
         this.game.next();
       }
-    }
-  }, {
-    key: 'shine',
-    value: function shine(image) {
-      image.blendMode = PIXI.blendModes.ADD;
-      // image.tint = 0xff0000;
-      // this.add.tween(image).to({
-      //   tint: 0xee0000,
-      // }, 20000, Phaser.Easing.Default, true, 0, -1, true);
-
-      var d = (image.width + image.height) / 2;
-      var x = undefined,
-          y = undefined;
-      // small item scale with a large factor.
-      x = y = d < 44 ? 1.4 : d < 100 ? 1.2 : d < 200 ? 1.05 : 1.01;
-
-      // scale large
-      this.add.tween(image.scale).to({
-        x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true);
-    }
-  }, {
-    key: 'progress',
-    value: function progress(percent) {
-      var x = this.crab.x;
-      var y = this.img1.bottom - this.img1.height * percent;
-
-      this.add.tween(this.crab).to({
-        x: x, y: y }, 1000, Phaser.Easing.Elastic.Out, true);
     }
   }]);
 
@@ -5345,7 +4879,54 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./seabed":94,"debug":86}],94:[function(require,module,exports){
+},{"./seabed":92}],91:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var log = console.log.bind(console);
+
+console.log = function () {
+  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  if (navigator.notification) {}
+
+  var cordova = window.cordova;
+  var device = window.device;
+
+  if (cordova && device) {
+    if (device.platform == 'Android') {
+      // alert(cordova.file.externalApplicationStorageDirectory);
+      return log(args.join(' '));
+    }
+  }
+
+  log.apply(undefined, args);
+};
+
+window.onerror = function (msg, url, line, column, err) {
+  var text = '' + msg + ' (' + url + ' [' + line + ':' + column + '])';
+
+  console.log(text, err);
+
+  var app = window.app;
+
+  if (app && app.game) {
+    app.game.errors = app.game.errors || [];
+    app.game.errors.push(text);
+  }
+};
+
+exports['default'] = log;
+module.exports = exports['default'];
+
+// navigator.notification.beep();
+// navigator.notification.alert(JSON.stringify(args));
+
+},{}],92:[function(require,module,exports){
 'use strict';
 
 var _interopRequireDefault = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -5361,8 +4942,6 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== 'fun
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-// jshint ignore:line
-
 /*
 Seabed
   the magic seabed world.
@@ -5372,7 +4951,6 @@ var _State2 = require('./state');
 
 var _State3 = _interopRequireDefault(_State2);
 
-var log = require('debug')('seabed');
 var Seabed = (function (_State) {
   function Seabed() {
     _classCallCheck(this, Seabed);
@@ -5387,12 +4965,12 @@ var Seabed = (function (_State) {
     value: function preload() {
       _get(Object.getPrototypeOf(Seabed.prototype), 'preload', this).call(this);
 
-      this.loadImageOnce('bubble', 'asset/bubble.png');
+      this.loadImage('bubble', 'asset/bubble.png');
 
-      this.loadAudioOnce('bg', 'asset/romanesca.mp3');
-      this.loadAudioOnce('water', 'asset/Water Lake.mp3');
-      this.loadAudioOnce('whale', 'asset/Whale Sounds.mp3');
-      this.loadAudioOnce('sweep', 'asset/Sweep Motion.mp3');
+      this.loadAudio('bg', 'asset/romanesca.mp3');
+      this.loadAudio('water', 'asset/Water Lake.mp3');
+      this.loadAudio('whale', 'asset/Whale Sounds.mp3');
+      this.loadAudio('sweep', 'asset/Sweep Motion.mp3');
     }
   }]);
 
@@ -5402,58 +4980,70 @@ var Seabed = (function (_State) {
 exports['default'] = Seabed;
 module.exports = exports['default'];
 
-},{"./state":95,"debug":86}],95:[function(require,module,exports){
+},{"./state":93}],93:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-var log = require('debug')('state'); // jshint ignore:line
-
 /*
 State
   game state base class.
 */
 
-var State = (function () {
+var State = (function (_Phaser$State) {
   function State() {
     _classCallCheck(this, State);
+
+    _get(Object.getPrototypeOf(State.prototype), 'constructor', this).call(this);
   }
+
+  _inherits(State, _Phaser$State);
 
   _createClass(State, [{
     key: 'init',
     value: function init() {
+      _get(Object.getPrototypeOf(State.prototype), 'init', this).call(this);
+
       this.game.fitScreen();
     }
   }, {
     key: 'preload',
     value: function preload() {
-      this.loadImageOnce('previous', 'asset/previous.png');
-      this.loadImageOnce('next', 'asset/next.png');
+      this.load.onFileComplete.add(this.onFileComplete, this);
+
+      this.loadImage('previous', 'asset/previous.png');
+      this.loadImage('next', 'asset/next.png');
       // this.load.image('sound', 'asset/sound.png');
     }
   }, {
     key: 'create',
-    value: function create() {}
+    value: function create() {
+      _get(Object.getPrototypeOf(State.prototype), 'create', this).call(this);
+    }
   }, {
     key: 'update',
     value: function update() {}
   }, {
     key: 'render',
     value: function render() {
-      if (this.env == 'development' && !navigator.isCocoonJS) {
-        if (!this.time.advancedTiming) {
-          this.time.advancedTiming = true;
-        }
-
-        var fps = this.game.time.fps;
-
-        this.game.debug.text('fps:' + fps, 0, 12);
-      }
+      // if (this.env == 'development' && !navigator.isCocoonJS) {
+      this.renderFps();
+      this.renderErrors();
+      // }
+    }
+  }, {
+    key: 'shutdown',
+    value: function shutdown() {
+      this.load.onFileComplete.remove(this.onFileComplete, this);
     }
   }, {
     key: 'env',
@@ -5466,28 +5056,139 @@ var State = (function () {
       Object.assign(this, obj);
     }
   }, {
-    key: 'loadImageOnce',
-    value: function loadImageOnce(key, path) {
+    key: 'loadImage',
+    value: function loadImage(key, path) {
       if (!this.cache.checkImageKey(key)) {
         this.load.image(key, path);
       }
     }
   }, {
-    key: 'loadAudioOnce',
-    value: function loadAudioOnce(key, path) {
+    key: 'loadAudio',
+    value: function loadAudio(key, path) {
       if (!this.cache.checkSoundKey(key)) {
-        this.load.audio(key, path);
+        var device = this.game.device;
+
+        if (device.android && !device.webAudio) {
+          console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
+
+          this.cache.addSound(key, '', {
+            path: path });
+        } else {
+          this.load.audio(key, path);
+        }
+      }
+    }
+  }, {
+    key: 'playAudio',
+    value: function playAudio(key) {
+      var _this = this;
+
+      var volume = arguments[1] === undefined ? 1 : arguments[1];
+      var loop = arguments[2] === undefined ? false : arguments[2];
+
+      var device = this.game.device;
+
+      if (device.android && !device.webAudio) {
+        var _ret = (function () {
+          var data = _this.cache.getSoundData(key);
+          // 10 is the length of 'index.html'
+          var root = location.href.substr(0, location.href.length - 10);
+          // file:///android_asset/www/asset/xxx.mp3
+          var path = root + data.path;
+          var media = new Media(path, function () {
+            console.log('[Media]', 'finish', '' + key + ' (' + path + ')');
+
+            if (!_this.game.paused) {
+              if (loop) {
+                console.log('[Media]', 'loop', '' + key + ' (' + path + ')');
+
+                media.play();
+              } else {
+                console.log('[Media]', 'release', '' + key + ' (' + path + ')');
+
+                media.release();
+              }
+            }
+          }, function (err) {
+            console.log('[Media]', 'error', err.message);
+          });
+
+          media.setVolume(volume);
+          media.play();
+
+          media.resume = media.play.bind(media);
+
+          return {
+            v: media
+          };
+        })();
+
+        if (typeof _ret === 'object') {
+          return _ret.v;
+        }
+      } else {
+        return this.sound.play(key, volume, loop);
+      }
+    }
+  }, {
+    key: 'renderFps',
+    value: function renderFps() {
+      if (this.game.paused) {
+        return;
+      }
+
+      if (!this.time.advancedTiming) {
+        this.time.advancedTiming = true;
+      }
+
+      var fps = this.game.time.fps;
+
+      this.game.debug.text('fps:' + fps, 0, 12);
+    }
+  }, {
+    key: 'renderErrors',
+    value: function renderErrors() {
+      if (this.game.errors && !this.game.paused) {
+        var err = this.game.errors.join('\n').substr(0, 100);
+
+        this.game.debug.text(err, 0, 32);
+      }
+    }
+  }, {
+    key: 'onFileComplete',
+    value: function onFileComplete(progress, key, success, loaded, total) {
+      if (!this.progress) {
+        var bar = this.add.graphics(0, 0);
+        var text = this.add.text(this.world.centerX, 20, '', {
+          align: 'center',
+          font: 'Arial',
+          fontWeight: 'bold',
+          fontSize: 20 });
+
+        text.anchor.setTo(0.5);
+
+        this.progress = {
+          bar: bar, text: text };
+      }
+
+      this.progress.bar.lineStyle(10, 52224);
+      this.progress.bar.lineTo(this.world.width * progress / 100, 0);
+      this.progress.text.text = '' + key + ' (' + loaded + '/' + total + ')';
+
+      if (progress >= 100) {
+        this.progress.bar.clear();
+        this.progress.text.text = '';
       }
     }
   }]);
 
   return State;
-})();
+})(Phaser.State);
 
 exports['default'] = State;
 module.exports = exports['default'];
 
-},{"debug":86}]},{},[1])
+},{}]},{},[1])
 
 
 //# sourceMappingURL=index.js.map

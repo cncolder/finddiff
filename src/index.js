@@ -1,10 +1,9 @@
-process.env.BROWSER_ENV =
-  location.host == 'localhost:3000' ? 'development' : 'production';
-
-const log = require('debug')('index'); // jshint ignore:line
+process.env.BROWSER_ENV = location.host == 'localhost:3000' ?
+  'development' : 'production';
 
 require('babelify/node_modules/babel-core/polyfill');
 
+import log from './log'; // jshint ignore:line
 import App from './app';
 import Game from './game';
 import Cover from './cover';

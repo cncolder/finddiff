@@ -1,5 +1,3 @@
-const log = require('debug')('game'); // jshint ignore:line
-
 /*
 Phaser game
   it will handle cordova deviceready event by itself.

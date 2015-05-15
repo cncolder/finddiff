@@ -1,5 +1,3 @@
-const log = require('debug')('level'); // jshint ignore:line
-
 /*
 Level
   The level of magic seabed world.
@@ -53,7 +51,7 @@ class Level extends Seabed {
       });
     });
 
-    this.loadAudioOnce('bell', 'asset/Bell Transition.mp3');
+    this.loadAudio('bell', 'asset/Bell Transition.mp3');
   }
 
   create() {
@@ -130,50 +128,6 @@ class Level extends Seabed {
     );
   }
 
-  onDragStop(image) {
-    let l = this.img1.toLocal(image.position);
-    let h = l.x / this.img1.width;
-    let v = l.y / this.img1.height;
-
-    if (l.x > this.world.centerX) {
-      l = this.img2.toLocal(image.position);
-      h = l.x / this.img2.width;
-      v = l.y / this.img2.height;
-    }
-
-    log('drag', image.key, l.x, l.y, h, v);
-  }
-
-  onInputUp(image) {
-    let found = this.found[image.index];
-
-    if (found.checked) {
-      return;
-    }
-
-    found.checked = true;
-
-    // shine and scale animate for both item.
-    found.items.forEach(item => {
-      if (item) {
-        this.shine(item);
-      }
-    });
-
-    // play a success sound.
-    this.sound.play('bell', 1);
-
-    // game progress.
-    let checked = this.found.filter(found => found.checked).length;
-
-    this.progress(checked / this.found.length);
-
-    // if all answer found then goto next level.
-    if (this.found.every(found => found.checked)) {
-      this.game.next();
-    }
-  }
-
   shine(image) {
     image.blendMode = PIXI.blendModes.ADD;
     // image.tint = 0xff0000;
@@ -194,18 +148,58 @@ class Level extends Seabed {
       1.01;
 
     // scale large
-    this.add.tween(image.scale).to({
+    this.shineTweens = this.shineTweens || [];
+    this.shineTweens.push(this.add.tween(image.scale).to({
       x, y,
-    }, 1000, Phaser.Easing.Default, true, 0, -1, true);
+    }, 1000, Phaser.Easing.Default, true, 0, -1, true));
   }
 
-  progress(percent) {
+  onDragStop(image) {
+    let l = this.img1.toLocal(image.position);
+    let h = l.x / this.img1.width;
+    let v = l.y / this.img1.height;
+
+    if (l.x > this.world.centerX) {
+      l = this.img2.toLocal(image.position);
+      h = l.x / this.img2.width;
+      v = l.y / this.img2.height;
+    }
+
+    console.log('drag', image.key, l.x, l.y, h, v);
+  }
+
+  onInputUp(image) {
+    let found = this.found[image.index];
+
+    if (found.checked) {
+      return;
+    }
+
+    found.checked = true;
+
+    // shine and scale animate for both item.
+    found.items.forEach(item => {
+      if (item) {
+        this.shine(item);
+      }
+    });
+
+    // play a success sound.
+    this.playAudio('bell');
+
+    // game progress.
+    let checked = this.found.filter(found => found.checked).length;
     let x = this.crab.x;
-    let y = this.img1.bottom - this.img1.height * percent;
+    let y = this.img1.bottom - this.img1.height * checked / this.found.length;
 
     this.add.tween(this.crab).to({
       x, y,
     }, 1000, Phaser.Easing.Elastic.Out, true);
+
+    // if all answer found then goto next level.
+    if (this.found.every(found => found.checked)) {
+      this.game.next();
+    }
   }
 }
 

@@ -1,5 +1,3 @@
-const log = require('debug')('cover'); // jshint ignore:line
-
 /*
 Cover
   the cover of magic seabed world.
@@ -17,7 +15,11 @@ class Cover extends Seabed {
   init() {
     super.init();
 
+    this.game.onPause.add(this.onPause, this);
+    this.game.onResume.add(this.onResume, this);
+
     this.stage.backgroundColor = this.data.backgroundColor;
+    // alert(`mp3? ${this.game.device.mp3}`);
   }
 
   preload() {
@@ -65,20 +67,25 @@ class Cover extends Seabed {
       let duration = this.rnd.between(1000, 2000); // animate speed
       let distance = this.rnd.between(3, 5); // animate offset
 
-      this.add.tween(img).to({
+      this.swimingTweens = this.swimingTweens || [];
+      this.swimingTweens.push(this.add.tween(img).to({
         y: img.position.y + distance,
-      }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+      }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
     });
 
     this.bubble();
 
-    // background music loop
-    if (!this.backgroundMusic) {
-      this.backgroundMusic = this.sound.play('bg', 0.5, true);
-      this.sound.play('water', 0.2, true);
+    // background music
+    if (!this.music) {
+      let bg = this.playAudio('bg', 0.5, true);
+      let water = this.playAudio('water', 0.2, true);
+      let whale = this.playAudio('whale', 0.4);
+      let sweep = this.playAudio('sweep', 0.6);
+
+      this.music = {
+        bg, water, whale, sweep,
+      };
     }
-    this.sound.play('whale', 0.4);
-    // this.sound.mute = true;
 
     // begin
     // this.add.button(
@@ -89,7 +96,9 @@ class Cover extends Seabed {
 
   // bubble pop up with explore effect.
   bubble() {
-    let emitter = this.add.emitter(this.world.centerX, this.world.height, 15);
+    let emitter = this.bubbleEmitter = this.add.emitter(
+      this.world.centerX, this.world.height, 15
+    );
 
     emitter.width = this.world.width;
     emitter.makeParticles('bubble');
@@ -105,12 +114,12 @@ class Cover extends Seabed {
   onInputUp(e) {
     // whale roar sound
     if (e.key == 'img4') {
-      this.sound.play('whale', 0.6);
+      this.music.whale.play();
     }
 
     // submarine sound
     if (e.key == 'img8') {
-      this.sound.play('sweep', 0.6);
+      this.music.sweep.play();
     }
   }
 
@@ -121,7 +130,15 @@ class Cover extends Seabed {
     let h = x / this.world.width;
     let v = y / this.world.height;
 
-    log('drag', e.key, x, y, h, v);
+    console.log('drag', e.key, x, y, h, v);
+  }
+
+  onPause() {
+    Object.entries(this.music || {}).forEach(([key, value]) => value.pause());
+  }
+
+  onResume() {
+    Object.entries(this.music || {}).forEach(([key, value]) => value.resume());
   }
 
   mute() {

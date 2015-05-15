@@ -28,6 +28,7 @@ node_modules
 
 # Other
 *.zip
+*.apk
 platforms/ios/build
 platforms/ios/www
 platforms/android/build

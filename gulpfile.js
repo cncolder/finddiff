@@ -19,7 +19,7 @@ gulp.task('browserify', function(cb) {
     debug: true,
   })
     .transform(babelify.configure({
-      blacklist: ['regenerator'],
+      // blacklist: ['regenerator'],
     }))
     .require('./src/index.js', {
       entry: true,
