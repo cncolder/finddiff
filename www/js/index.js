@@ -37,7 +37,7 @@ require('babelify/node_modules/babel-core/polyfill');
 var app = window.app = new _App2['default']();
 var game = app.game = new _Game2['default']();
 
-game.state.add('cover', new _Cover2['default'](_data2['default'].seabed.cover));
+game.state.add('cover', new _Cover2['default'](_data2['default'].seabed.cover), true);
 
 _data2['default'].seabed.levels.forEach(function (level, index) {
   var key = 'level' + (index + 1);
@@ -45,8 +45,6 @@ _data2['default'].seabed.levels.forEach(function (level, index) {
   game.state.add(key, new _Level2['default'](level));
   game.levels.push(key);
 });
-
-game.state.start('cover');
 
 }).call(this,require('_process'))
 
@@ -3434,6 +3432,8 @@ var App = (function () {
     _classCallCheck(this, App);
 
     this.bindEvents();
+
+    this.previousBackbuttonTimestamp = 0;
   }
 
   _createClass(App, [{
@@ -3457,45 +3457,31 @@ var App = (function () {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     value: function onDeviceReady() {
-      console.log('ready');
-
-      this.receivedEvent('deviceready');
+      console.log('[Cordova] ready');
     }
   }, {
     key: 'onPause',
     value: function onPause() {
-      console.log('pause');
-
-      if (this.game) {
-        this.game.sound.mute = true;
-      }
+      console.log('[Cordova] pause');
     }
   }, {
     key: 'onResume',
     value: function onResume() {
-      console.log('resume');
-
-      if (this.game) {
-        this.game.sound.mute = false;
-      }
+      console.log('[Cordova] resume');
     }
   }, {
     key: 'onBackKeyDown',
     value: function onBackKeyDown() {
-      console.log('backbutton');
+      console.log('[Cordova] backbutton');
 
-      navigator.notification.confirm('Quit?', // message
-      function (buttonIndex) {
-        console.log(buttonIndex);
+      var now = Date.now();
+      var gap = now - this.previousBackbuttonTimestamp;
+
+      this.previousBackbuttonTimestamp = now;
+
+      if (gap < 300) {
+        navigator.app.exitApp();
       }
-      // 'Game Over',           // title
-      // ['Restart','Exit']     // buttonLabels
-      );
-    }
-  }, {
-    key: 'receivedEvent',
-    value: function receivedEvent(id) {
-      console.log('Received Event:', id);
     }
   }]);
 
@@ -3576,6 +3562,7 @@ var Cover = (function (_Seabed) {
 
       _get(Object.getPrototypeOf(Cover.prototype), 'create', this).call(this);
 
+      // this.pictures = this.pictures || {};
       this.data.images.forEach(function (_ref2) {
         var i = _ref2.i;
         var h = _ref2.h;
@@ -3650,6 +3637,11 @@ var Cover = (function (_Seabed) {
       emitter.start(false, 2500, 200, 0);
     }
   }, {
+    key: 'mute',
+    value: function mute() {
+      this.sound.mute = !this.sound.mute;
+    }
+  }, {
     key: 'onInputUp',
     value: function onInputUp(e) {
       // whale roar sound
@@ -3695,11 +3687,6 @@ var Cover = (function (_Seabed) {
         var value = _ref42[1];
         return value.resume();
       });
-    }
-  }, {
-    key: 'mute',
-    value: function mute() {
-      this.sound.mute = !this.sound.mute;
     }
   }]);
 
@@ -5026,19 +5013,17 @@ var State = (function (_Phaser$State) {
     }
   }, {
     key: 'create',
-    value: function create() {
-      _get(Object.getPrototypeOf(State.prototype), 'create', this).call(this);
-    }
+    value: function create() {}
   }, {
     key: 'update',
     value: function update() {}
   }, {
     key: 'render',
     value: function render() {
-      // if (this.env == 'development' && !navigator.isCocoonJS) {
-      this.renderFps();
-      this.renderErrors();
-      // }
+      if (!this.game.device.cocoonJS) {
+        this.renderFps();
+      }
+      // this.renderErrors();
     }
   }, {
     key: 'shutdown',
@@ -5133,10 +5118,6 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'renderFps',
     value: function renderFps() {
-      if (this.game.paused) {
-        return;
-      }
-
       if (!this.time.advancedTiming) {
         this.time.advancedTiming = true;
       }
@@ -5176,8 +5157,10 @@ var State = (function (_Phaser$State) {
       this.progress.text.text = '' + key + ' (' + loaded + '/' + total + ')';
 
       if (progress >= 100) {
-        this.progress.bar.clear();
-        this.progress.text.text = '';
+        this.progress.bar.destroy();
+        this.progress.text.destroy();
+
+        delete this.progress;
       }
     }
   }]);

@@ -13,7 +13,7 @@ import data from './data';
 let app = window.app = new App();
 let game = app.game = new Game();
 
-game.state.add('cover', new Cover(data.seabed.cover));
+game.state.add('cover', new Cover(data.seabed.cover), true);
 
 data.seabed.levels.forEach((level, index) => {
   let key = `level${index + 1}`;
@@ -21,5 +21,3 @@ data.seabed.levels.forEach((level, index) => {
   game.state.add(key, new Level(level));
   game.levels.push(key);
 });
-
-game.state.start('cover');

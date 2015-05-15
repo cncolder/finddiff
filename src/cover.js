@@ -37,6 +37,7 @@ class Cover extends Seabed {
   create() {
     super.create();
 
+    // this.pictures = this.pictures || {};
     this.data.images.forEach(({
       i, h, v
     }) => {
@@ -111,6 +112,10 @@ class Cover extends Seabed {
     emitter.start(false, 2500, 200, 0);
   }
 
+  mute() {
+    this.sound.mute = !this.sound.mute;
+  }
+
   onInputUp(e) {
     // whale roar sound
     if (e.key == 'img4') {
@@ -139,10 +144,6 @@ class Cover extends Seabed {
 
   onResume() {
     Object.entries(this.music || {}).forEach(([key, value]) => value.resume());
-  }
-
-  mute() {
-    this.sound.mute = !this.sound.mute;
   }
 }
 

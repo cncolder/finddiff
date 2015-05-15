@@ -22,17 +22,15 @@ class State extends Phaser.State {
     // this.load.image('sound', 'asset/sound.png');
   }
 
-  create() {
-    super.create();
-  }
+  create() {}
 
   update() {}
 
   render() {
-    // if (this.env == 'development' && !navigator.isCocoonJS) {
-    this.renderFps();
-    this.renderErrors();
-    // }
+    if (!this.game.device.cocoonJS) {
+      this.renderFps();
+    }
+    // this.renderErrors();
   }
 
   shutdown() {
@@ -108,10 +106,6 @@ class State extends Phaser.State {
   }
 
   renderFps() {
-    if (this.game.paused) {
-      return;
-    }
-    
     if (!this.time.advancedTiming) {
       this.time.advancedTiming = true;
     }
@@ -151,8 +145,10 @@ class State extends Phaser.State {
     this.progress.text.text = `${key} (${loaded}/${total})`;
 
     if (progress >= 100) {
-      this.progress.bar.clear();
-      this.progress.text.text = '';
+      this.progress.bar.destroy();
+      this.progress.text.destroy();
+
+      delete this.progress;
     }
   }
 }

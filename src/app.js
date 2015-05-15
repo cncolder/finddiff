@@ -7,6 +7,8 @@ class App {
   // Application Constructor
   constructor() {
     this.bindEvents();
+
+    this.previousBackbuttonTimestamp = 0;
   }
 
   // Bind Event Listeners
@@ -29,42 +31,28 @@ class App {
   // The scope of 'this' is the event. In order to call the 'receivedEvent'
   // function, we must explicitly call 'app.receivedEvent(...);'
   onDeviceReady() {
-    console.log('ready');
-
-    this.receivedEvent('deviceready');
+    console.log('[Cordova] ready');
   }
 
   onPause() {
-    console.log('pause');
-
-    if (this.game) {
-      this.game.sound.mute = true;
-    }
+    console.log('[Cordova] pause');
   }
 
   onResume() {
-    console.log('resume');
-
-    if (this.game) {
-      this.game.sound.mute = false;
-    }
+    console.log('[Cordova] resume');
   }
 
   onBackKeyDown() {
-    console.log('backbutton');
+    console.log('[Cordova] backbutton');
 
-    navigator.notification.confirm(
-      'Quit?', // message
-      buttonIndex => {
-        console.log(buttonIndex);
-      }
-      // 'Game Over',           // title
-      // ['Restart','Exit']     // buttonLabels
-    );
-  }
+    let now = Date.now();
+    let gap = now - this.previousBackbuttonTimestamp;
 
-  receivedEvent(id) {
-    console.log('Received Event:', id);
+    this.previousBackbuttonTimestamp = now;
+
+    if (gap < 300) {
+      navigator.app.exitApp();
+    }
   }
 }
 
