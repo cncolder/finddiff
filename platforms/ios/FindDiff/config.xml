@@ -40,6 +40,12 @@
     <feature name="NetworkStatus">
         <param name="ios-package" value="CDVConnection" />
     </feature>
+    <feature name="Globalization">
+        <param name="ios-package" value="CDVGlobalization" />
+    </feature>
+    <feature name="FileTransfer">
+        <param name="ios-package" value="CDVFileTransfer" />
+    </feature>
     <icon height="180" src="res/ios/icon-60@3x.png" width="180" />
     <icon height="60" src="res/ios/icon-60.png" width="60" />
     <icon height="120" src="res/ios/icon-60@2x.png" width="120" />
@@ -74,13 +80,12 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <allow-navigation href="*" />
+    <allow-intent href="*" />
     <preference name="Orientation" value="landscape" />
     <preference name="Fullscreen" value="true" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashScreen" value="screen" />
     <icon src="res/icon.png" />
-    <feature name="Globalization">
-        <param name="ios-package" value="CDVGlobalization" />
-    </feature>
 </widget>

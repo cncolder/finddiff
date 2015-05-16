@@ -41,9 +41,7 @@ process.env.BROWSER_ENV = location.host == 'localhost:3000' ? 'development' : 'p
 require('babelify/node_modules/babel-core/polyfill');
 
 var app = window.app = new _app2['default']();
-var game = app.game = new _game2['default']();
-
-game.app = app;
+var game = app.game = new _game2['default'](app);
 
 game.state.add('cover', new _cover2['default'](_data2['default'].seabed.cover), true);
 
@@ -3931,19 +3929,57 @@ var App = (function () {
       return _i18n2['default'];
     }
   }, {
-    key: 'bindEvents',
+    key: 'polyfill',
+    value: function polyfill() {
+      // hook dialogs to go through Dialogs
+      // https://github.com/apache/cordova-plugin-dialogs
+      if (navigator.notification) {
+        // alert(message, alertCallback, [title], [buttonName])
+        /*  message: Dialog message. (String)
+            alertCallback: Callback to invoke when alert dialog is dismissed. (Function)
+            title: Dialog title. (String) (Optional, defaults to Alert)
+            buttonName: Button name. (String) (Optional, defaults to OK)
+        */
+        window.alert = navigator.notification.alert;
 
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    value: function bindEvents() {
-      document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
-      document.addEventListener('pause', this.onPause.bind(this), false);
-      document.addEventListener('resume', this.onResume.bind(this), false);
-      document.addEventListener('offline', this.onOffline.bind(this), false);
-      document.addEventListener('online', this.onOnline.bind(this), false);
-      document.addEventListener('backbutton', this.onBackKeyDown.bind(this), false);
+        // confirm(message, confirmCallback, [title], [buttonLabels])
+        /*  message: Dialog message. (String)
+            confirmCallback: Callback to invoke with index of button pressed (1, 2, or 3) or when the dialog is dismissed without a button press (0). (Function)
+            title: Dialog title. (String) (Optional, defaults to Confirm)
+            buttonLabels: Array of strings specifying button labels. (Array) (Optional, defaults to [OK,Cancel])
+        */
+        window.confirm = navigator.notification.confirm;
+
+        // prompt(message, promptCallback, [title], [buttonLabels], [defaultText])
+        /*  message: Dialog message. (String)
+            promptCallback: Callback to invoke with index of button pressed (1, 2, or 3) or when the dialog is dismissed without a button press (0). (Function)
+            title: Dialog title (String) (Optional, defaults to Prompt)
+            buttonLabels: Array of strings specifying button labels (Array) (Optional, defaults to ["OK","Cancel"])
+            defaultText: Default textbox input value (String) (Optional, Default: empty string)
+        */
+        window.prompt = navigator.notification.prompt;
+
+        // non standard beep function
+        // beep(times)
+        /*  times: The number of times to repeat the beep. (Number)
+        */
+        window.beep = navigator.notification.beep;
+      }
+
+      // hook all page loads to go through InAppBrowser
+      // https://github.com/apache/cordova-plugin-inappbrowser
+      if (cordova.InAppBrowser) {
+        // var ref = open(url, target, options);
+        /*  ref: Reference to the InAppBrowser window. (InAppBrowser)
+            url: The URL to load (String). Call encodeURI() on this if the URL contains Unicode characters.
+            target: The target in which to load the URL, an optional parameter that defaults to _self. (String)
+              _self: Opens in the Cordova WebView if the URL is in the white list, otherwise it opens in the InAppBrowser.
+              _blank: Opens in the InAppBrowser.
+              _system: Opens in the system's web browser.
+            options: Options for the InAppBrowser. Optional, defaulting to: location=yes. (String)
+        */
+        window.open = cordova.InAppBrowser.open;
+      }
     }
   }, {
     key: 'checkVersion',
@@ -3966,11 +4002,11 @@ var App = (function () {
           fetch(url).then(function (res) {
             return res.json();
           }).then(function (json) {
-            var lastest = json.lastest;
+            var latest = json.latest;
             var version = json.version;
             var download = json.download;
 
-            if (lastest) {
+            if (latest) {
               console.log('[App] my version is updated');
             } else {
               console.log('[App] new version', version, download);
@@ -3981,7 +4017,11 @@ var App = (function () {
               // jscs: enable maximumLineLength
               function (buttonIndex) {
                 if (buttonIndex == 1) {
-                  open(updateServer + download, '_system');
+                  cordova.plugins.FileOpener.openFile(updateServer + download, function (data) {
+                    console.log('[Opener]', data.message);
+                  }, function (err) {
+                    console.log('[Opener] error', err.message);
+                  }, true);
                 }
               }, t(_taggedTemplateLiteral(['There is a new version'], ['There is a new version'])), [t(_taggedTemplateLiteral(['Update'], ['Update'])), t(_taggedTemplateLiteral(['Later'], ['Later']))]);
             }
@@ -3990,6 +4030,21 @@ var App = (function () {
           });
         }
       }
+    }
+  }, {
+    key: 'bindEvents',
+
+    // Bind Event Listeners
+    //
+    // Bind any events that are required on startup. Common events are:
+    // 'load', 'deviceready', 'offline', and 'online'.
+    value: function bindEvents() {
+      document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+      document.addEventListener('pause', this.onPause.bind(this), false);
+      document.addEventListener('resume', this.onResume.bind(this), false);
+      document.addEventListener('offline', this.onOffline.bind(this), false);
+      document.addEventListener('online', this.onOnline.bind(this), false);
+      document.addEventListener('backbutton', this.onBackKeyDown.bind(this), false);
     }
   }, {
     key: 'onDeviceReady',
@@ -4001,12 +4056,7 @@ var App = (function () {
     value: function onDeviceReady() {
       console.log('[Cordova] ready');
 
-      // hook all page loads to go through the InAppBrowser
-      // https://github.com/apache/cordova-plugin-inappbrowser
-      if (cordova.InAppBrowser) {
-        window.open = cordova.InAppBrowser.open;
-      }
-
+      // this.polyfill();
       this.i18n.init();
       this.checkVersion();
     }
@@ -4151,29 +4201,11 @@ var Cover = (function (_Seabed) {
       // rainbow
       this.img4.sendToBack();
 
-      // up down animate, like swiming.
-      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
-        var img = _this2['img' + i];
-        var duration = _this2.rnd.between(1000, 2000); // animate speed
-        var distance = _this2.rnd.between(3, 5); // animate offset
+      this.addWaveTweens();
 
-        _this2.swimingTweens = _this2.swimingTweens || [];
-        _this2.swimingTweens.push(_this2.add.tween(img).to({
-          y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
-      });
+      this.addBubbleEmitter();
 
-      this.bubble();
-
-      // background music
-      if (!this.music) {
-        var bg = this.playAudio('bg', 0.5, true);
-        var water = this.playAudio('water', 0.2, true);
-        var whale = this.playAudio('whale', 0.4);
-        var sweep = this.playAudio('sweep', 0.6);
-
-        this.music = {
-          bg: bg, water: water, whale: whale, sweep: sweep };
-      }
+      this.addMusic();
 
       // begin
       // this.add.button(
@@ -4182,21 +4214,64 @@ var Cover = (function (_Seabed) {
       // this.add.button(96 + 50, 0, 'sound', this.mute, this);
     }
   }, {
-    key: 'bubble',
+    key: 'addWaveTweens',
+
+    // up down animate, like swiming.
+    value: function addWaveTweens() {
+      var _this3 = this;
+
+      if (!this.waveTweens) {
+        this.waveTweens = [];
+
+        [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
+          var img = _this3['img' + i];
+          var duration = _this3.rnd.between(1000, 2000); // animate speed
+          var distance = _this3.rnd.between(3, 5); // animate offset
+
+          _this3.waveTweens.push(_this3.add.tween(img).to({
+            y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
+        });
+      }
+    }
+  }, {
+    key: 'addBubbleEmitter',
 
     // bubble pop up with explore effect.
-    value: function bubble() {
-      var emitter = this.bubbleEmitter = this.add.emitter(this.world.centerX, this.world.height, 15);
+    value: function addBubbleEmitter() {
+      if (!this.bubbleEmitter) {
+        var emitter = this.bubbleEmitter = this.add.emitter(this.world.centerX, this.world.height, 15);
 
-      emitter.width = this.world.width;
-      emitter.makeParticles('bubble');
-      emitter.minParticleScale = 0.1;
-      emitter.maxParticleScale = 1;
-      emitter.setYSpeed(-300, -500);
-      emitter.setXSpeed(-5, 5);
-      emitter.minRotation = 0;
-      emitter.maxRotation = 0;
-      emitter.start(false, 2500, 200, 0);
+        emitter.width = this.world.width;
+        emitter.makeParticles('bubble');
+        emitter.minParticleScale = 0.1;
+        emitter.maxParticleScale = 1;
+        emitter.setYSpeed(-300, -500);
+        emitter.setXSpeed(-5, 5);
+        emitter.minRotation = 0;
+        emitter.maxRotation = 0;
+        emitter.start(false, 2500, 200, 0);
+      }
+    }
+  }, {
+    key: 'addMusic',
+    value: function addMusic() {
+      // background music
+      if (!this.backgroundMusic) {
+        var bg = this.playAudio('bg', 0.5, true);
+        var water = this.playAudio('water', 0.2, true);
+
+        this.backgroundMusic = {
+          bg: bg, water: water };
+      }
+
+      // sound effect
+      if (!this.soundEffect) {
+        var whale = this.playAudio('whale', 0.4);
+        var sweep = this.playAudio('sweep', 0.6);
+
+        this.soundEffect = {
+          whale: whale, sweep: sweep };
+      }
     }
   }, {
     key: 'mute',
@@ -4231,24 +4306,32 @@ var Cover = (function (_Seabed) {
   }, {
     key: 'onPause',
     value: function onPause() {
-      Object.entries(this.music || {}).forEach(function (_ref3) {
-        var _ref32 = _slicedToArray(_ref3, 2);
+      var device = this.game.device;
 
-        var key = _ref32[0];
-        var value = _ref32[1];
-        return value.pause();
-      });
+      if (device.android && !device.webAudio) {
+        Object.entries(this.backgroundMusic || {}).forEach(function (_ref3) {
+          var _ref32 = _slicedToArray(_ref3, 2);
+
+          var key = _ref32[0];
+          var value = _ref32[1];
+          return value.pause();
+        });
+      }
     }
   }, {
     key: 'onResume',
     value: function onResume() {
-      Object.entries(this.music || {}).forEach(function (_ref4) {
-        var _ref42 = _slicedToArray(_ref4, 2);
+      var device = this.game.device;
 
-        var key = _ref42[0];
-        var value = _ref42[1];
-        return value.resume();
-      });
+      if (device.android && !device.webAudio) {
+        Object.entries(this.backgroundMusic || {}).forEach(function (_ref4) {
+          var _ref42 = _slicedToArray(_ref4, 2);
+
+          var key = _ref42[0];
+          var value = _ref42[1];
+          return value.resume();
+        });
+      }
     }
   }]);
 
@@ -5108,6 +5191,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
@@ -5118,11 +5203,14 @@ Phaser game
 */
 
 var Game = (function (_Phaser$Game) {
-  function Game() {
+  function Game(app) {
     _classCallCheck(this, Game);
 
-    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768);
+    // super(1024, 768); // 1.0
+    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 768, 576); // 0.75
+    // super(512, 384); // 0.5
 
+    this.app = app;
     this.levels = [];
     this.fadeColor = 16777215;
   }
@@ -5160,8 +5248,17 @@ var Game = (function (_Phaser$Game) {
         this.fade(this.levels[0]);
       } else {
         var index = this.levels.indexOf(this.state.current);
+        var state = this.levels[index + 1];
 
-        this.fade(this.levels[index + 1]);
+        if (this.state.checkState(state)) {
+          this.fade(this.levels[index + 1]);
+        } else {
+          var t = this.app.i18n.t;
+
+          navigator.notification.alert(t(_taggedTemplateLiteral(['Game complete page is working out.'], ['Game complete page is working out.'])), function () {
+            console.log('[Game] levels complete');
+          }, t(_taggedTemplateLiteral(['Nothing else'], ['Nothing else'])));
+        }
       }
     }
   }, {
@@ -5207,7 +5304,9 @@ var locale = {
     'There is a new version': '发现新版本',
     'Your app running currently ${0} was outdated. Please download and install the newer version ${1}.': '您正在使用的 App ${0} 已经过时了, 请下载安装新版本 ${1}.',
     Update: '升级',
-    Later: '稍后' } };
+    Later: '稍后',
+    'Nothing else': '没了',
+    'Game complete page is working out.': '通关页面还没做.' } };
 
 var lang = 'en';
 
@@ -5323,8 +5422,13 @@ var Level = (function (_Seabed) {
 
       var code = this.data.code;
 
-      this.load.image('img1', 'asset/' + code + '1.png');
-      this.load.image('img2', 'asset/' + code + '2.png');
+      if (code % 2 == 0) {
+        this.load.image('img1', 'asset/' + code + '1.png');
+        this.load.image('img2', 'asset/' + code + '2.png');
+      } else {
+        this.load.image('img1', 'asset/' + code + '1.jpg');
+        this.load.image('img2', 'asset/' + code + '2.jpg');
+      }
 
       [1, 2].forEach(function (i) {
         _this.data.difference[i - 1].forEach(function (_ref, j) {
@@ -5355,15 +5459,16 @@ var Level = (function (_Seabed) {
 
       this.img1 = this.add.image(0, 0, 'img1');
       this.img2 = this.add.image(this.world.centerX, 0, 'img2');
+      this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
 
       // show level number
       var level = parseInt(this.data.code) - 100;
-      var text = this.add.text(this.world.centerX, 25, ' ' + level + ' ', {
+      var text = this.add.text(this.world.centerX, 0, ' ' + level + ' ', {
         align: 'center',
         font: 'Arial',
         fontWeight: 'bold',
-        fontSize: 40 });
-      text.anchor.setTo(0.5);
+        fontSize: this.world.width / 20 });
+      text.anchor.setTo(0.5, 0);
       text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
 
       var grd = text.context.createLinearGradient(0, 0, 0, text.height);
@@ -5413,7 +5518,10 @@ var Level = (function (_Seabed) {
       });
 
       this.add.button(0, 0, 'previous', this.game.previous, this.game);
-      this.add.button(this.world.width - 96, 0, 'next', this.game.next, this.game);
+
+      var nextButton = this.add.button(this.world.width, 0, 'next', this.game.next, this.game);
+
+      nextButton.anchor.setTo(1, 0);
     }
   }, {
     key: 'shine',

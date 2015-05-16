@@ -62,31 +62,11 @@ class Cover extends Seabed {
     // rainbow
     this.img4.sendToBack();
 
-    // up down animate, like swiming.
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
-      let img = this[`img${i}`];
-      let duration = this.rnd.between(1000, 2000); // animate speed
-      let distance = this.rnd.between(3, 5); // animate offset
+    this.addWaveTweens();
 
-      this.swimingTweens = this.swimingTweens || [];
-      this.swimingTweens.push(this.add.tween(img).to({
-        y: img.position.y + distance,
-      }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
-    });
+    this.addBubbleEmitter();
 
-    this.bubble();
-
-    // background music
-    if (!this.music) {
-      let bg = this.playAudio('bg', 0.5, true);
-      let water = this.playAudio('water', 0.2, true);
-      let whale = this.playAudio('whale', 0.4);
-      let sweep = this.playAudio('sweep', 0.6);
-
-      this.music = {
-        bg, water, whale, sweep,
-      };
-    }
+    this.addMusic();
 
     // begin
     // this.add.button(
@@ -95,21 +75,62 @@ class Cover extends Seabed {
     // this.add.button(96 + 50, 0, 'sound', this.mute, this);
   }
 
-  // bubble pop up with explore effect.
-  bubble() {
-    let emitter = this.bubbleEmitter = this.add.emitter(
-      this.world.centerX, this.world.height, 15
-    );
+  // up down animate, like swiming.
+  addWaveTweens() {
+    if (!this.waveTweens) {
+      this.waveTweens = [];
 
-    emitter.width = this.world.width;
-    emitter.makeParticles('bubble');
-    emitter.minParticleScale = 0.1;
-    emitter.maxParticleScale = 1;
-    emitter.setYSpeed(-300, -500);
-    emitter.setXSpeed(-5, 5);
-    emitter.minRotation = 0;
-    emitter.maxRotation = 0;
-    emitter.start(false, 2500, 200, 0);
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
+        let img = this[`img${i}`];
+        let duration = this.rnd.between(1000, 2000); // animate speed
+        let distance = this.rnd.between(3, 5); // animate offset
+
+        this.waveTweens.push(this.add.tween(img).to({
+          y: img.position.y + distance,
+        }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
+      });
+    }
+  }
+
+  // bubble pop up with explore effect.
+  addBubbleEmitter() {
+    if (!this.bubbleEmitter) {
+      let emitter = this.bubbleEmitter = this.add.emitter(
+        this.world.centerX, this.world.height, 15
+      );
+
+      emitter.width = this.world.width;
+      emitter.makeParticles('bubble');
+      emitter.minParticleScale = 0.1;
+      emitter.maxParticleScale = 1;
+      emitter.setYSpeed(-300, -500);
+      emitter.setXSpeed(-5, 5);
+      emitter.minRotation = 0;
+      emitter.maxRotation = 0;
+      emitter.start(false, 2500, 200, 0);
+    }
+  }
+
+  addMusic() {
+    // background music
+    if (!this.backgroundMusic) {
+      let bg = this.playAudio('bg', 0.5, true);
+      let water = this.playAudio('water', 0.2, true);
+
+      this.backgroundMusic = {
+        bg, water,
+      };
+    }
+
+    // sound effect
+    if (!this.soundEffect) {
+      let whale = this.playAudio('whale', 0.4);
+      let sweep = this.playAudio('sweep', 0.6);
+
+      this.soundEffect = {
+        whale, sweep,
+      };
+    }
   }
 
   mute() {
@@ -139,11 +160,19 @@ class Cover extends Seabed {
   }
 
   onPause() {
-    Object.entries(this.music || {}).forEach(([key, value]) => value.pause());
+    let device = this.game.device;
+
+    if (device.android && !device.webAudio) {
+      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => value.pause());
+    }
   }
 
   onResume() {
-    Object.entries(this.music || {}).forEach(([key, value]) => value.resume());
+    let device = this.game.device;
+
+    if (device.android && !device.webAudio) {
+      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => value.resume());
+    }
   }
 }
 

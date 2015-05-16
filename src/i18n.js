@@ -5,6 +5,8 @@ let locale = {
     'Your app running currently ${0} was outdated. Please download and install the newer version ${1}.': '您正在使用的 App ${0} 已经过时了, 请下载安装新版本 ${1}.',
     Update: '升级',
     Later: '稍后',
+    'Nothing else': '没了',
+    'Game complete page is working out.': '通关页面还没做.',
     // jscs: enable
   },
 };

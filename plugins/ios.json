@@ -43,6 +43,10 @@
                         {
                             "xml": "<feature name=\"Globalization\"><param name=\"ios-package\" value=\"CDVGlobalization\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"FileTransfer\"><param name=\"ios-package\" value=\"CDVFileTransfer\" /></feature>",
+                            "count": 1
                         }
                     ]
                 }
@@ -52,7 +56,7 @@
                     "AssetsLibrary.framework": [
                         {
                             "xml": false,
-                            "count": 1
+                            "count": 2
                         }
                     ],
                     "MobileCoreServices.framework": [
@@ -78,7 +82,9 @@
                             "xml": true,
                             "count": 1
                         }
-                    ]
+                    ],
+                    "QuickLook.framework": [],
+                    "Foundation.framework": []
                 }
             }
         }
@@ -115,6 +121,12 @@
             "PACKAGE_NAME": "com.vitarn.finddiff"
         },
         "cordova-plugin-globalization": {
+            "PACKAGE_NAME": "com.vitarn.finddiff"
+        },
+        "cordova-plugin-file-transfer": {
+            "PACKAGE_NAME": "com.vitarn.finddiff"
+        },
+        "cordova-plugin-fileopener": {
             "PACKAGE_NAME": "com.vitarn.finddiff"
         }
     },

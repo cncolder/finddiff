@@ -58,8 +58,11 @@
         "url": "https://github.com/cncolder/finddiff.git"
     },
     "scripts": {
-        "restart": "cordova run --nobuild --target=iPhone-5",
-        "start": "cordova run --target=iPhone-5",
+        "loga": "./platforms/android/cordova/log | grep Console",
+        "loga5": "./platforms/android/cordova/log | grep CONSOLE",
+        "logi": "./platforms/ios/cordova/log | grep FindDiff",
+        "runa": "cordova run android -d",
+        "runi": "cordova run ios -d",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "version": "1.0.0"

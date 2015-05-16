@@ -21,14 +21,16 @@
     <plugin name="cordova-plugin-console" spec="^1.0.0"/>
     <plugin name="cordova-plugin-device" spec="^1.0.0"/>
     <plugin name="cordova-plugin-dialogs" spec="^1.1.0"/>
-    <plugin name="cordova-plugin-file" spec="^2.0.0"/>
     <plugin name="cordova-plugin-media" spec="^1.0.0"/>
     <plugin name="cordova-plugin-splashscreen" spec="^2.0.0"/>
+    <plugin name="cordova-plugin-globalization" spec="^1.0.0"/>
+    <plugin name="cordova-plugin-file" spec="^2.0.0"/>
+    <plugin name="cordova-plugin-file-transfer" spec="^1.1.0"/>
     <plugin name="cordova-plugin-whitelist" spec="^1.0.0"/>
     <plugin name="cordova-plugin-network-information" spec="^1.0.0"/>
     <plugin name="cordova-plugin-inappbrowser" spec="^1.0.0"/>
-    <plugin name="cordova-plugin-globalization" spec="^1.0.0"/>
     <plugin name="org.binarypark.cordova.plugins.version" spec="^0.1.0"/>
+    <plugin name="cordova-plugin-fileopener" spec="^1.0.2"/>
     <icon src="res/icon.png"/>
     <platform name="ios">
         <icon height="180" src="res/ios/icon-60@3x.png" width="180"/>

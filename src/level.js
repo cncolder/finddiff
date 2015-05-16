@@ -31,8 +31,13 @@ class Level extends Seabed {
 
     let code = this.data.code;
 
-    this.load.image('img1', `asset/${code}1.png`);
-    this.load.image('img2', `asset/${code}2.png`);
+    if (code % 2 == 0) {
+      this.load.image('img1', `asset/${code}1.png`);
+      this.load.image('img2', `asset/${code}2.png`);
+    } else {
+      this.load.image('img1', `asset/${code}1.jpg`);
+      this.load.image('img2', `asset/${code}2.jpg`);
+    }
 
     [1, 2].forEach(i => {
       this.data.difference[i - 1].forEach(({
@@ -59,16 +64,17 @@ class Level extends Seabed {
 
     this.img1 = this.add.image(0, 0, 'img1');
     this.img2 = this.add.image(this.world.centerX, 0, 'img2');
+    this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
 
     // show level number
     let level = parseInt(this.data.code) - 100;
-    let text = this.add.text(this.world.centerX, 25, ` ${level} `, {
+    let text = this.add.text(this.world.centerX, 0, ` ${level} `, {
       align: 'center',
       font: 'Arial',
       fontWeight: 'bold',
-      fontSize: 40,
+      fontSize: this.world.width / 20,
     });
-    text.anchor.setTo(0.5);
+    text.anchor.setTo(0.5, 0);
     text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
 
     let grd = text.context.createLinearGradient(0, 0, 0, text.height);
@@ -123,9 +129,12 @@ class Level extends Seabed {
     this.add.button(
       0, 0, 'previous', this.game.previous, this.game
     );
-    this.add.button(
-      this.world.width - 96, 0, 'next', this.game.next, this.game
+
+    let nextButton = this.add.button(
+      this.world.width, 0, 'next', this.game.next, this.game
     );
+
+    nextButton.anchor.setTo(1, 0);
   }
 
   shine(image) {

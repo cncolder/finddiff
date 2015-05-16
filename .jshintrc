@@ -10,9 +10,12 @@
         "Phaser": true,
         "Promise": true,
         "alert": true,
+        "beep": true,
+        "confirm": true,
         "cordova": true,
         "device": true,
         "fetch": true,
+        "prompt": true,
         "window": true
     },
     "latedef": "nofunc",

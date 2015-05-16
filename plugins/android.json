@@ -43,6 +43,14 @@
                         {
                             "xml": "<feature name=\"Globalization\"><param name=\"android-package\" value=\"org.apache.cordova.globalization.Globalization\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"FileTransfer\"><param name=\"android-package\" value=\"org.apache.cordova.filetransfer.FileTransfer\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"FileOpener\"><param name=\"android-package\" value=\"fr.smile.cordova.fileopener.FileOpener\" /></feature>",
+                            "count": 1
                         }
                     ]
                 }
@@ -52,7 +60,7 @@
                     "/*": [
                         {
                             "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
-                            "count": 2
+                            "count": 4
                         },
                         {
                             "xml": "<uses-permission android:name=\"android.permission.RECORD_AUDIO\" />",
@@ -107,6 +115,12 @@
             "PACKAGE_NAME": "com.vitarn.finddiff"
         },
         "cordova-plugin-globalization": {
+            "PACKAGE_NAME": "com.vitarn.finddiff"
+        },
+        "cordova-plugin-file-transfer": {
+            "PACKAGE_NAME": "com.vitarn.finddiff"
+        },
+        "cordova-plugin-fileopener": {
             "PACKAGE_NAME": "com.vitarn.finddiff"
         }
     },

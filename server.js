@@ -16,18 +16,19 @@ app.use(stat('./platforms/android/build/outputs/apk'));
 
 app.use(function*(next) {
   var version = this.query.version;
+  var latest = '1.0.0';
 
   if (this.path == '/update.json' && version) {
     this.assert(semver.valid(version), 400, 'version invalid');
 
-    if (semver.lt(version, '1.1.0')) {
+    if (semver.lt(version, latest)) {
       this.body = {
-        version: '1.1.0',
-        download: '/android-release.apk',
+        version: latest,
+        download: '/android-debug.apk',
       };
     } else {
       this.body = {
-        version: '1.1.0',
+        version: latest,
         latest: true,
       };
     }

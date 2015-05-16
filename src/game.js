@@ -4,9 +4,12 @@ Phaser game
 */
 
 class Game extends Phaser.Game {
-  constructor() {
-    super(1024, 768);
+  constructor(app) {
+    // super(1024, 768); // 1.0
+    super(768, 576); // 0.75
+    // super(512, 384); // 0.5
 
+    this.app = app;
     this.levels = [];
     this.fadeColor = 0xffffff;
   }
@@ -26,7 +29,7 @@ class Game extends Phaser.Game {
     if (this.state.current == this.levels[0]) {
       this.fade('cover');
     } else {
-      var index = this.levels.indexOf(this.state.current);
+      let index = this.levels.indexOf(this.state.current);
 
       this.fade(this.levels[index - 1]);
     }
@@ -36,9 +39,18 @@ class Game extends Phaser.Game {
     if (this.state.current == 'cover') {
       this.fade(this.levels[0]);
     } else {
-      var index = this.levels.indexOf(this.state.current);
+      let index = this.levels.indexOf(this.state.current);
+      let state = this.levels[index + 1];
 
-      this.fade(this.levels[index + 1]);
+      if (this.state.checkState(state)) {
+        this.fade(this.levels[index + 1]);
+      } else {
+        let t = this.app.i18n.t;
+
+        navigator.notification.alert(t `Game complete page is working out.`, () => {
+          console.log('[Game] levels complete');
+        }, t `Nothing else`);
+      }
     }
   }
 
