@@ -3,6 +3,8 @@ State
   game state base class.
 */
 
+import throttle from 'lodash/function/throttle';
+
 class State extends Phaser.State {
   constructor() {
     super();
@@ -28,7 +30,9 @@ class State extends Phaser.State {
 
   render() {
     if (!this.game.device.cocoonJS) {
-      this.renderFps();
+      this.renderFpsThrottle =
+        this.renderFpsThrottle || throttle(this.renderFps, 500);
+      this.renderFpsThrottle();
     }
     // this.renderErrors();
   }

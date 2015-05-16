@@ -29,9 +29,7 @@
     "bugs": {
         "url": "https://github.com/cncolder/finddiff/issues"
     },
-    "dependencies": {
-        "whatwg-fetch": "^0.8.1"
-    },
+    "dependencies": {},
     "description": "A children book to find difference between two images.",
     "devDependencies": {
         "babelify": "^6.1.0",
@@ -43,10 +41,12 @@
         "koa": "^0.20.0",
         "koa-logger": "^1.2.2",
         "koa-static": "^1.4.9",
+        "lodash": "^3.8.0",
         "phaser": "^2.3.0",
         "semver": "^4.3.4",
         "vinyl-buffer": "^1.0.0",
-        "vinyl-source-stream": "^1.1.0"
+        "vinyl-source-stream": "^1.1.0",
+        "whatwg-fetch": "^0.8.1"
     },
     "homepage": "https://github.com/cncolder/finddiff",
     "license": "ISC",

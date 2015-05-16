@@ -54,7 +54,7 @@ _data2['default'].seabed.levels.forEach(function (level, index) {
 
 }).call(this,require('_process'))
 
-},{"./app":91,"./cover":92,"./data":93,"./game":94,"./level":96,"./log":97,"_process":89,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":90}],2:[function(require,module,exports){
+},{"./app":99,"./cover":100,"./data":101,"./game":102,"./level":104,"./log":105,"_process":89,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":98}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3553,6 +3553,446 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],90:[function(require,module,exports){
+var isNative = require('../lang/isNative');
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeNow = isNative(nativeNow = Date.now) && nativeNow;
+
+/**
+ * Gets the number of milliseconds that have elapsed since the Unix epoch
+ * (1 January 1970 00:00:00 UTC).
+ *
+ * @static
+ * @memberOf _
+ * @category Date
+ * @example
+ *
+ * _.defer(function(stamp) {
+ *   console.log(_.now() - stamp);
+ * }, _.now());
+ * // => logs the number of milliseconds it took for the deferred function to be invoked
+ */
+var now = nativeNow || function() {
+  return new Date().getTime();
+};
+
+module.exports = now;
+
+},{"../lang/isNative":95}],91:[function(require,module,exports){
+var isObject = require('../lang/isObject'),
+    now = require('../date/now');
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max;
+
+/**
+ * Creates a function that delays invoking `func` until after `wait` milliseconds
+ * have elapsed since the last time it was invoked. The created function comes
+ * with a `cancel` method to cancel delayed invocations. Provide an options
+ * object to indicate that `func` should be invoked on the leading and/or
+ * trailing edge of the `wait` timeout. Subsequent calls to the debounced
+ * function return the result of the last `func` invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
+ * on the trailing edge of the timeout only if the the debounced function is
+ * invoked more than once during the `wait` timeout.
+ *
+ * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
+ * for details over the differences between `_.debounce` and `_.throttle`.
+ *
+ * @static
+ * @memberOf _
+ * @category Function
+ * @param {Function} func The function to debounce.
+ * @param {number} [wait=0] The number of milliseconds to delay.
+ * @param {Object} [options] The options object.
+ * @param {boolean} [options.leading=false] Specify invoking on the leading
+ *  edge of the timeout.
+ * @param {number} [options.maxWait] The maximum time `func` is allowed to be
+ *  delayed before it is invoked.
+ * @param {boolean} [options.trailing=true] Specify invoking on the trailing
+ *  edge of the timeout.
+ * @returns {Function} Returns the new debounced function.
+ * @example
+ *
+ * // avoid costly calculations while the window size is in flux
+ * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+ *
+ * // invoke `sendMail` when the click event is fired, debouncing subsequent calls
+ * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+ *   'leading': true,
+ *   'trailing': false
+ * }));
+ *
+ * // ensure `batchLog` is invoked once after 1 second of debounced calls
+ * var source = new EventSource('/stream');
+ * jQuery(source).on('message', _.debounce(batchLog, 250, {
+ *   'maxWait': 1000
+ * }));
+ *
+ * // cancel a debounced call
+ * var todoChanges = _.debounce(batchLog, 1000);
+ * Object.observe(models.todo, todoChanges);
+ *
+ * Object.observe(models, function(changes) {
+ *   if (_.find(changes, { 'user': 'todo', 'type': 'delete'})) {
+ *     todoChanges.cancel();
+ *   }
+ * }, ['delete']);
+ *
+ * // ...at some point `models.todo` is changed
+ * models.todo.completed = true;
+ *
+ * // ...before 1 second has passed `models.todo` is deleted
+ * // which cancels the debounced `todoChanges` call
+ * delete models.todo;
+ */
+function debounce(func, wait, options) {
+  var args,
+      maxTimeoutId,
+      result,
+      stamp,
+      thisArg,
+      timeoutId,
+      trailingCall,
+      lastCalled = 0,
+      maxWait = false,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  wait = wait < 0 ? 0 : (+wait || 0);
+  if (options === true) {
+    var leading = true;
+    trailing = false;
+  } else if (isObject(options)) {
+    leading = options.leading;
+    maxWait = 'maxWait' in options && nativeMax(+options.maxWait || 0, wait);
+    trailing = 'trailing' in options ? options.trailing : trailing;
+  }
+
+  function cancel() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    if (maxTimeoutId) {
+      clearTimeout(maxTimeoutId);
+    }
+    maxTimeoutId = timeoutId = trailingCall = undefined;
+  }
+
+  function delayed() {
+    var remaining = wait - (now() - stamp);
+    if (remaining <= 0 || remaining > wait) {
+      if (maxTimeoutId) {
+        clearTimeout(maxTimeoutId);
+      }
+      var isCalled = trailingCall;
+      maxTimeoutId = timeoutId = trailingCall = undefined;
+      if (isCalled) {
+        lastCalled = now();
+        result = func.apply(thisArg, args);
+        if (!timeoutId && !maxTimeoutId) {
+          args = thisArg = null;
+        }
+      }
+    } else {
+      timeoutId = setTimeout(delayed, remaining);
+    }
+  }
+
+  function maxDelayed() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    maxTimeoutId = timeoutId = trailingCall = undefined;
+    if (trailing || (maxWait !== wait)) {
+      lastCalled = now();
+      result = func.apply(thisArg, args);
+      if (!timeoutId && !maxTimeoutId) {
+        args = thisArg = null;
+      }
+    }
+  }
+
+  function debounced() {
+    args = arguments;
+    stamp = now();
+    thisArg = this;
+    trailingCall = trailing && (timeoutId || !leading);
+
+    if (maxWait === false) {
+      var leadingCall = leading && !timeoutId;
+    } else {
+      if (!maxTimeoutId && !leading) {
+        lastCalled = stamp;
+      }
+      var remaining = maxWait - (stamp - lastCalled),
+          isCalled = remaining <= 0 || remaining > maxWait;
+
+      if (isCalled) {
+        if (maxTimeoutId) {
+          maxTimeoutId = clearTimeout(maxTimeoutId);
+        }
+        lastCalled = stamp;
+        result = func.apply(thisArg, args);
+      }
+      else if (!maxTimeoutId) {
+        maxTimeoutId = setTimeout(maxDelayed, remaining);
+      }
+    }
+    if (isCalled && timeoutId) {
+      timeoutId = clearTimeout(timeoutId);
+    }
+    else if (!timeoutId && wait !== maxWait) {
+      timeoutId = setTimeout(delayed, wait);
+    }
+    if (leadingCall) {
+      isCalled = true;
+      result = func.apply(thisArg, args);
+    }
+    if (isCalled && !timeoutId && !maxTimeoutId) {
+      args = thisArg = null;
+    }
+    return result;
+  }
+  debounced.cancel = cancel;
+  return debounced;
+}
+
+module.exports = debounce;
+
+},{"../date/now":90,"../lang/isObject":96}],92:[function(require,module,exports){
+var debounce = require('./debounce'),
+    isObject = require('../lang/isObject');
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/** Used as an internal `_.debounce` options object by `_.throttle`. */
+var debounceOptions = {
+  'leading': false,
+  'maxWait': 0,
+  'trailing': false
+};
+
+/**
+ * Creates a function that only invokes `func` at most once per every `wait`
+ * milliseconds. The created function comes with a `cancel` method to cancel
+ * delayed invocations. Provide an options object to indicate that `func`
+ * should be invoked on the leading and/or trailing edge of the `wait` timeout.
+ * Subsequent calls to the throttled function return the result of the last
+ * `func` call.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
+ * on the trailing edge of the timeout only if the the throttled function is
+ * invoked more than once during the `wait` timeout.
+ *
+ * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
+ * for details over the differences between `_.throttle` and `_.debounce`.
+ *
+ * @static
+ * @memberOf _
+ * @category Function
+ * @param {Function} func The function to throttle.
+ * @param {number} [wait=0] The number of milliseconds to throttle invocations to.
+ * @param {Object} [options] The options object.
+ * @param {boolean} [options.leading=true] Specify invoking on the leading
+ *  edge of the timeout.
+ * @param {boolean} [options.trailing=true] Specify invoking on the trailing
+ *  edge of the timeout.
+ * @returns {Function} Returns the new throttled function.
+ * @example
+ *
+ * // avoid excessively updating the position while scrolling
+ * jQuery(window).on('scroll', _.throttle(updatePosition, 100));
+ *
+ * // invoke `renewToken` when the click event is fired, but not more than once every 5 minutes
+ * jQuery('.interactive').on('click', _.throttle(renewToken, 300000, {
+ *   'trailing': false
+ * }));
+ *
+ * // cancel a trailing throttled call
+ * jQuery(window).on('popstate', throttled.cancel);
+ */
+function throttle(func, wait, options) {
+  var leading = true,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  if (options === false) {
+    leading = false;
+  } else if (isObject(options)) {
+    leading = 'leading' in options ? !!options.leading : leading;
+    trailing = 'trailing' in options ? !!options.trailing : trailing;
+  }
+  debounceOptions.leading = leading;
+  debounceOptions.maxWait = +wait;
+  debounceOptions.trailing = trailing;
+  return debounce(func, wait, debounceOptions);
+}
+
+module.exports = throttle;
+
+},{"../lang/isObject":96,"./debounce":91}],93:[function(require,module,exports){
+/**
+ * Converts `value` to a string if it is not one. An empty string is returned
+ * for `null` or `undefined` values.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  if (typeof value == 'string') {
+    return value;
+  }
+  return value == null ? '' : (value + '');
+}
+
+module.exports = baseToString;
+
+},{}],94:[function(require,module,exports){
+/**
+ * Checks if `value` is object-like.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+},{}],95:[function(require,module,exports){
+var escapeRegExp = require('../string/escapeRegExp'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** `Object#toString` result references. */
+var funcTag = '[object Function]';
+
+/** Used to detect host constructors (Safari > 5). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var fnToString = Function.prototype.toString;
+
+/**
+ * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  escapeRegExp(objToString)
+  .replace(/toString|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/**
+ * Checks if `value` is a native function.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+ * @example
+ *
+ * _.isNative(Array.prototype.push);
+ * // => true
+ *
+ * _.isNative(_);
+ * // => false
+ */
+function isNative(value) {
+  if (value == null) {
+    return false;
+  }
+  if (objToString.call(value) == funcTag) {
+    return reIsNative.test(fnToString.call(value));
+  }
+  return isObjectLike(value) && reIsHostCtor.test(value);
+}
+
+module.exports = isNative;
+
+},{"../internal/isObjectLike":94,"../string/escapeRegExp":97}],96:[function(require,module,exports){
+/**
+ * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(1);
+ * // => false
+ */
+function isObject(value) {
+  // Avoid a V8 JIT bug in Chrome 19-20.
+  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+  var type = typeof value;
+  return type == 'function' || (!!value && type == 'object');
+}
+
+module.exports = isObject;
+
+},{}],97:[function(require,module,exports){
+var baseToString = require('../internal/baseToString');
+
+/**
+ * Used to match `RegExp` [special characters](http://www.regular-expressions.info/characters.html#special).
+ * In addition to special characters the forward slash is escaped to allow for
+ * easier `eval` use and `Function` compilation.
+ */
+var reRegExpChars = /[.*+?^${}()|[\]\/\\]/g,
+    reHasRegExpChars = RegExp(reRegExpChars.source);
+
+/**
+ * Escapes the `RegExp` special characters "\", "/", "^", "$", ".", "|", "?",
+ * "*", "+", "(", ")", "[", "]", "{" and "}" in `string`.
+ *
+ * @static
+ * @memberOf _
+ * @category String
+ * @param {string} [string=''] The string to escape.
+ * @returns {string} Returns the escaped string.
+ * @example
+ *
+ * _.escapeRegExp('[lodash](https://lodash.com/)');
+ * // => '\[lodash\]\(https:\/\/lodash\.com\/\)'
+ */
+function escapeRegExp(string) {
+  string = baseToString(string);
+  return (string && reHasRegExpChars.test(string))
+    ? string.replace(reRegExpChars, '\\$&')
+    : string;
+}
+
+module.exports = escapeRegExp;
+
+},{"../internal/baseToString":93}],98:[function(require,module,exports){
 (function() {
   'use strict';
 
@@ -3888,7 +4328,7 @@ process.umask = function() { return 0; };
   self.fetch.polyfill = true
 })();
 
-},{}],91:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -4102,7 +4542,7 @@ var App = (function () {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"./i18n":95}],92:[function(require,module,exports){
+},{"./i18n":103}],100:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -4220,37 +4660,31 @@ var Cover = (function (_Seabed) {
     value: function addWaveTweens() {
       var _this3 = this;
 
-      if (!this.waveTweens) {
-        this.waveTweens = [];
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
+        var img = _this3['img' + i];
+        var duration = _this3.rnd.between(1000, 2000); // animate speed
+        var distance = _this3.rnd.between(3, 5); // animate offset
 
-        [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
-          var img = _this3['img' + i];
-          var duration = _this3.rnd.between(1000, 2000); // animate speed
-          var distance = _this3.rnd.between(3, 5); // animate offset
-
-          _this3.waveTweens.push(_this3.add.tween(img).to({
-            y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
-        });
-      }
+        _this3.add.tween(img).to({
+          y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+      });
     }
   }, {
     key: 'addBubbleEmitter',
 
     // bubble pop up with explore effect.
     value: function addBubbleEmitter() {
-      if (!this.bubbleEmitter) {
-        var emitter = this.bubbleEmitter = this.add.emitter(this.world.centerX, this.world.height, 15);
+      var emitter = this.add.emitter(this.world.centerX, this.world.height, 15);
 
-        emitter.width = this.world.width;
-        emitter.makeParticles('bubble');
-        emitter.minParticleScale = 0.1;
-        emitter.maxParticleScale = 1;
-        emitter.setYSpeed(-300, -500);
-        emitter.setXSpeed(-5, 5);
-        emitter.minRotation = 0;
-        emitter.maxRotation = 0;
-        emitter.start(false, 2500, 200, 0);
-      }
+      emitter.width = this.world.width;
+      emitter.makeParticles('bubble');
+      emitter.minParticleScale = 0.1;
+      emitter.maxParticleScale = 1;
+      emitter.setYSpeed(-300, -500);
+      emitter.setXSpeed(-5, 5);
+      emitter.minRotation = 0;
+      emitter.maxRotation = 0;
+      emitter.start(false, 2500, 200, 0);
     }
   }, {
     key: 'addMusic',
@@ -4314,7 +4748,8 @@ var Cover = (function (_Seabed) {
 
           var key = _ref32[0];
           var value = _ref32[1];
-          return value.pause();
+
+          value.pause();
         });
       }
     }
@@ -4329,7 +4764,8 @@ var Cover = (function (_Seabed) {
 
           var key = _ref42[0];
           var value = _ref42[1];
-          return value.resume();
+
+          value.resume();
         });
       }
     }
@@ -4341,7 +4777,7 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./seabed":98}],93:[function(require,module,exports){
+},{"./seabed":106}],101:[function(require,module,exports){
 module.exports={
     "seabed": {
         "cover": {
@@ -5179,7 +5615,7 @@ module.exports={
     }
 }
 
-},{}],94:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -5206,8 +5642,8 @@ var Game = (function (_Phaser$Game) {
   function Game(app) {
     _classCallCheck(this, Game);
 
-    // super(1024, 768); // 1.0
-    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 768, 576); // 0.75
+    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768); // 1.0
+    // super(768, 576); // 0.75
     // super(512, 384); // 0.5
 
     this.app = app;
@@ -5254,8 +5690,9 @@ var Game = (function (_Phaser$Game) {
           this.fade(this.levels[index + 1]);
         } else {
           var t = this.app.i18n.t;
+          var _alert = navigator.notification.alert;
 
-          navigator.notification.alert(t(_taggedTemplateLiteral(['Game complete page is working out.'], ['Game complete page is working out.'])), function () {
+          _alert(t(_taggedTemplateLiteral(['Game complete page is working out.'], ['Game complete page is working out.'])), function () {
             console.log('[Game] levels complete');
           }, t(_taggedTemplateLiteral(['Nothing else'], ['Nothing else'])));
         }
@@ -5292,7 +5729,7 @@ module.exports = exports['default'];
 
 }).call(this,require('_process'))
 
-},{"_process":89}],95:[function(require,module,exports){
+},{"_process":89}],103:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5362,7 +5799,7 @@ module.exports = exports['default'];
 
 // jscs: enable
 
-},{}],96:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5422,13 +5859,8 @@ var Level = (function (_Seabed) {
 
       var code = this.data.code;
 
-      if (code % 2 == 0) {
-        this.load.image('img1', 'asset/' + code + '1.png');
-        this.load.image('img2', 'asset/' + code + '2.png');
-      } else {
-        this.load.image('img1', 'asset/' + code + '1.jpg');
-        this.load.image('img2', 'asset/' + code + '2.jpg');
-      }
+      this.load.image('img1', 'asset/' + code + '1.png');
+      this.load.image('img2', 'asset/' + code + '2.png');
 
       [1, 2].forEach(function (i) {
         _this.data.difference[i - 1].forEach(function (_ref, j) {
@@ -5460,6 +5892,7 @@ var Level = (function (_Seabed) {
       this.img1 = this.add.image(0, 0, 'img1');
       this.img2 = this.add.image(this.world.centerX, 0, 'img2');
       this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
+      this.img1.smoothed = this.img2.smoothed = false;
 
       // show level number
       var level = parseInt(this.data.code) - 100;
@@ -5606,7 +6039,7 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./seabed":98}],97:[function(require,module,exports){
+},{"./seabed":106}],105:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5653,7 +6086,7 @@ module.exports = exports['default'];
 // navigator.notification.beep();
 // navigator.notification.alert(JSON.stringify(args));
 
-},{}],98:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5708,7 +6141,7 @@ var Seabed = (function (_State) {
 exports['default'] = Seabed;
 module.exports = exports['default'];
 
-},{"./state":99}],99:[function(require,module,exports){
+},{"./state":107}],107:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5719,6 +6152,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
@@ -5727,6 +6162,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 State
   game state base class.
 */
+
+var _lodashFunctionThrottle = require('lodash/function/throttle');
+
+var _lodashFunctionThrottle2 = _interopRequireDefault(_lodashFunctionThrottle);
 
 var State = (function (_Phaser$State) {
   function State() {
@@ -5763,7 +6202,8 @@ var State = (function (_Phaser$State) {
     key: 'render',
     value: function render() {
       if (!this.game.device.cocoonJS) {
-        this.renderFps();
+        this.renderFpsThrottle = this.renderFpsThrottle || (0, _lodashFunctionThrottle2['default'])(this.renderFps, 500);
+        this.renderFpsThrottle();
       }
       // this.renderErrors();
     }
@@ -5911,7 +6351,7 @@ var State = (function (_Phaser$State) {
 exports['default'] = State;
 module.exports = exports['default'];
 
-},{}]},{},[1])
+},{"lodash/function/throttle":92}]},{},[1])
 
 
 //# sourceMappingURL=index.js.map

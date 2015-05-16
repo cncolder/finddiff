@@ -77,38 +77,32 @@ class Cover extends Seabed {
 
   // up down animate, like swiming.
   addWaveTweens() {
-    if (!this.waveTweens) {
-      this.waveTweens = [];
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
+      let img = this[`img${i}`];
+      let duration = this.rnd.between(1000, 2000); // animate speed
+      let distance = this.rnd.between(3, 5); // animate offset
 
-      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
-        let img = this[`img${i}`];
-        let duration = this.rnd.between(1000, 2000); // animate speed
-        let distance = this.rnd.between(3, 5); // animate offset
-
-        this.waveTweens.push(this.add.tween(img).to({
-          y: img.position.y + distance,
-        }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true));
-      });
-    }
+      this.add.tween(img).to({
+        y: img.position.y + distance,
+      }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+    });
   }
 
   // bubble pop up with explore effect.
   addBubbleEmitter() {
-    if (!this.bubbleEmitter) {
-      let emitter = this.bubbleEmitter = this.add.emitter(
-        this.world.centerX, this.world.height, 15
-      );
+    let emitter = this.add.emitter(
+      this.world.centerX, this.world.height, 15
+    );
 
-      emitter.width = this.world.width;
-      emitter.makeParticles('bubble');
-      emitter.minParticleScale = 0.1;
-      emitter.maxParticleScale = 1;
-      emitter.setYSpeed(-300, -500);
-      emitter.setXSpeed(-5, 5);
-      emitter.minRotation = 0;
-      emitter.maxRotation = 0;
-      emitter.start(false, 2500, 200, 0);
-    }
+    emitter.width = this.world.width;
+    emitter.makeParticles('bubble');
+    emitter.minParticleScale = 0.1;
+    emitter.maxParticleScale = 1;
+    emitter.setYSpeed(-300, -500);
+    emitter.setXSpeed(-5, 5);
+    emitter.minRotation = 0;
+    emitter.maxRotation = 0;
+    emitter.start(false, 2500, 200, 0);
   }
 
   addMusic() {
@@ -163,7 +157,9 @@ class Cover extends Seabed {
     let device = this.game.device;
 
     if (device.android && !device.webAudio) {
-      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => value.pause());
+      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+        value.pause();
+      });
     }
   }
 
@@ -171,7 +167,9 @@ class Cover extends Seabed {
     let device = this.game.device;
 
     if (device.android && !device.webAudio) {
-      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => value.resume());
+      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+        value.resume();
+      });
     }
   }
 }

@@ -5,8 +5,8 @@ Phaser game
 
 class Game extends Phaser.Game {
   constructor(app) {
-    // super(1024, 768); // 1.0
-    super(768, 576); // 0.75
+    super(1024, 768); // 1.0
+    // super(768, 576); // 0.75
     // super(512, 384); // 0.5
 
     this.app = app;
@@ -46,8 +46,9 @@ class Game extends Phaser.Game {
         this.fade(this.levels[index + 1]);
       } else {
         let t = this.app.i18n.t;
+        let alert = navigator.notification.alert;
 
-        navigator.notification.alert(t `Game complete page is working out.`, () => {
+        alert(t `Game complete page is working out.`, () => {
           console.log('[Game] levels complete');
         }, t `Nothing else`);
       }

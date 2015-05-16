@@ -31,13 +31,8 @@ class Level extends Seabed {
 
     let code = this.data.code;
 
-    if (code % 2 == 0) {
-      this.load.image('img1', `asset/${code}1.png`);
-      this.load.image('img2', `asset/${code}2.png`);
-    } else {
-      this.load.image('img1', `asset/${code}1.jpg`);
-      this.load.image('img2', `asset/${code}2.jpg`);
-    }
+    this.load.image('img1', `asset/${code}1.png`);
+    this.load.image('img2', `asset/${code}2.png`);
 
     [1, 2].forEach(i => {
       this.data.difference[i - 1].forEach(({
@@ -65,6 +60,7 @@ class Level extends Seabed {
     this.img1 = this.add.image(0, 0, 'img1');
     this.img2 = this.add.image(this.world.centerX, 0, 'img2');
     this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
+    this.img1.smoothed = this.img2.smoothed = false;
 
     // show level number
     let level = parseInt(this.data.code) - 100;
