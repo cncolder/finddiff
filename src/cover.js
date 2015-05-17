@@ -15,14 +15,14 @@ class Cover extends Seabed {
   init() {
     super.init();
 
+    this.stage.backgroundColor = this.data.backgroundColor;
+
     if (!this.game.onPause.has(this.onPause, this)) {
       this.game.onPause.add(this.onPause, this);
     }
     if (!this.game.onResume.has(this.onResume, this)) {
       this.game.onResume.add(this.onResume, this);
     }
-
-    this.stage.backgroundColor = this.data.backgroundColor;
   }
 
   preload() {

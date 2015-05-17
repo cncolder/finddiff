@@ -16,12 +16,51 @@ class State extends Phaser.State {
     if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
       this.load.onFileComplete.add(this.onFileComplete, this);
     }
+
+    if (!this.input.onDown.has(this.onDown, this)) {
+      this.input.onDown.add(this.onDown, this);
+    }
+    if (!this.input.onUp.has(this.onUp, this)) {
+      this.input.onUp.add(this.onUp, this);
+    }
   }
 
   preload() {
-    this.loadImage('previous', 'img/previous.png');
-    this.loadImage('next', 'img/next.png');
+    // this.loadImage('previous', 'img/previous.png');
+    // this.loadImage('next', 'img/next.png');
     // this.load.image('sound', 'asset/sound.png');
+  }
+
+  update() {
+    // slide camera left or right.
+    if (this.inputDown) {
+      if (this.camera.bounds) {
+        this.camera.bounds = null;
+      }
+
+      this.camera.x = this.inputDownX - this.input.activePointer.x;
+    } else if (this.inputDownX) {
+      if (this.camera.x < -this.world.centerX / 2) {
+        this.add.tween(this.camera)
+          .to({
+            x: -this.world.width,
+          }, 200, Phaser.Easing.Quadratic.InOut, true)
+          .onComplete.addOnce(() => this.game.previous());
+      } else if (this.camera.x > this.world.centerX / 2) {
+        this.add.tween(this.camera)
+          .to({
+            x: this.world.width,
+          }, 200, Phaser.Easing.Quadratic.InOut, true)
+          .onComplete.addOnce(() => this.game.next());
+      } else {
+        this.add.tween(this.camera)
+          .to({
+            x: 0,
+          }, 100, Phaser.Easing.Quadratic.InOut, true);
+      }
+
+      delete this.inputDownX;
+    }
   }
 
   render() {
@@ -32,6 +71,8 @@ class State extends Phaser.State {
 
   shutdown() {
     this.load.onFileComplete.remove(this.onFileComplete, this);
+    this.input.onDown.remove(this.onDown, this);
+    this.input.onUp.remove(this.onUp, this);
   }
 
   get env() {
@@ -145,7 +186,7 @@ class State extends Phaser.State {
       };
     }
 
-    this.progress.bar.lineStyle(10, 0x00cc00);
+    this.progress.bar.lineStyle(this.height / 100, 0x00cc00);
     this.progress.bar.lineTo(this.world.width * progress / 100, 0);
     this.progress.text.text = `${key} (${loaded}/${total})`;
 
@@ -155,6 +196,15 @@ class State extends Phaser.State {
 
       delete this.progress;
     }
+  }
+
+  onDown(pointer) {
+    this.inputDown = true;
+    this.inputDownX = pointer.x;
+  }
+
+  onUp() {
+    this.inputDown = false;
   }
 }
 

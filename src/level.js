@@ -15,6 +15,8 @@ class Level extends Seabed {
   init() {
     super.init();
 
+    this.stage.backgroundColor = 0x000000;
+
     let difference = this.data.difference;
     let length = Math.max(difference[0].length, difference[1].length);
     let found = this.found = [];
@@ -59,8 +61,13 @@ class Level extends Seabed {
 
     this.img1 = this.add.image(0, 0, 'img1');
     this.img2 = this.add.image(this.world.centerX, 0, 'img2');
-    this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
-    this.img1.smoothed = this.img2.smoothed = false;
+    // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
+    // this.img1.smoothed = this.img2.smoothed = false;
+
+    // show spliter
+    let spliter = this.add.graphics(this.world.centerX, 0);
+    spliter.lineStyle(this.world.width / 200, 0xffffff);
+    spliter.lineTo(0, this.img1.bottom);
 
     // show level number
     let level = parseInt(this.data.code) - 100;
@@ -87,23 +94,38 @@ class Level extends Seabed {
     crab.anchor.setTo(0.5, 0.5);
     crab.scale.setTo(0.5, 0.5);
 
-    [1, 2].forEach(i => {
-      this.data.difference[i - 1].forEach(({
+    [0, 1].forEach(i => {
+      this.data.difference[i].forEach(({
         h, v
       }, j) => {
-        if (!h) {
+        // placeholder
+        if (!h || !v) {
+          let other = this.data.difference[i ? 0 : 1][j];
+
+          h = other.h;
+          v = other.v;
+
+          let x = this[`img${i + 1}`].left + this[`img${i + 1}`].width * h;
+          let y = this[`img${i + 1}`].top + this[`img${i + 1}`].height * v;
+          let item = this.add.graphics(x, y);
+
+          item.index = j;
+
+          item.hitArea = new Phaser.Circle(0, 0, 44);
+
+          item.inputEnabled = true;
+          item.events.onInputUp.add(this.onInputUp, this);
+
           return;
         }
 
-        j += 1;
-
-        let x = this[`img${i}`].position.x + this[`img${i}`].width * h;
-        let y = this[`img${i}`].position.y + this[`img${i}`].height * v;
-        let key = `img${i}${j}`;
+        let x = this[`img${i + 1}`].left + this[`img${i + 1}`].width * h;
+        let y = this[`img${i + 1}`].top + this[`img${i + 1}`].height * v;
+        let key = `img${i + 1}${j + 1}`;
         let item = this[key] = this.add.image(x, y, key);
 
-        item.index = j - 1;
-        this.found[item.index].items[i - 1] = item;
+        item.index = j;
+        this.found[item.index].items[i] = item;
 
         item.anchor.setTo(0.5, 0.5);
 
@@ -121,16 +143,6 @@ class Level extends Seabed {
         }
       });
     });
-
-    this.add.button(
-      0, 0, 'previous', this.game.previous, this.game
-    );
-
-    let nextButton = this.add.button(
-      this.world.width, 0, 'next', this.game.next, this.game
-    );
-
-    nextButton.anchor.setTo(1, 0);
   }
 
   shine(image) {

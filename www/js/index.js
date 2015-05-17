@@ -5530,14 +5530,14 @@ var Cover = (function (_Seabed) {
     value: function init() {
       _get(Object.getPrototypeOf(Cover.prototype), 'init', this).call(this);
 
+      this.stage.backgroundColor = this.data.backgroundColor;
+
       if (!this.game.onPause.has(this.onPause, this)) {
         this.game.onPause.add(this.onPause, this);
       }
       if (!this.game.onResume.has(this.onResume, this)) {
         this.game.onResume.add(this.onResume, this);
       }
-
-      this.stage.backgroundColor = this.data.backgroundColor;
     }
   }, {
     key: 'preload',
@@ -5811,7 +5811,8 @@ module.exports={
                         {
                             "h": 0.646,
                             "v": 0.692
-                        }
+                        },
+                        {}
                     ],
                     [
                         {
@@ -6188,7 +6189,13 @@ module.exports={
             {
                 "code": "110",
                 "difference": [
-                    [],
+                    [
+                        {},
+                        {},
+                        {},
+                        {},
+                        {}
+                    ],
                     [
                         {
                             "h": 0.128,
@@ -6261,7 +6268,8 @@ module.exports={
                         {
                             "h": 0.445,
                             "v": 0.856
-                        }
+                        },
+                        {}
                     ],
                     [
                         {
@@ -6376,7 +6384,10 @@ module.exports={
                         {
                             "h": 0.823,
                             "v": 0.156
-                        }
+                        },
+                        {},
+                        {},
+                        {}
                     ],
                     [
                         {},
@@ -6444,7 +6455,9 @@ module.exports={
                         {
                             "h": 0.43,
                             "v": 0.235
-                        }
+                        },
+                        {},
+                        {}
                     ],
                     [
                         {
@@ -6516,6 +6529,7 @@ module.exports={
                             "h": 0.137,
                             "v": 0.709
                         },
+                        {}
                     ],
                     [
                         {
@@ -6548,7 +6562,8 @@ module.exports={
                         {
                             "h": 0.054,
                             "v": 0.863
-                        }
+                        },
+                        {}
                     ],
                     [
                         {
@@ -6630,24 +6645,28 @@ var Game = (function (_Phaser$Game) {
     key: 'previous',
     value: function previous() {
       if (this.state.current == this.levels[0]) {
-        this.fade('cover');
+        // this.fade('cover');
+        this.state.start('cover');
       } else {
         var index = this.levels.indexOf(this.state.current);
 
-        this.fade(this.levels[index - 1]);
+        // this.fade(this.levels[index - 1]);
+        this.state.start(this.levels[index - 1]);
       }
     }
   }, {
     key: 'next',
     value: function next() {
       if (this.state.current == 'cover') {
-        this.fade(this.levels[0]);
+        // this.fade(this.levels[0]);
+        this.state.start(this.levels[0]);
       } else {
         var index = this.levels.indexOf(this.state.current);
         var state = this.levels[index + 1];
 
         if (this.state.checkState(state)) {
-          this.fade(this.levels[index + 1]);
+          // this.fade(this.levels[index + 1]);
+          this.state.start(this.levels[index + 1]);
         } else {
           var t = app.t;
 
@@ -6829,7 +6848,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -6861,6 +6880,8 @@ var Level = (function (_Seabed) {
     key: 'init',
     value: function init() {
       _get(Object.getPrototypeOf(Level.prototype), 'init', this).call(this);
+
+      this.stage.backgroundColor = 0;
 
       var difference = this.data.difference;
       var length = Math.max(difference[0].length, difference[1].length);
@@ -6912,8 +6933,13 @@ var Level = (function (_Seabed) {
 
       this.img1 = this.add.image(0, 0, 'img1');
       this.img2 = this.add.image(this.world.centerX, 0, 'img2');
-      this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
-      this.img1.smoothed = this.img2.smoothed = false;
+      // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
+      // this.img1.smoothed = this.img2.smoothed = false;
+
+      // show spliter
+      var spliter = this.add.graphics(this.world.centerX, 0);
+      spliter.lineStyle(this.world.width / 200, 16777215);
+      spliter.lineTo(0, this.img1.bottom);
 
       // show level number
       var level = parseInt(this.data.code) - 100;
@@ -6935,24 +6961,39 @@ var Level = (function (_Seabed) {
       crab.anchor.setTo(0.5, 0.5);
       crab.scale.setTo(0.5, 0.5);
 
-      [1, 2].forEach(function (i) {
-        _this2.data.difference[i - 1].forEach(function (_ref2, j) {
+      [0, 1].forEach(function (i) {
+        _this2.data.difference[i].forEach(function (_ref2, j) {
           var h = _ref2.h;
           var v = _ref2.v;
 
-          if (!h) {
+          // placeholder
+          if (!h || !v) {
+            var other = _this2.data.difference[i ? 0 : 1][j];
+
+            h = other.h;
+            v = other.v;
+
+            var _x = _this2['img' + (i + 1)].left + _this2['img' + (i + 1)].width * h;
+            var _y = _this2['img' + (i + 1)].top + _this2['img' + (i + 1)].height * v;
+            var _item = _this2.add.graphics(_x, _y);
+
+            _item.index = j;
+
+            _item.hitArea = new Phaser.Circle(0, 0, 44);
+
+            _item.inputEnabled = true;
+            _item.events.onInputUp.add(_this2.onInputUp, _this2);
+
             return;
           }
 
-          j += 1;
-
-          var x = _this2['img' + i].position.x + _this2['img' + i].width * h;
-          var y = _this2['img' + i].position.y + _this2['img' + i].height * v;
-          var key = 'img' + i + '' + j;
+          var x = _this2['img' + (i + 1)].left + _this2['img' + (i + 1)].width * h;
+          var y = _this2['img' + (i + 1)].top + _this2['img' + (i + 1)].height * v;
+          var key = 'img' + (i + 1) + '' + (j + 1);
           var item = _this2[key] = _this2.add.image(x, y, key);
 
-          item.index = j - 1;
-          _this2.found[item.index].items[i - 1] = item;
+          item.index = j;
+          _this2.found[item.index].items[i] = item;
 
           item.anchor.setTo(0.5, 0.5);
 
@@ -6970,12 +7011,6 @@ var Level = (function (_Seabed) {
           }
         });
       });
-
-      this.add.button(0, 0, 'previous', this.game.previous, this.game);
-
-      var nextButton = this.add.button(this.world.width, 0, 'next', this.game.next, this.game);
-
-      nextButton.anchor.setTo(1, 0);
     }
   }, {
     key: 'shine',
@@ -7192,13 +7227,47 @@ var State = (function (_Phaser$State) {
       if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
         this.load.onFileComplete.add(this.onFileComplete, this);
       }
+
+      if (!this.input.onDown.has(this.onDown, this)) {
+        this.input.onDown.add(this.onDown, this);
+      }
+      if (!this.input.onUp.has(this.onUp, this)) {
+        this.input.onUp.add(this.onUp, this);
+      }
     }
   }, {
     key: 'preload',
-    value: function preload() {
-      this.loadImage('previous', 'img/previous.png');
-      this.loadImage('next', 'img/next.png');
-      // this.load.image('sound', 'asset/sound.png');
+    value: function preload() {}
+  }, {
+    key: 'update',
+    value: function update() {
+      var _this = this;
+
+      // slide camera left or right.
+      if (this.inputDown) {
+        if (this.camera.bounds) {
+          this.camera.bounds = null;
+        }
+
+        this.camera.x = this.inputDownX - this.input.activePointer.x;
+      } else if (this.inputDownX) {
+        if (this.camera.x < -this.world.centerX / 2) {
+          this.add.tween(this.camera).to({
+            x: -this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
+            return _this.game.previous();
+          });
+        } else if (this.camera.x > this.world.centerX / 2) {
+          this.add.tween(this.camera).to({
+            x: this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
+            return _this.game.next();
+          });
+        } else {
+          this.add.tween(this.camera).to({
+            x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
+        }
+
+        delete this.inputDownX;
+      }
     }
   }, {
     key: 'render',
@@ -7211,6 +7280,8 @@ var State = (function (_Phaser$State) {
     key: 'shutdown',
     value: function shutdown() {
       this.load.onFileComplete.remove(this.onFileComplete, this);
+      this.input.onDown.remove(this.onDown, this);
+      this.input.onUp.remove(this.onUp, this);
     }
   }, {
     key: 'env',
@@ -7256,7 +7327,7 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'playAudio',
     value: function playAudio(key) {
-      var _this = this;
+      var _this2 = this;
 
       var volume = arguments[1] === undefined ? 1 : arguments[1];
       var loop = arguments[2] === undefined ? false : arguments[2];
@@ -7265,7 +7336,7 @@ var State = (function (_Phaser$State) {
 
       if (device.android && !device.webAudio) {
         var _ret = (function () {
-          var data = _this.cache.getSoundData(key);
+          var data = _this2.cache.getSoundData(key);
           // 10 is the length of 'index.html'
           var root = location.href.substr(0, location.href.length - 10);
           // file:///android_asset/www/asset/xxx.mp3
@@ -7273,7 +7344,7 @@ var State = (function (_Phaser$State) {
           var media = new Media(path, function () {
             console.log('[Media]', 'finish', '' + key + ' (' + path + ')');
 
-            if (!_this.game.paused) {
+            if (!_this2.game.paused) {
               if (loop) {
                 console.log('[Media]', 'loop', '' + key + ' (' + path + ')');
 
@@ -7306,7 +7377,7 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'renderFps',
     value: function renderFps() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!this.time.advancedTiming) {
         this.time.advancedTiming = true;
@@ -7314,9 +7385,9 @@ var State = (function (_Phaser$State) {
 
       if (!this.renderFpsThrottle) {
         var renderFps = function renderFps() {
-          var fps = _this2.game.time.fps;
+          var fps = _this3.game.time.fps;
 
-          _this2.game.debug.text('fps:' + fps, 0, 12);
+          _this3.game.debug.text('fps:' + fps, 0, 12);
         };
 
         this.renderFpsThrottle = (0, _lodashFunctionThrottle2['default'])(renderFps, 500);
@@ -7341,7 +7412,7 @@ var State = (function (_Phaser$State) {
           bar: bar, text: text };
       }
 
-      this.progress.bar.lineStyle(10, 52224);
+      this.progress.bar.lineStyle(this.height / 100, 52224);
       this.progress.bar.lineTo(this.world.width * progress / 100, 0);
       this.progress.text.text = '' + key + ' (' + loaded + '/' + total + ')';
 
@@ -7352,6 +7423,17 @@ var State = (function (_Phaser$State) {
         delete this.progress;
       }
     }
+  }, {
+    key: 'onDown',
+    value: function onDown(pointer) {
+      this.inputDown = true;
+      this.inputDownX = pointer.x;
+    }
+  }, {
+    key: 'onUp',
+    value: function onUp() {
+      this.inputDown = false;
+    }
   }]);
 
   return State;
@@ -7359,6 +7441,10 @@ var State = (function (_Phaser$State) {
 
 exports['default'] = State;
 module.exports = exports['default'];
+
+// this.loadImage('previous', 'img/previous.png');
+// this.loadImage('next', 'img/next.png');
+// this.load.image('sound', 'asset/sound.png');
 
 },{"lodash/function/throttle":96}]},{},[1])
 

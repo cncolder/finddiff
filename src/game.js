@@ -27,23 +27,27 @@ class Game extends Phaser.Game {
 
   previous() {
     if (this.state.current == this.levels[0]) {
-      this.fade('cover');
+      // this.fade('cover');
+      this.state.start('cover');
     } else {
       let index = this.levels.indexOf(this.state.current);
 
-      this.fade(this.levels[index - 1]);
+      // this.fade(this.levels[index - 1]);
+      this.state.start(this.levels[index - 1]);
     }
   }
 
   next() {
     if (this.state.current == 'cover') {
-      this.fade(this.levels[0]);
+      // this.fade(this.levels[0]);
+      this.state.start(this.levels[0]);
     } else {
       let index = this.levels.indexOf(this.state.current);
       let state = this.levels[index + 1];
 
       if (this.state.checkState(state)) {
-        this.fade(this.levels[index + 1]);
+        // this.fade(this.levels[index + 1]);
+        this.state.start(this.levels[index + 1]);
       } else {
         let t = app.t;
 
