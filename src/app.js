@@ -109,10 +109,24 @@ class App {
 
   onPause() {
     console.log('[Cordova] pause');
+
+    // fix ios background crash gpus_ReturnNotPermittedKillClient
+    // Background Apps May Not Execute Commands on the Graphics Hardware https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/ImplementingaMultitasking-awareOpenGLESApplication/ImplementingaMultitasking-awareOpenGLESApplication.html#//apple_ref/doc/uid/TP40008793-CH5-SW1
+    if (window.game && game.device.iOS && game.renderType == Phaser.WEBGL) {
+      console.log('[App] turn on lockRender to prevent background crash.');
+
+      this.gameLockRenderBeforePause = game.lockRender;
+      game.lockRender = true;
+    }
+
   }
 
   onResume() {
     console.log('[Cordova] resume');
+
+    if (window.game && game.device.iOS && game.renderType == Phaser.WEBGL) {
+      game.lockRender = this.gameLockRenderBeforePause;
+    }
   }
 
   onOffline() {

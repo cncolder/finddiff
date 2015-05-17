@@ -40,8 +40,9 @@ process.env.BROWSER_ENV = location.host == 'localhost:3000' ? 'development' : 'p
 
 require('babelify/node_modules/babel-core/polyfill');
 
-var app = window.app = new _app2['default']();
-var game = app.game = new _game2['default'](app);
+window.app = new _app2['default']();
+
+var game = window.game = new _game2['default']();
 
 game.state.add('cover', new _cover2['default'](_data2['default'].seabed.cover), true);
 
@@ -5434,11 +5435,24 @@ var App = (function () {
     key: 'onPause',
     value: function onPause() {
       console.log('[Cordova] pause');
+
+      // fix ios background crash gpus_ReturnNotPermittedKillClient
+      // Background Apps May Not Execute Commands on the Graphics Hardware https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/ImplementingaMultitasking-awareOpenGLESApplication/ImplementingaMultitasking-awareOpenGLESApplication.html#//apple_ref/doc/uid/TP40008793-CH5-SW1
+      if (window.game && game.device.iOS && game.renderType == Phaser.WEBGL) {
+        console.log('[App] turn on lockRender to prevent background crash.');
+
+        this.gameLockRenderBeforePause = game.lockRender;
+        game.lockRender = true;
+      }
     }
   }, {
     key: 'onResume',
     value: function onResume() {
       console.log('[Cordova] resume');
+
+      if (window.game && game.device.iOS && game.renderType == Phaser.WEBGL) {
+        game.lockRender = this.gameLockRenderBeforePause;
+      }
     }
   }, {
     key: 'onOffline',
@@ -6585,14 +6599,13 @@ Phaser game
 */
 
 var Game = (function (_Phaser$Game) {
-  function Game(app) {
+  function Game() {
     _classCallCheck(this, Game);
 
     _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768); // 1.0
     // super(768, 576); // 0.75
     // super(512, 384); // 0.5
 
-    this.app = app;
     this.levels = [];
     this.fadeColor = 16777215;
   }
@@ -6636,7 +6649,7 @@ var Game = (function (_Phaser$Game) {
         if (this.state.checkState(state)) {
           this.fade(this.levels[index + 1]);
         } else {
-          var t = this.app.t;
+          var t = app.t;
 
           navigator.notification.alert(t(_taggedTemplateLiteral(['Game complete page is working out.'], ['Game complete page is working out.'])), function () {
             console.log('[Game] levels complete');

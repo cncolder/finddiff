@@ -11,8 +11,9 @@ import Cover from './cover';
 import Level from './level';
 import data from './data';
 
-let app = window.app = new App();
-let game = app.game = new Game(app);
+window.app = new App();
+
+let game = window.game = new Game();
 
 game.state.add('cover', new Cover(data.seabed.cover), true);
 
