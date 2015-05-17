@@ -19,10 +19,11 @@ class Game extends Phaser.Game {
   }
 
   fitScreen() {
-    // this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
-    this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-    this.scale.setUserScale(window.innerWidth / this.world.width);
-    this.scale.pageAlignHorizontally = this.scale.pageAlignVertically = true;
+    if (this.scale.scaleMode != Phaser.ScaleManager.USER_SCALE) {
+      this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+      this.scale.setUserScale(window.innerWidth / this.world.width);
+      this.scale.pageAlignHorizontally = this.scale.pageAlignVertically = true;
+    }
   }
 
   previous() {
@@ -45,12 +46,13 @@ class Game extends Phaser.Game {
       if (this.state.checkState(state)) {
         this.fade(this.levels[index + 1]);
       } else {
-        let t = this.app.i18n.t;
-        let alert = navigator.notification.alert;
+        let t = this.app.t;
 
-        alert(t `Game complete page is working out.`, () => {
-          console.log('[Game] levels complete');
-        }, t `Nothing else`);
+        navigator.notification.alert(
+          t `Game complete page is working out.`, () => {
+            console.log('[Game] levels complete');
+          }, t `Nothing else`
+        );
       }
     }
   }

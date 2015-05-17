@@ -16,6 +16,7 @@
     <preference name="DisallowOverscroll" value="true"/>
     <preference name="BackupWebStorage" value="none"/>
     <preference name="SplashScreen" value="screen"/>
+    <preference name="SplashScreenDelay" value="10000"/>
     <engine name="ios" spec="^3.8.0"/>
     <engine name="android" spec="^4.0.0"/>
     <plugin name="cordova-plugin-console" spec="^1.0.0"/>
@@ -25,7 +26,6 @@
     <plugin name="cordova-plugin-splashscreen" spec="^2.0.0"/>
     <plugin name="cordova-plugin-globalization" spec="^1.0.0"/>
     <plugin name="cordova-plugin-file" spec="^2.0.0"/>
-    <plugin name="cordova-plugin-file-transfer" spec="^1.1.0"/>
     <plugin name="cordova-plugin-whitelist" spec="^1.0.0"/>
     <plugin name="cordova-plugin-network-information" spec="^1.0.0"/>
     <plugin name="cordova-plugin-inappbrowser" spec="^1.0.0"/>

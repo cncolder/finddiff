@@ -15,11 +15,14 @@ class Cover extends Seabed {
   init() {
     super.init();
 
-    this.game.onPause.add(this.onPause, this);
-    this.game.onResume.add(this.onResume, this);
+    if (!this.game.onPause.has(this.onPause, this)) {
+      this.game.onPause.add(this.onPause, this);
+    }
+    if (!this.game.onResume.has(this.onResume, this)) {
+      this.game.onResume.add(this.onResume, this);
+    }
 
     this.stage.backgroundColor = this.data.backgroundColor;
-    // alert(`mp3? ${this.game.device.mp3}`);
   }
 
   preload() {
@@ -30,14 +33,15 @@ class Cover extends Seabed {
     this.data.images.forEach(({
       i
     }) => {
-      this.load.image(`img${i}`, `asset/${code}${i}.png`);
+      this.load.image(`img${i}`, `img/${code}${i}.png`);
     });
+
+    this.loadImage('bubble', 'img/bubble.png');
   }
 
   create() {
     super.create();
 
-    // this.pictures = this.pictures || {};
     this.data.images.forEach(({
       i, h, v
     }) => {
@@ -68,10 +72,6 @@ class Cover extends Seabed {
 
     this.addMusic();
 
-    // begin
-    // this.add.button(
-    //   this.world.width - 96, 0, 'next', this.game.next, this.game
-    // );
     // this.add.button(96 + 50, 0, 'sound', this.mute, this);
   }
 
@@ -134,12 +134,12 @@ class Cover extends Seabed {
   onInputUp(e) {
     // whale roar sound
     if (e.key == 'img4') {
-      this.music.whale.play();
+      this.soundEffect.whale.play();
     }
 
     // submarine sound
     if (e.key == 'img8') {
-      this.music.sweep.play();
+      this.soundEffect.sweep.play();
     }
   }
 
@@ -154,23 +154,34 @@ class Cover extends Seabed {
   }
 
   onPause() {
-    let device = this.game.device;
+    Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+      value.pause();
+    });
+    Object.entries(this.soundEffect || {}).forEach(([key, value]) => {
+      value.stop();
+    });
 
-    if (device.android && !device.webAudio) {
-      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
-        value.pause();
-      });
-    }
+    // let device = this.game.device;
+    //
+    // if (device.android && !device.webAudio) {
+    //   let entries = Object.entries(this.backgroundMusic || {});
+    //
+    //   entries.forEach(([key, value]) => value.pause());
+    // }
   }
 
   onResume() {
-    let device = this.game.device;
+    Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+      value.resume();
+    });
 
-    if (device.android && !device.webAudio) {
-      Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
-        value.resume();
-      });
-    }
+    // let device = this.game.device;
+    //
+    // if (device.android && !device.webAudio) {
+    //   let entries = Object.entries(this.backgroundMusic || {});
+    //
+    //   entries.forEach(([key, value]) => value.resume());
+    // }
   }
 }
 

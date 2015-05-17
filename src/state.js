@@ -11,30 +11,23 @@ class State extends Phaser.State {
   }
 
   init() {
-    super.init();
-
     this.game.fitScreen();
+
+    if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
+      this.load.onFileComplete.add(this.onFileComplete, this);
+    }
   }
 
   preload() {
-    this.load.onFileComplete.add(this.onFileComplete, this);
-
-    this.loadImage('previous', 'asset/previous.png');
-    this.loadImage('next', 'asset/next.png');
+    this.loadImage('previous', 'img/previous.png');
+    this.loadImage('next', 'img/next.png');
     // this.load.image('sound', 'asset/sound.png');
   }
 
-  create() {}
-
-  update() {}
-
   render() {
-    if (!this.game.device.cocoonJS) {
-      this.renderFpsThrottle =
-        this.renderFpsThrottle || throttle(this.renderFps, 500);
-      this.renderFpsThrottle();
+    if (!this.game.paused && !this.game.device.cocoonJSApp) {
+      this.renderFps();
     }
-    // this.renderErrors();
   }
 
   shutdown() {
@@ -59,15 +52,23 @@ class State extends Phaser.State {
     if (!this.cache.checkSoundKey(key)) {
       let device = this.game.device;
 
-      if (device.android && !device.webAudio) {
-        console.log('[Media]', 'cache', `${key} (${path})`);
+      if (device.iOS) {
+        path += '.m4a';
+      } else if (device.android) {
+        path += '.ogg';
 
-        this.cache.addSound(key, '', {
-          path,
-        });
+        if (!device.webAudio) {
+          console.log('[Media]', 'cache', `${key} (${path})`);
+
+          return this.cache.addSound(key, '', {
+            path,
+          });
+        }
       } else {
-        this.load.audio(key, path);
+        path += '.m4a';
       }
+
+      this.load.audio(key, path);
     }
   }
 
@@ -114,17 +115,17 @@ class State extends Phaser.State {
       this.time.advancedTiming = true;
     }
 
-    let fps = this.game.time.fps;
+    if (!this.renderFpsThrottle) {
+      let renderFps = () => {
+        let fps = this.game.time.fps;
 
-    this.game.debug.text(`fps:${fps}`, 0, 12);
-  }
+        this.game.debug.text(`fps:${fps}`, 0, 12);
+      };
 
-  renderErrors() {
-    if (this.game.errors && !this.game.paused) {
-      let err = this.game.errors.join('\n').substr(0, 100);
-
-      this.game.debug.text(err, 0, 32);
+      this.renderFpsThrottle = throttle(renderFps, 500);
     }
+
+    this.renderFpsThrottle();
   }
 
   onFileComplete(progress, key, success, loaded, total) {

@@ -43,9 +43,6 @@
     <feature name="Globalization">
         <param name="ios-package" value="CDVGlobalization" />
     </feature>
-    <feature name="FileTransfer">
-        <param name="ios-package" value="CDVFileTransfer" />
-    </feature>
     <icon height="180" src="res/ios/icon-60@3x.png" width="180" />
     <icon height="60" src="res/ios/icon-60.png" width="60" />
     <icon height="120" src="res/ios/icon-60@2x.png" width="120" />
@@ -87,5 +84,6 @@
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashScreen" value="screen" />
+    <preference name="SplashScreenDelay" value="10000" />
     <icon src="res/icon.png" />
 </widget>

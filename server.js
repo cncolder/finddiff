@@ -11,7 +11,7 @@ var stat = require('koa-static');
 app.use(stat('./www', {
   index: 'index.html',
 }));
-
+app.use(stat('./merges/ios'));
 app.use(stat('./platforms/android/build/outputs/apk'));
 
 app.use(function*(next) {

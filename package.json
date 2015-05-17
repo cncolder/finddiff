@@ -42,6 +42,7 @@
         "koa-logger": "^1.2.2",
         "koa-static": "^1.4.9",
         "lodash": "^3.8.0",
+        "mocha": "^2.2.5",
         "phaser": "^2.3.0",
         "semver": "^4.3.4",
         "vinyl-buffer": "^1.0.0",
@@ -61,8 +62,8 @@
         "loga": "./platforms/android/cordova/log | grep Console",
         "loga5": "./platforms/android/cordova/log | grep CONSOLE",
         "logi": "./platforms/ios/cordova/log | grep FindDiff",
-        "runa": "cordova run android -d",
-        "runi": "cordova run ios -d",
+        "runa": "cordova run android --device -d",
+        "runi": "cordova run ios --device -d",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "version": "1.0.0"

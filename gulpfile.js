@@ -11,13 +11,13 @@ gulp.task('default', ['pm2:start', 'pm2:logs', 'watch']);
 
 gulp.task('watch', function() {
   gulp.watch('src/**/*', ['browserify']);
-  gulp.watch(['test/**/*.js', '!test/browser/*'], ['mocha']);
+  gulp.watch(['test/**/*.js'], ['mocha']);
 });
 
 gulp.task('browserify', function(cb) {
   browserify({
-    debug: true,
-  })
+      debug: true,
+    })
     .transform(babelify.configure({
       // blacklist: ['regenerator'],
     }))
@@ -41,22 +41,22 @@ gulp.task('browserify', function(cb) {
 
 gulp.task('pm2:start', function(cb) {
   child.spawn('pm2', ['startOrRestart', 'package.json'], {
-    stdio: 'inherit',
-  })
+      stdio: 'inherit',
+    })
     .on('exit', cb);
 });
 
 gulp.task('pm2:stop', function(cb) {
   child.spawn('pm2', ['stop', 'package.json'], {
-    stdio: 'inherit',
-  })
+      stdio: 'inherit',
+    })
     .on('exit', cb);
 });
 
 gulp.task('pm2:logs', function(cb) {
   child.spawn('pm2', ['logs', 'finddiff'], {
-    stdio: 'inherit',
-  })
+      stdio: 'inherit',
+    })
     .on('exit', cb);
 });
 
@@ -65,14 +65,16 @@ gulp.task('mocha', function(done) {
     env[key] = process.env[key];
     return env;
   }, {});
-  env.NODE_ENV = 'test';
-  env.DEBUG = 'wishing:*';
-  env.MONGOOSE_DISABLE_STABILITY_WARNING = 1;
 
-  child.spawn('mocha', ['--harmony', '--bail', '--reporter', 'dot'], {
-    env: env,
-    stdio: 'inherit',
-  }).on('close', done);
+  env.NODE_ENV = 'test';
+  // env.DEBUG = '*';
+
+  child
+    .spawn('mocha', ['--harmony', '--bail'], {
+      env: env,
+      stdio: 'inherit',
+    })
+    .on('close', done);
 });
 
 process.on('uncaughtException', function(err) {
@@ -84,8 +86,8 @@ process.on('uncaughtException', function(err) {
 
 process.on('SIGINT', function() {
   child.spawn('pm2', ['stop', 'package.json'], {
-    stdio: 'inherit',
-  })
+      stdio: 'inherit',
+    })
     .on('exit', function() {
       process.exit(0);
     });

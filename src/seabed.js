@@ -13,12 +13,12 @@ class Seabed extends State {
   preload() {
     super.preload();
 
-    this.loadImage('bubble', 'asset/bubble.png');
+    // http://magnatune.com/artists/albums/fulton-once?song=4
+    this.loadAudio('bg', 'music/Romanesca');
 
-    this.loadAudio('bg', 'asset/romanesca.mp3');
-    this.loadAudio('water', 'asset/Water Lake.mp3');
-    this.loadAudio('whale', 'asset/Whale Sounds.mp3');
-    this.loadAudio('sweep', 'asset/Sweep Motion.mp3');
+    this.loadAudio('water', 'sounds/Water Lake');
+    this.loadAudio('whale', 'sounds/Whale Sounds');
+    this.loadAudio('sweep', 'sounds/Sweep Motion');
   }
 }
 

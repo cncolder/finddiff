@@ -31,9 +31,6 @@
     <feature name="Globalization">
         <param name="android-package" value="org.apache.cordova.globalization.Globalization" />
     </feature>
-    <feature name="FileTransfer">
-        <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
-    </feature>
     <feature name="FileOpener">
         <param name="android-package" value="fr.smile.cordova.fileopener.FileOpener" />
     </feature>
@@ -67,5 +64,6 @@
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashScreen" value="screen" />
+    <preference name="SplashScreenDelay" value="10000" />
     <icon src="res/icon.png" />
 </widget>

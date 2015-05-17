@@ -31,8 +31,8 @@ class Level extends Seabed {
 
     let code = this.data.code;
 
-    this.load.image('img1', `asset/${code}1.png`);
-    this.load.image('img2', `asset/${code}2.png`);
+    this.load.image('img1', `img/${code}1.png`);
+    this.load.image('img2', `img/${code}2.png`);
 
     [1, 2].forEach(i => {
       this.data.difference[i - 1].forEach(({
@@ -45,13 +45,13 @@ class Level extends Seabed {
         j += 1;
 
         let key = `img${i}${j}`;
-        let path = `asset/${code}${i}${j}.png`;
+        let path = `img/${code}${i}${j}.png`;
 
         this.load.image(key, path);
       });
     });
 
-    this.loadAudio('bell', 'asset/Bell Transition.mp3');
+    this.loadAudio('bell', 'sounds/Bell Transition');
   }
 
   create() {
