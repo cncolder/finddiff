@@ -24,9 +24,8 @@ class State extends Phaser.State {
       this.load.onFileComplete.add(this.onFileComplete, this);
     }
 
-    if (!this.input.onDown.has(this.onDown, this)) {
-      this.input.onDown.add(this.onDown, this);
-    }
+    this.moveCallbackIndex = this.input.addMoveCallback(this.onMove, this);
+
     if (!this.input.onUp.has(this.onUp, this)) {
       this.input.onUp.add(this.onUp, this);
     }
@@ -38,33 +37,6 @@ class State extends Phaser.State {
     // this.load.image('sound', 'asset/sound.png');
   }
 
-  update() {
-    // slide camera left or right.
-    if (this.inputDown) {
-      let x = this.input.activePointer.x;
-
-      // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
-      if (x > this.camera.width - this.camera.width / 200) {
-        this.inputDown = false;
-      } else {
-        this.camera.x = this.inputDownX - this.input.activePointer.x;
-      }
-    } else if (this.inputDownX) {
-      if (this.camera.x < -this.world.centerX / 2) {
-        this.game.previous();
-      } else if (this.camera.x > this.world.centerX / 2) {
-        this.game.next();
-      } else {
-        this.add.tween(this.camera)
-          .to({
-            x: 0,
-          }, 100, Phaser.Easing.Quadratic.InOut, true);
-      }
-
-      delete this.inputDownX;
-    }
-  }
-
   render() {
     if (!this.game.paused && !this.game.device.cocoonJSApp) {
       this.renderFps();
@@ -73,7 +45,7 @@ class State extends Phaser.State {
 
   shutdown() {
     this.load.onFileComplete.remove(this.onFileComplete, this);
-    this.input.onDown.remove(this.onDown, this);
+    this.input.deleteMoveCallback(this.moveCallbackIndex);
     this.input.onUp.remove(this.onUp, this);
   }
 
@@ -201,13 +173,30 @@ class State extends Phaser.State {
     }
   }
 
-  onDown(pointer) {
-    this.inputDown = true;
-    this.inputDownX = pointer.x;
+  onUp() {
+    // this.inputDown = false;
+    if (this.camera.x < -this.world.centerX / 2) {
+      this.game.previous();
+    } else if (this.camera.x > this.world.centerX / 2) {
+      this.game.next();
+    } else if (this.camera.x !== 0) {
+      this.add.tween(this.camera)
+        .to({
+          x: 0,
+        }, 100, Phaser.Easing.Quadratic.InOut, true);
+    }
   }
 
-  onUp() {
-    this.inputDown = false;
+  // slide camera left or right. down is first time.
+  onMove(pointer, x, y, down) {
+    if (pointer.isDown && !down && !pointer.justPressed()) {
+      // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
+      if (x > this.camera.width - this.camera.width / 100) {
+        this.onUp();
+      } else {
+        this.camera.x = pointer.positionDown.x - x;
+      }
+    }
   }
 }
 

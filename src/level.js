@@ -133,10 +133,10 @@ class Level extends Seabed {
 
         item.inputEnabled = true;
         item.events.onInputUp.add(this.onInputUp, this);
-        item.events.onDragStop.add(this.onDragStop, this);
 
         if (this.env == 'development') {
           item.input.enableDrag();
+          item.events.onDragStop.add(this.onDragStop, this);
         }
       });
     });
@@ -182,7 +182,15 @@ class Level extends Seabed {
     console.log('drag', image.key, l.x, l.y, h, v);
   }
 
-  onInputUp(image) {
+  onInputUp(image, pointer, over) {
+    // let duration = Date.now() - pointer.timeDown;
+    let distance = pointer.position.distance(pointer.positionDown);
+
+    // not tap, is drag move.
+    if (!over || distance > this.inputCircle.radius) {
+      return;
+    }
+
     let found = this.found[image.index];
 
     if (found.checked) {

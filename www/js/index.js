@@ -7040,10 +7040,10 @@ var Level = (function (_Seabed) {
 
           item.inputEnabled = true;
           item.events.onInputUp.add(_this2.onInputUp, _this2);
-          item.events.onDragStop.add(_this2.onDragStop, _this2);
 
           if (_this2.env == 'development') {
             item.input.enableDrag();
+            item.events.onDragStop.add(_this2.onDragStop, _this2);
           }
         });
       });
@@ -7085,8 +7085,16 @@ var Level = (function (_Seabed) {
     }
   }, {
     key: 'onInputUp',
-    value: function onInputUp(image) {
+    value: function onInputUp(image, pointer, over) {
       var _this3 = this;
+
+      // let duration = Date.now() - pointer.timeDown;
+      var distance = pointer.position.distance(pointer.positionDown);
+
+      // not tap, is drag move.
+      if (!over || distance > this.inputCircle.radius) {
+        return;
+      }
 
       var found = this.found[image.index];
 
@@ -7271,9 +7279,8 @@ var State = (function (_Phaser$State) {
         this.load.onFileComplete.add(this.onFileComplete, this);
       }
 
-      if (!this.input.onDown.has(this.onDown, this)) {
-        this.input.onDown.add(this.onDown, this);
-      }
+      this.moveCallbackIndex = this.input.addMoveCallback(this.onMove, this);
+
       if (!this.input.onUp.has(this.onUp, this)) {
         this.input.onUp.add(this.onUp, this);
       }
@@ -7281,32 +7288,6 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'preload',
     value: function preload() {}
-  }, {
-    key: 'update',
-    value: function update() {
-      // slide camera left or right.
-      if (this.inputDown) {
-        var x = this.input.activePointer.x;
-
-        // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
-        if (x > this.camera.width - this.camera.width / 200) {
-          this.inputDown = false;
-        } else {
-          this.camera.x = this.inputDownX - this.input.activePointer.x;
-        }
-      } else if (this.inputDownX) {
-        if (this.camera.x < -this.world.centerX / 2) {
-          this.game.previous();
-        } else if (this.camera.x > this.world.centerX / 2) {
-          this.game.next();
-        } else {
-          this.add.tween(this.camera).to({
-            x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
-        }
-
-        delete this.inputDownX;
-      }
-    }
   }, {
     key: 'render',
     value: function render() {
@@ -7318,7 +7299,7 @@ var State = (function (_Phaser$State) {
     key: 'shutdown',
     value: function shutdown() {
       this.load.onFileComplete.remove(this.onFileComplete, this);
-      this.input.onDown.remove(this.onDown, this);
+      this.input.deleteMoveCallback(this.moveCallbackIndex);
       this.input.onUp.remove(this.onUp, this);
     }
   }, {
@@ -7463,15 +7444,31 @@ var State = (function (_Phaser$State) {
       }
     }
   }, {
-    key: 'onDown',
-    value: function onDown(pointer) {
-      this.inputDown = true;
-      this.inputDownX = pointer.x;
-    }
-  }, {
     key: 'onUp',
     value: function onUp() {
-      this.inputDown = false;
+      // this.inputDown = false;
+      if (this.camera.x < -this.world.centerX / 2) {
+        this.game.previous();
+      } else if (this.camera.x > this.world.centerX / 2) {
+        this.game.next();
+      } else if (this.camera.x !== 0) {
+        this.add.tween(this.camera).to({
+          x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
+      }
+    }
+  }, {
+    key: 'onMove',
+
+    // slide camera left or right. down is first time.
+    value: function onMove(pointer, x, y, down) {
+      if (pointer.isDown && !down && !pointer.justPressed()) {
+        // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
+        if (x > this.camera.width - this.camera.width / 100) {
+          this.onUp();
+        } else {
+          this.camera.x = pointer.positionDown.x - x;
+        }
+      }
     }
   }]);
 
