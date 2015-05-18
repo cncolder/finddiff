@@ -54,7 +54,7 @@ class Level extends Seabed {
       });
     });
 
-    this.loadAudio('bell', 'sounds/Bell Transition');
+    this.loadAudio('bell', 'sounds/Bell Transition.m4a');
   }
 
   create() {

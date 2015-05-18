@@ -6962,7 +6962,7 @@ var Level = (function (_Seabed) {
         });
       });
 
-      this.loadAudio('bell', 'sounds/Bell Transition');
+      this.loadAudio('bell', 'sounds/Bell Transition.m4a');
     }
   }, {
     key: 'create',
@@ -7245,11 +7245,11 @@ var Seabed = (function (_State) {
       _get(Object.getPrototypeOf(Seabed.prototype), 'preload', this).call(this);
 
       // http://magnatune.com/artists/albums/fulton-once?song=4
-      this.loadAudio('bg', 'music/Romanesca');
+      this.loadAudio('bg', 'music/Romanesca.m4a');
 
-      this.loadAudio('water', 'sounds/Water Lake');
-      this.loadAudio('whale', 'sounds/Whale Sounds');
-      this.loadAudio('sweep', 'sounds/Sweep Motion');
+      this.loadAudio('water', 'sounds/Water Lake.m4a');
+      this.loadAudio('whale', 'sounds/Whale Sounds.m4a');
+      this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
     }
   }]);
 
@@ -7356,22 +7356,14 @@ var State = (function (_Phaser$State) {
       if (!this.cache.checkSoundKey(key)) {
         var device = this.game.device;
 
-        if (device.iOS) {
-          path += '.m4a';
-        } else if (device.android) {
-          path += '.ogg';
+        if (device.android && !device.webAudio) {
+          console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
 
-          if (!device.webAudio) {
-            console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
-
-            return this.cache.addSound(key, '', {
-              path: path });
-          }
-        } else {
-          path += '.m4a';
+          return this.cache.addSound(key, '', {
+            path: path });
         }
 
-        this.load.audio(key, path);
+        this.load.audio(key, path, false);
       }
     }
   }, {
@@ -7437,7 +7429,7 @@ var State = (function (_Phaser$State) {
         var renderFps = function renderFps() {
           var fps = _this2.game.time.fps;
 
-          _this2.game.debug.text('fps:' + fps, 0, 12);
+          _this2.game.debug.text(fps, 0, 12);
         };
 
         this.renderFpsThrottle = (0, _lodashFunctionThrottle2['default'])(renderFps, 500);

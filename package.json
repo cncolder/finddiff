@@ -62,8 +62,8 @@
         "loga": "./platforms/android/cordova/log | grep Console",
         "loga5": "./platforms/android/cordova/log | grep CONSOLE",
         "logi": "./platforms/ios/cordova/log | grep FindDiff",
-        "runa": "cordova run android --device -d",
-        "runi": "cordova run ios --device -d",
+        "runa": "cordova run android --device",
+        "runi": "cordova run ios --device",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "version": "1.0.0"

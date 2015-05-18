@@ -67,23 +67,15 @@ class State extends Phaser.State {
     if (!this.cache.checkSoundKey(key)) {
       let device = this.game.device;
 
-      if (device.iOS) {
-        path += '.m4a';
-      } else if (device.android) {
-        path += '.ogg';
+      if (device.android && !device.webAudio) {
+        console.log('[Media]', 'cache', `${key} (${path})`);
 
-        if (!device.webAudio) {
-          console.log('[Media]', 'cache', `${key} (${path})`);
-
-          return this.cache.addSound(key, '', {
-            path,
-          });
-        }
-      } else {
-        path += '.m4a';
+        return this.cache.addSound(key, '', {
+          path,
+        });
       }
 
-      this.load.audio(key, path);
+      this.load.audio(key, path, false);
     }
   }
 
@@ -134,7 +126,7 @@ class State extends Phaser.State {
       let renderFps = () => {
         let fps = this.game.time.fps;
 
-        this.game.debug.text(`fps:${fps}`, 0, 12);
+        this.game.debug.text(fps, 0, 12);
       };
 
       this.renderFpsThrottle = throttle(renderFps, 500);
