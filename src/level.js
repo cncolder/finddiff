@@ -5,6 +5,9 @@ Level
 
 import Seabed from './seabed';
 
+var colorIndex = 0;
+const colors = Phaser.Color.HSLColorWheel();
+
 class Level extends Seabed {
   constructor(data) {
     super();
@@ -67,6 +70,9 @@ class Level extends Seabed {
     spliter.lineStyle(this.world.width / 500, 0xffffff);
     spliter.lineTo(0, this.img1.bottom);
 
+    // level up progress
+    this.levelup = this.add.graphics(this.world.centerX, this.img1.bottom);
+
     // show level number
     let level = parseInt(this.data.code) - 100;
     let text = this.add.text(this.world.centerX, 0, ` ${level} `, {
@@ -84,13 +90,13 @@ class Level extends Seabed {
     text.fill = grd;
 
     // a crab indicator for game progress.
-    let crab = this.crab = this.add.image(
-      this.world.centerX,
-      this.img1.top + this.img1.height,
-      'img7'
-    );
-    crab.anchor.setTo(0.5, 0.5);
-    crab.scale.setTo(0.5, 0.5);
+    // let crab = this.crab = this.add.image(
+    //   this.world.centerX,
+    //   this.img1.top + this.img1.height,
+    //   'img7'
+    // );
+    // crab.anchor.setTo(0.5, 0.5);
+    // crab.scale.setTo(0.5, 0.5);
 
     [0, 1].forEach(i => {
       this.data.difference[i].forEach(({
@@ -168,6 +174,22 @@ class Level extends Seabed {
     }, 1000, Phaser.Easing.Default, true, 0, -1, true));
   }
 
+  colorFromWheel() {
+    let color = colors[colorIndex];
+
+    colorIndex = this.math.wrapValue(colorIndex, 111, 359);
+
+    return color;
+  }
+
+  colorValueFromWheel() {
+    let color = this.colorFromWheel();
+
+    color = Phaser.Color.toRGBA(color.r, color.g, color.b);
+
+    return color;
+  }
+
   onDragStop(image) {
     let l = this.img1.toLocal(image.position);
     let h = l.x / this.img1.width;
@@ -183,7 +205,6 @@ class Level extends Seabed {
   }
 
   onInputUp(image, pointer, over) {
-    // let duration = Date.now() - pointer.timeDown;
     let distance = pointer.position.distance(pointer.positionDown);
 
     // not tap, is drag move.
@@ -211,12 +232,17 @@ class Level extends Seabed {
 
     // game progress.
     let checked = this.found.filter(found => found.checked).length;
-    let x = this.crab.x;
-    let y = this.img1.bottom - this.img1.height * checked / this.found.length;
+    // let x = this.crab.x;
+    let d = this.img1.height * checked / this.found.length;
+    // let y = this.img1.bottom - d;
 
-    this.add.tween(this.crab).to({
-      x, y,
-    }, 1000, Phaser.Easing.Elastic.Out, true);
+    // this.add.tween(this.crab).to({
+    //   x, y,
+    // }, 1000, Phaser.Easing.Elastic.Out, true);
+
+    this.levelup
+      .lineStyle(this.world.width / 200, this.colorValueFromWheel())
+      .lineTo(0, -d);
 
     // if all answer found then goto next level.
     if (this.found.every(found => found.checked)) {

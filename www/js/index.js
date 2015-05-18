@@ -6904,6 +6904,9 @@ var _seabed = require('./seabed');
 
 var _seabed2 = _interopRequireDefault(_seabed);
 
+var colorIndex = 0;
+var colors = Phaser.Color.HSLColorWheel();
+
 var Level = (function (_Seabed) {
   function Level(data) {
     _classCallCheck(this, Level);
@@ -6978,6 +6981,9 @@ var Level = (function (_Seabed) {
       spliter.lineStyle(this.world.width / 500, 16777215);
       spliter.lineTo(0, this.img1.bottom);
 
+      // level up progress
+      this.levelup = this.add.graphics(this.world.centerX, this.img1.bottom);
+
       // show level number
       var level = parseInt(this.data.code) - 100;
       var text = this.add.text(this.world.centerX, 0, ' ' + level + ' ', {
@@ -6994,9 +7000,13 @@ var Level = (function (_Seabed) {
       text.fill = grd;
 
       // a crab indicator for game progress.
-      var crab = this.crab = this.add.image(this.world.centerX, this.img1.top + this.img1.height, 'img7');
-      crab.anchor.setTo(0.5, 0.5);
-      crab.scale.setTo(0.5, 0.5);
+      // let crab = this.crab = this.add.image(
+      //   this.world.centerX,
+      //   this.img1.top + this.img1.height,
+      //   'img7'
+      // );
+      // crab.anchor.setTo(0.5, 0.5);
+      // crab.scale.setTo(0.5, 0.5);
 
       [0, 1].forEach(function (i) {
         _this2.data.difference[i].forEach(function (_ref2, j) {
@@ -7069,6 +7079,24 @@ var Level = (function (_Seabed) {
         x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true));
     }
   }, {
+    key: 'colorFromWheel',
+    value: function colorFromWheel() {
+      var color = colors[colorIndex];
+
+      colorIndex = this.math.wrapValue(colorIndex, 111, 359);
+
+      return color;
+    }
+  }, {
+    key: 'colorValueFromWheel',
+    value: function colorValueFromWheel() {
+      var color = this.colorFromWheel();
+
+      color = Phaser.Color.toRGBA(color.r, color.g, color.b);
+
+      return color;
+    }
+  }, {
     key: 'onDragStop',
     value: function onDragStop(image) {
       var l = this.img1.toLocal(image.position);
@@ -7088,7 +7116,6 @@ var Level = (function (_Seabed) {
     value: function onInputUp(image, pointer, over) {
       var _this3 = this;
 
-      // let duration = Date.now() - pointer.timeDown;
       var distance = pointer.position.distance(pointer.positionDown);
 
       // not tap, is drag move.
@@ -7118,11 +7145,15 @@ var Level = (function (_Seabed) {
       var checked = this.found.filter(function (found) {
         return found.checked;
       }).length;
-      var x = this.crab.x;
-      var y = this.img1.bottom - this.img1.height * checked / this.found.length;
+      // let x = this.crab.x;
+      var d = this.img1.height * checked / this.found.length;
+      // let y = this.img1.bottom - d;
 
-      this.add.tween(this.crab).to({
-        x: x, y: y }, 1000, Phaser.Easing.Elastic.Out, true);
+      // this.add.tween(this.crab).to({
+      //   x, y,
+      // }, 1000, Phaser.Easing.Elastic.Out, true);
+
+      this.levelup.lineStyle(this.world.width / 200, this.colorValueFromWheel()).lineTo(0, -d);
 
       // if all answer found then goto next level.
       if (this.found.every(function (found) {
