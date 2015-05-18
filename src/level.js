@@ -15,8 +15,6 @@ class Level extends Seabed {
   init() {
     super.init();
 
-    this.stage.backgroundColor = 0x000000;
-
     let difference = this.data.difference;
     let length = Math.max(difference[0].length, difference[1].length);
     let found = this.found = [];
@@ -66,7 +64,7 @@ class Level extends Seabed {
 
     // show spliter
     let spliter = this.add.graphics(this.world.centerX, 0);
-    spliter.lineStyle(this.world.width / 200, 0xffffff);
+    spliter.lineStyle(this.world.width / 500, 0xffffff);
     spliter.lineTo(0, this.img1.bottom);
 
     // show level number

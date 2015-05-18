@@ -25,38 +25,76 @@ class Game extends Phaser.Game {
     }
   }
 
-  previous() {
-    if (this.state.current == this.levels[0]) {
-      // this.fade('cover');
-      this.state.start('cover');
+  get previousStateKey() {
+    if (this.state.current == 'cover') {
+      return;
+    } else if (this.state.current == this.levels[0]) {
+      return 'cover';
     } else {
       let index = this.levels.indexOf(this.state.current);
 
-      // this.fade(this.levels[index - 1]);
-      this.state.start(this.levels[index - 1]);
+      return this.levels[index - 1];
     }
   }
 
-  next() {
+  previous() {
+    let previousStateKey = this.previousStateKey;
+
+    if (previousStateKey) {
+      this.add.tween(this.camera)
+        .to({
+          x: -this.world.width,
+        }, 200, Phaser.Easing.Quadratic.InOut, true)
+        .onComplete.addOnce(() => {
+          this.state.start(previousStateKey);
+        });
+    } else {
+      this.add.tween(this.camera)
+        .to({
+          x: 0,
+        }, 100, Phaser.Easing.Quadratic.InOut, true);
+    }
+  }
+
+  get nextStateKey() {
     if (this.state.current == 'cover') {
-      // this.fade(this.levels[0]);
-      this.state.start(this.levels[0]);
+      return this.levels[0];
     } else {
       let index = this.levels.indexOf(this.state.current);
       let state = this.levels[index + 1];
 
       if (this.state.checkState(state)) {
-        // this.fade(this.levels[index + 1]);
-        this.state.start(this.levels[index + 1]);
+        return state;
       } else {
-        let t = app.t;
-
-        navigator.notification.alert(
-          t `Game complete page is working out.`, () => {
-            console.log('[Game] levels complete');
-          }, t `Nothing else`
-        );
+        return;
       }
+    }
+  }
+
+  next() {
+    let nextStateKey = this.nextStateKey;
+
+    if (nextStateKey) {
+      this.add.tween(this.camera)
+        .to({
+          x: this.world.width,
+        }, 200, Phaser.Easing.Quadratic.InOut, true)
+        .onComplete.addOnce(() => {
+          this.state.start(nextStateKey);
+        });
+    } else {
+      this.add.tween(this.camera)
+        .to({
+          x: 0,
+        }, 100, Phaser.Easing.Quadratic.InOut, true);
+
+      // let t = app.t;
+      //
+      // navigator.notification.alert(
+      //   t `Game complete page is working out.`, () => {
+      //     console.log('[Game] levels complete');
+      //   }, t `Nothing else`
+      // );
     }
   }
 

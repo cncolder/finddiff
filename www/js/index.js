@@ -6602,8 +6602,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
@@ -6642,38 +6640,74 @@ var Game = (function (_Phaser$Game) {
       }
     }
   }, {
-    key: 'previous',
-    value: function previous() {
-      if (this.state.current == this.levels[0]) {
-        // this.fade('cover');
-        this.state.start('cover');
+    key: 'previousStateKey',
+    get: function () {
+      if (this.state.current == 'cover') {
+        return;
+      } else if (this.state.current == this.levels[0]) {
+        return 'cover';
       } else {
         var index = this.levels.indexOf(this.state.current);
 
-        // this.fade(this.levels[index - 1]);
-        this.state.start(this.levels[index - 1]);
+        return this.levels[index - 1];
       }
     }
   }, {
-    key: 'next',
-    value: function next() {
+    key: 'previous',
+    value: function previous() {
+      var _this = this;
+
+      var previousStateKey = this.previousStateKey;
+
+      if (previousStateKey) {
+        this.add.tween(this.camera).to({
+          x: -this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
+          _this.state.start(previousStateKey);
+        });
+      } else {
+        this.add.tween(this.camera).to({
+          x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
+      }
+    }
+  }, {
+    key: 'nextStateKey',
+    get: function () {
       if (this.state.current == 'cover') {
-        // this.fade(this.levels[0]);
-        this.state.start(this.levels[0]);
+        return this.levels[0];
       } else {
         var index = this.levels.indexOf(this.state.current);
         var state = this.levels[index + 1];
 
         if (this.state.checkState(state)) {
-          // this.fade(this.levels[index + 1]);
-          this.state.start(this.levels[index + 1]);
+          return state;
         } else {
-          var t = app.t;
-
-          navigator.notification.alert(t(_taggedTemplateLiteral(['Game complete page is working out.'], ['Game complete page is working out.'])), function () {
-            console.log('[Game] levels complete');
-          }, t(_taggedTemplateLiteral(['Nothing else'], ['Nothing else'])));
+          return;
         }
+      }
+    }
+  }, {
+    key: 'next',
+    value: function next() {
+      var _this2 = this;
+
+      var nextStateKey = this.nextStateKey;
+
+      if (nextStateKey) {
+        this.add.tween(this.camera).to({
+          x: this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
+          _this2.state.start(nextStateKey);
+        });
+      } else {
+        this.add.tween(this.camera).to({
+          x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
+
+        // let t = app.t;
+        //
+        // navigator.notification.alert(
+        //   t `Game complete page is working out.`, () => {
+        //     console.log('[Game] levels complete');
+        //   }, t `Nothing else`
+        // );
       }
     }
   }, {
@@ -6681,7 +6715,7 @@ var Game = (function (_Phaser$Game) {
 
     // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
     value: function fade(state) {
-      var _this = this;
+      var _this3 = this;
 
       var mask = this.add.graphics(0, 0);
 
@@ -6692,7 +6726,7 @@ var Game = (function (_Phaser$Game) {
 
       this.add.tween(mask).to({
         alpha: 0.5 }, 200, Phaser.Easing.Default, true).onComplete.addOnce(function (graphic, tween) {
-        _this.state.start(state);
+        _this3.state.start(state);
         tween.to({
           alpha: 0 }, 500, Phaser.Easing.Default, true, 500);
       });
@@ -6881,8 +6915,6 @@ var Level = (function (_Seabed) {
     value: function init() {
       _get(Object.getPrototypeOf(Level.prototype), 'init', this).call(this);
 
-      this.stage.backgroundColor = 0;
-
       var difference = this.data.difference;
       var length = Math.max(difference[0].length, difference[1].length);
       var found = this.found = [];
@@ -6938,7 +6970,7 @@ var Level = (function (_Seabed) {
 
       // show spliter
       var spliter = this.add.graphics(this.world.centerX, 0);
-      spliter.lineStyle(this.world.width / 200, 16777215);
+      spliter.lineStyle(this.world.width / 500, 16777215);
       spliter.lineTo(0, this.img1.bottom);
 
       // show level number
@@ -7223,6 +7255,7 @@ var State = (function (_Phaser$State) {
     key: 'init',
     value: function init() {
       this.game.fitScreen();
+      this.camera.bounds = null;
 
       if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
         this.load.onFileComplete.add(this.onFileComplete, this);
@@ -7241,26 +7274,21 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'update',
     value: function update() {
-      var _this = this;
-
       // slide camera left or right.
       if (this.inputDown) {
-        if (this.camera.bounds) {
-          this.camera.bounds = null;
-        }
+        var x = this.input.activePointer.x;
 
-        this.camera.x = this.inputDownX - this.input.activePointer.x;
+        // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
+        if (x > this.camera.width - this.camera.width / 200) {
+          this.inputDown = false;
+        } else {
+          this.camera.x = this.inputDownX - this.input.activePointer.x;
+        }
       } else if (this.inputDownX) {
         if (this.camera.x < -this.world.centerX / 2) {
-          this.add.tween(this.camera).to({
-            x: -this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
-            return _this.game.previous();
-          });
+          this.game.previous();
         } else if (this.camera.x > this.world.centerX / 2) {
-          this.add.tween(this.camera).to({
-            x: this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
-            return _this.game.next();
-          });
+          this.game.next();
         } else {
           this.add.tween(this.camera).to({
             x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
@@ -7327,7 +7355,7 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'playAudio',
     value: function playAudio(key) {
-      var _this2 = this;
+      var _this = this;
 
       var volume = arguments[1] === undefined ? 1 : arguments[1];
       var loop = arguments[2] === undefined ? false : arguments[2];
@@ -7336,7 +7364,7 @@ var State = (function (_Phaser$State) {
 
       if (device.android && !device.webAudio) {
         var _ret = (function () {
-          var data = _this2.cache.getSoundData(key);
+          var data = _this.cache.getSoundData(key);
           // 10 is the length of 'index.html'
           var root = location.href.substr(0, location.href.length - 10);
           // file:///android_asset/www/asset/xxx.mp3
@@ -7344,7 +7372,7 @@ var State = (function (_Phaser$State) {
           var media = new Media(path, function () {
             console.log('[Media]', 'finish', '' + key + ' (' + path + ')');
 
-            if (!_this2.game.paused) {
+            if (!_this.game.paused) {
               if (loop) {
                 console.log('[Media]', 'loop', '' + key + ' (' + path + ')');
 
@@ -7377,7 +7405,7 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'renderFps',
     value: function renderFps() {
-      var _this3 = this;
+      var _this2 = this;
 
       if (!this.time.advancedTiming) {
         this.time.advancedTiming = true;
@@ -7385,9 +7413,9 @@ var State = (function (_Phaser$State) {
 
       if (!this.renderFpsThrottle) {
         var renderFps = function renderFps() {
-          var fps = _this3.game.time.fps;
+          var fps = _this2.game.time.fps;
 
-          _this3.game.debug.text('fps:' + fps, 0, 12);
+          _this2.game.debug.text('fps:' + fps, 0, 12);
         };
 
         this.renderFpsThrottle = (0, _lodashFunctionThrottle2['default'])(renderFps, 500);
@@ -7400,11 +7428,12 @@ var State = (function (_Phaser$State) {
     value: function onFileComplete(progress, key, success, loaded, total) {
       if (!this.progress) {
         var bar = this.add.graphics(0, 0);
-        var text = this.add.text(this.world.centerX, 20, '', {
+        var fontSize = this.world.height / 50;
+        var text = this.add.text(this.world.centerX, fontSize, '', {
           align: 'center',
           font: 'Arial',
           fontWeight: 'bold',
-          fontSize: 20 });
+          fontSize: fontSize });
 
         text.anchor.setTo(0.5);
 
@@ -7412,7 +7441,7 @@ var State = (function (_Phaser$State) {
           bar: bar, text: text };
       }
 
-      this.progress.bar.lineStyle(this.height / 100, 52224);
+      this.progress.bar.lineStyle(this.height / 100, 43520);
       this.progress.bar.lineTo(this.world.width * progress / 100, 0);
       this.progress.text.text = '' + key + ' (' + loaded + '/' + total + ')';
 

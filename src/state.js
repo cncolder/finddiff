@@ -12,6 +12,7 @@ class State extends Phaser.State {
 
   init() {
     this.game.fitScreen();
+    this.camera.bounds = null;
 
     if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
       this.load.onFileComplete.add(this.onFileComplete, this);
@@ -34,24 +35,19 @@ class State extends Phaser.State {
   update() {
     // slide camera left or right.
     if (this.inputDown) {
-      if (this.camera.bounds) {
-        this.camera.bounds = null;
-      }
+      let x = this.input.activePointer.x;
 
-      this.camera.x = this.inputDownX - this.input.activePointer.x;
+      // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
+      if (x > this.camera.width - this.camera.width / 200) {
+        this.inputDown = false;
+      } else {
+        this.camera.x = this.inputDownX - this.input.activePointer.x;
+      }
     } else if (this.inputDownX) {
       if (this.camera.x < -this.world.centerX / 2) {
-        this.add.tween(this.camera)
-          .to({
-            x: -this.world.width,
-          }, 200, Phaser.Easing.Quadratic.InOut, true)
-          .onComplete.addOnce(() => this.game.previous());
+        this.game.previous();
       } else if (this.camera.x > this.world.centerX / 2) {
-        this.add.tween(this.camera)
-          .to({
-            x: this.world.width,
-          }, 200, Phaser.Easing.Quadratic.InOut, true)
-          .onComplete.addOnce(() => this.game.next());
+        this.game.next();
       } else {
         this.add.tween(this.camera)
           .to({
@@ -172,11 +168,12 @@ class State extends Phaser.State {
   onFileComplete(progress, key, success, loaded, total) {
     if (!this.progress) {
       let bar = this.add.graphics(0, 0);
-      let text = this.add.text(this.world.centerX, 20, '', {
+      let fontSize = this.world.height / 50;
+      let text = this.add.text(this.world.centerX, fontSize, '', {
         align: 'center',
         font: 'Arial',
         fontWeight: 'bold',
-        fontSize: 20,
+        fontSize,
       });
 
       text.anchor.setTo(0.5);
@@ -186,7 +183,7 @@ class State extends Phaser.State {
       };
     }
 
-    this.progress.bar.lineStyle(this.height / 100, 0x00cc00);
+    this.progress.bar.lineStyle(this.height / 100, 0x00aa00);
     this.progress.bar.lineTo(this.world.width * progress / 100, 0);
     this.progress.text.text = `${key} (${loaded}/${total})`;
 
