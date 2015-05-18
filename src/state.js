@@ -11,7 +11,13 @@ class State extends Phaser.State {
   }
 
   init() {
+    // min finger tip size. 44 is for 480*320 screen.
+    // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+    this.inputCircle = new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
+
     this.game.fitScreen();
+
+    // remove camera bounds for slide.
     this.camera.bounds = null;
 
     if (!this.load.onFileComplete.has(this.onFileComplete, this)) {

@@ -109,7 +109,7 @@ class Level extends Seabed {
 
           item.index = j;
 
-          item.hitArea = new Phaser.Circle(0, 0, 44);
+          item.hitArea = this.inputCircle;
 
           item.inputEnabled = true;
           item.events.onInputUp.add(this.onInputUp, this);
@@ -127,9 +127,8 @@ class Level extends Seabed {
 
         item.anchor.setTo(0.5, 0.5);
 
-        // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
-        if ((item.width + item.height) / 2 < 44) {
-          item.hitArea = new Phaser.Circle(0, 0, 44);
+        if ((item.width + item.height) / 2 < this.inputCircle.diameter) {
+          item.hitArea = this.inputCircle;
         }
 
         item.inputEnabled = true;

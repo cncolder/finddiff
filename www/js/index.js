@@ -7016,7 +7016,7 @@ var Level = (function (_Seabed) {
 
             _item.index = j;
 
-            _item.hitArea = new Phaser.Circle(0, 0, 44);
+            _item.hitArea = _this2.inputCircle;
 
             _item.inputEnabled = true;
             _item.events.onInputUp.add(_this2.onInputUp, _this2);
@@ -7034,9 +7034,8 @@ var Level = (function (_Seabed) {
 
           item.anchor.setTo(0.5, 0.5);
 
-          // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
-          if ((item.width + item.height) / 2 < 44) {
-            item.hitArea = new Phaser.Circle(0, 0, 44);
+          if ((item.width + item.height) / 2 < _this2.inputCircle.diameter) {
+            item.hitArea = _this2.inputCircle;
           }
 
           item.inputEnabled = true;
@@ -7259,7 +7258,13 @@ var State = (function (_Phaser$State) {
   _createClass(State, [{
     key: 'init',
     value: function init() {
+      // min finger tip size. 44 is for 480*320 screen.
+      // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+      this.inputCircle = new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
+
       this.game.fitScreen();
+
+      // remove camera bounds for slide.
       this.camera.bounds = null;
 
       if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
