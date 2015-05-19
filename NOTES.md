@@ -3,7 +3,7 @@
 
 ### Play audio on android stock browser.
 
-Android stock browser not support web audio api. The html audio tag is not work on cordova. We need [crosswalk][crosswalk] chromium webview.
+Android stock browser is not support web audio api. The html audio tag is not work on cordova. We need [crosswalk][crosswalk] chromium webview.
 
 ### Crosswalk WebGL is not enabled in some old device.
 
@@ -14,11 +14,14 @@ xwalk --ignore-gpu-blacklist
 
 If a device has a blacklisted GPU, canvas elements are not hardware accelerated.
 
-### App name locale.
+### Localize app display name.
 
-For iOS:
+For iOS: edit `platforms/ios/FindDiff.xcodeproj/project.pbxproj`, search `knownRegions` then append `zh,` to it. Now create `Resources/InfoPlist.strings` in XCode. Localize it to Chinese. Add a line:
+```
+CFBundleDisplayName = "找不同";
+```
 
-For android: Copy `platforms/android/res/values` to `values-zh-rcn`. Then modify `strings.xml`.
+For android: Copy `platforms/android/res/values` to `values-zh-rCN`. Then modify `strings.xml`.
 
 
 [crosswalk]: https://crosswalk-project.org/documentation/cordova/crosswalk_with_cordova4.html

@@ -6,7 +6,7 @@
 	<string>English</string>
 	<key>CFBundleLocalizations</key>
 	<array>
-		<string>zh_CN</string>
+		<string>zh</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>${PRODUCT_NAME}</string>

@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		06BA3F129C754696932A3A16 /* CDVNotification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = CAE1A975C5594FF7B6C72031 /* CDVNotification.bundle */; };
-		0C979B4B1B0B01560077C861 /* FindDiff-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0C979B4A1B0B01560077C861 /* FindDiff-Info.plist */; };
+		0C87B53E1B0B203F00D4CF6C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0C87B5401B0B203F00D4CF6C /* InfoPlist.strings */; };
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		251DAD23DE494848A423D463 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E11EC2969574976AFE16EC2 /* AudioToolbox.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -74,7 +74,7 @@
 /* Begin PBXFileReference section */
 		02C79E2547234936A9990883 /* CDVNotification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVNotification.m; path = "cordova-plugin-dialogs/CDVNotification.m"; sourceTree = "<group>"; };
 		03093A1C68E6459C85B5F76F /* CDVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVConnection.h; path = "cordova-plugin-network-information/CDVConnection.h"; sourceTree = "<group>"; };
-		0C979B4A1B0B01560077C861 /* FindDiff-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "FindDiff-Info.plist"; path = "FindDiff/FindDiff-Info.plist"; sourceTree = SOURCE_ROOT; };
+		0C87B53F1B0B203F00D4CF6C /* zh */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh; path = zh.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* FindDiff.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FindDiff.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -123,6 +123,7 @@
 		7E7966DC1810823500FA85AD /* icon-small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-small.png"; sourceTree = "<group>"; };
 		7E7966DD1810823500FA85AD /* icon-small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-small@2x.png"; sourceTree = "<group>"; };
 		7EBBFAB7AD6E493DA8CFCC52 /* CDVSplashScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVSplashScreen.m; path = "cordova-plugin-splashscreen/CDVSplashScreen.m"; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* FindDiff-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "FindDiff-Info.plist"; path = "../FindDiff-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		8E328A146C4F43359C41F19F /* CDVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVConnection.m; path = "cordova-plugin-network-information/CDVConnection.m"; sourceTree = "<group>"; };
 		91BB2B447CB04B019AE06165 /* CDVLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVLogger.m; path = "cordova-plugin-console/CDVLogger.m"; sourceTree = "<group>"; };
 		C46111DF97754820B868BDEF /* CDVInAppBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVInAppBrowser.m; path = "cordova-plugin-inappbrowser/CDVInAppBrowser.m"; sourceTree = "<group>"; };
@@ -205,10 +206,11 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				0C979B4A1B0B01560077C861 /* FindDiff-Info.plist */,
 				308D052D1370CCF300D202BF /* icons */,
 				308D05311370CCF300D202BF /* splash */,
+				8D1107310486CEB800E47090 /* FindDiff-Info.plist */,
 				CAE1A975C5594FF7B6C72031 /* CDVNotification.bundle */,
+				0C87B5401B0B203F00D4CF6C /* InfoPlist.strings */,
 			);
 			name = Resources;
 			path = FindDiff/Resources;
@@ -354,6 +356,7 @@
 				es,
 				de,
 				se,
+				zh,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			projectDirPath = "";
@@ -386,6 +389,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E7966E41810823500FA85AD /* icon-76.png in Resources */,
+				0C87B53E1B0B203F00D4CF6C /* InfoPlist.strings in Resources */,
 				7E7966DF1810823500FA85AD /* icon-40@2x.png in Resources */,
 				308D05371370CCF300D202BF /* icon-72.png in Resources */,
 				30B4F30119D5E07200D9F7D8 /* Default-736h.png in Resources */,
@@ -409,7 +413,6 @@
 				30B4F30219D5E07200D9F7D8 /* Default-Landscape-736h.png in Resources */,
 				30C1856619D5FC0A00212699 /* icon-60@3x.png in Resources */,
 				7E7966E11810823500FA85AD /* icon-50@2x.png in Resources */,
-				0C979B4B1B0B01560077C861 /* FindDiff-Info.plist in Resources */,
 				7E7966E51810823500FA85AD /* icon-76@2x.png in Resources */,
 				30FC414916E50CA1004E6F35 /* icon-72@2x.png in Resources */,
 				06BA3F129C754696932A3A16 /* CDVNotification.bundle in Resources */,
@@ -464,6 +467,17 @@
 			targetProxy = 301BF550109A68C00062928A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		0C87B5401B0B203F00D4CF6C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0C87B53F1B0B203F00D4CF6C /* zh */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
