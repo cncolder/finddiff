@@ -182,7 +182,6 @@ class State extends Phaser.State {
   }
 
   onUp() {
-    // this.inputDown = false;
     if (this.camera.x < -this.world.centerX / 2) {
       this.game.previous();
     } else if (this.camera.x > this.world.centerX / 2) {

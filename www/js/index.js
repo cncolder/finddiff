@@ -7484,7 +7484,6 @@ var State = (function (_Phaser$State) {
   }, {
     key: 'onUp',
     value: function onUp() {
-      // this.inputDown = false;
       if (this.camera.x < -this.world.centerX / 2) {
         this.game.previous();
       } else if (this.camera.x > this.world.centerX / 2) {

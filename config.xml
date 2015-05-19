@@ -14,11 +14,10 @@
     <preference name="Orientation" value="landscape"/>
     <preference name="Fullscreen" value="true"/>
     <preference name="DisallowOverscroll" value="true"/>
+    <preference name="BackgroundColor" value="0x000000ff"/>
     <preference name="BackupWebStorage" value="none"/>
-    <preference name="SplashScreen" value="screen"/>
     <engine name="ios" spec="^3.8.0"/>
     <engine name="android" spec="^4.0.0"/>
-    <plugin name="cordova-plugin-crosswalk-webview" spec="^1.2.0"/>
     <plugin name="cordova-plugin-console" spec="^1.0.0"/>
     <plugin name="cordova-plugin-device" spec="^1.0.0"/>
     <plugin name="cordova-plugin-dialogs" spec="^1.1.0"/>
@@ -27,6 +26,7 @@
     <plugin name="cordova-plugin-whitelist" spec="^1.0.0"/>
     <plugin name="cordova-plugin-network-information" spec="^1.0.0"/>
     <plugin name="cordova-plugin-inappbrowser" spec="^1.0.0"/>
+    <plugin name="cordova-plugin-crosswalk-webview" spec="^1.2.0"/>
     <plugin name="org.binarypark.cordova.plugins.version" spec="^0.1.0"/>
     <plugin name="cordova-plugin-fileopener" spec="^1.0.2"/>
     <icon src="res/icon.png"/>
@@ -58,6 +58,8 @@
         <splash height="1242" src="res/ios/Default-Landscape-736h.png" width="2208"/>
     </platform>
     <platform name="android">
+        <preference name="Orientation" value="sensorLandscape"/>
+        <preference name="SplashScreen" value="screen"/>
         <icon density="ldpi" src="res/android/ldpi.png"/>
         <icon density="mdpi" src="res/android/mdpi.png"/>
         <icon density="hdpi" src="res/android/hdpi.png"/>
