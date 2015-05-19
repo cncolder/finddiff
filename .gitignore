@@ -32,4 +32,4 @@ node_modules
 platforms/ios/build
 platforms/ios/www
 platforms/android/build
-platforms/android/assets
+platforms/android/assets/www

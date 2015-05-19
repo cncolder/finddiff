@@ -18,6 +18,7 @@
     <preference name="SplashScreen" value="screen"/>
     <engine name="ios" spec="^3.8.0"/>
     <engine name="android" spec="^4.0.0"/>
+    <plugin name="cordova-plugin-crosswalk-webview" spec="^1.2.0"/>
     <plugin name="cordova-plugin-console" spec="^1.0.0"/>
     <plugin name="cordova-plugin-device" spec="^1.0.0"/>
     <plugin name="cordova-plugin-dialogs" spec="^1.1.0"/>

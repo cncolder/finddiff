@@ -68,53 +68,64 @@ class State extends Phaser.State {
       let device = this.game.device;
 
       if (device.android && !device.webAudio) {
-        console.log('[Media]', 'cache', `${key} (${path})`);
-
-        return this.cache.addSound(key, '', {
-          path,
-        });
+        return this.loadMedia(key, path);
       }
 
       this.load.audio(key, path, false);
     }
   }
 
+  loadMedia(key, path) {
+    console.log('[Media]', 'cache', `${key} (${path})`);
+
+    this.cache.addSound(key, '', {
+      path,
+    });
+  }
+
   playAudio(key, volume = 1, loop = false) {
     let device = this.game.device;
 
     if (device.android && !device.webAudio) {
-      let data = this.cache.getSoundData(key);
-      // 10 is the length of 'index.html'
-      let root = location.href.substr(0, location.href.length - 10);
-      // file:///android_asset/www/asset/xxx.mp3
-      let path = root + data.path;
-      let media = new Media(path, () => {
-        console.log('[Media]', 'finish', `${key} (${path})`);
-
-        if (!this.game.paused) {
-          if (loop) {
-            console.log('[Media]', 'loop', `${key} (${path})`);
-
-            media.play();
-          } else {
-            console.log('[Media]', 'release', `${key} (${path})`);
-
-            media.release();
-          }
-        }
-      }, err => {
-        console.log('[Media]', 'error', err.message);
-      });
-
-      media.setVolume(volume);
-      media.play();
-
-      media.resume = media.play.bind(media);
-
-      return media;
+      return this.playMedia(key, volume, loop);
     } else {
       return this.sound.play(key, volume, loop);
     }
+  }
+
+  playMedia(key, volume = 1, loop = false) {
+    let data = this.cache.getSoundData(key);
+
+    // 10 is the length of 'index.html'
+    let root = location.href.substr(0, location.href.length - 10);
+
+    // file:///android_asset/www/asset/xxx.mp3
+    let path = root + data.path;
+
+    let media = new Media(path, () => {
+      console.log('[Media]', 'finish', `${key} (${path})`);
+
+      if (!this.game.paused) {
+        if (loop) {
+          console.log('[Media]', 'loop', `${key} (${path})`);
+
+          media.play();
+        } else {
+          console.log('[Media]', 'release', `${key} (${path})`);
+
+          media.release();
+        }
+      }
+    }, err => {
+      console.log('[Media]', 'error', err.message);
+    });
+
+    media.setVolume(volume);
+    media.play();
+
+    media.resume = media.play.bind(media);
+
+    return media;
   }
 
   renderFps() {

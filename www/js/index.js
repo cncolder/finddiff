@@ -5356,7 +5356,7 @@ var App = (function () {
     value: function checkVersion() {
       var t = this.t;
       var appVersion = cordova.plugins.version.getAppVersion();
-      var updateServer = 'http://192.168.1.109:3000';
+      var updateServer = 'http://haoduo.vitarn.com';
       var updateUrl = '' + updateServer + '/update.json?version=' + appVersion;
 
       console.log('[App] current version', appVersion);
@@ -7268,7 +7268,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x5, _x6, _x7) { var _again = true; _function: while (_again) { var object = _x5, property = _x6, receiver = _x7; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x5 = parent; _x6 = property; _x7 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -7357,64 +7357,74 @@ var State = (function (_Phaser$State) {
         var device = this.game.device;
 
         if (device.android && !device.webAudio) {
-          console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
-
-          return this.cache.addSound(key, '', {
-            path: path });
+          return this.loadMedia(key, path);
         }
 
         this.load.audio(key, path, false);
       }
     }
   }, {
+    key: 'loadMedia',
+    value: function loadMedia(key, path) {
+      console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
+
+      this.cache.addSound(key, '', {
+        path: path });
+    }
+  }, {
     key: 'playAudio',
     value: function playAudio(key) {
-      var _this = this;
-
       var volume = arguments[1] === undefined ? 1 : arguments[1];
       var loop = arguments[2] === undefined ? false : arguments[2];
 
       var device = this.game.device;
 
       if (device.android && !device.webAudio) {
-        var _ret = (function () {
-          var data = _this.cache.getSoundData(key);
-          // 10 is the length of 'index.html'
-          var root = location.href.substr(0, location.href.length - 10);
-          // file:///android_asset/www/asset/xxx.mp3
-          var path = root + data.path;
-          var media = new Media(path, function () {
-            console.log('[Media]', 'finish', '' + key + ' (' + path + ')');
-
-            if (!_this.game.paused) {
-              if (loop) {
-                console.log('[Media]', 'loop', '' + key + ' (' + path + ')');
-
-                media.play();
-              } else {
-                console.log('[Media]', 'release', '' + key + ' (' + path + ')');
-
-                media.release();
-              }
-            }
-          }, function (err) {
-            console.log('[Media]', 'error', err.message);
-          });
-
-          media.setVolume(volume);
-          media.play();
-
-          media.resume = media.play.bind(media);
-
-          return {
-            v: media
-          };
-        })();
-
-        if (typeof _ret === 'object') return _ret.v;
+        return this.playMedia(key, volume, loop);
       } else {
         return this.sound.play(key, volume, loop);
       }
+    }
+  }, {
+    key: 'playMedia',
+    value: function playMedia(key) {
+      var _this = this;
+
+      var volume = arguments[1] === undefined ? 1 : arguments[1];
+      var loop = arguments[2] === undefined ? false : arguments[2];
+
+      var data = this.cache.getSoundData(key);
+
+      // 10 is the length of 'index.html'
+      var root = location.href.substr(0, location.href.length - 10);
+
+      // file:///android_asset/www/asset/xxx.mp3
+      var path = root + data.path;
+
+      var media = new Media(path, function () {
+        console.log('[Media]', 'finish', '' + key + ' (' + path + ')');
+
+        if (!_this.game.paused) {
+          if (loop) {
+            console.log('[Media]', 'loop', '' + key + ' (' + path + ')');
+
+            media.play();
+          } else {
+            console.log('[Media]', 'release', '' + key + ' (' + path + ')');
+
+            media.release();
+          }
+        }
+      }, function (err) {
+        console.log('[Media]', 'error', err.message);
+      });
+
+      media.setVolume(volume);
+      media.play();
+
+      media.resume = media.play.bind(media);
+
+      return media;
     }
   }, {
     key: 'renderFps',

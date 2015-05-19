@@ -34,6 +34,7 @@
     <feature name="FileOpener">
         <param name="android-package" value="fr.smile.cordova.fileopener.FileOpener" />
     </feature>
+    <preference name="webView" value="org.crosswalk.engine.XWalkWebViewEngine" />
     <icon density="ldpi" src="res/android/ldpi.png" />
     <icon density="mdpi" src="res/android/mdpi.png" />
     <icon density="hdpi" src="res/android/hdpi.png" />

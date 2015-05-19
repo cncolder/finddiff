@@ -121,6 +121,9 @@
         },
         "cordova-plugin-fileopener": {
             "PACKAGE_NAME": "com.vitarn.finddiff"
+        },
+        "cordova-plugin-crosswalk-webview": {
+            "PACKAGE_NAME": "com.vitarn.finddiff"
         }
     },
     "dependent_plugins": {}

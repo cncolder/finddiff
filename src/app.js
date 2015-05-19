@@ -18,7 +18,7 @@ class App {
   checkVersion() {
     let t = this.t;
     let appVersion = cordova.plugins.version.getAppVersion();
-    let updateServer = 'http://192.168.1.109:3000';
+    let updateServer = 'http://haoduo.vitarn.com';
     let updateUrl = `${updateServer}/update.json?version=${appVersion}`;
 
     console.log('[App] current version', appVersion);
