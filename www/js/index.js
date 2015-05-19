@@ -7393,6 +7393,11 @@ var State = (function (_Phaser$State) {
       var volume = arguments[1] === undefined ? 1 : arguments[1];
       var loop = arguments[2] === undefined ? false : arguments[2];
 
+      if (!window.Media) {
+        console.log('[Media] need cordova-plugin-media to play');
+        return;
+      }
+
       var data = this.cache.getSoundData(key);
 
       // 10 is the length of 'index.html'

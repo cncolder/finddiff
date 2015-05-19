@@ -94,6 +94,11 @@ class State extends Phaser.State {
   }
 
   playMedia(key, volume = 1, loop = false) {
+    if (!window.Media) {
+      console.log('[Media] need cordova-plugin-media to play');
+      return;
+    }
+
     let data = this.cache.getSoundData(key);
 
     // 10 is the length of 'index.html'
