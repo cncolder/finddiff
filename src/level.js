@@ -54,6 +54,8 @@ class Level extends Seabed {
       });
     });
 
+    this.load.image('submarine', 'img/1008.png');
+
     this.loadAudio('bell', 'sounds/Bell Transition.m4a');
   }
 
@@ -146,6 +148,19 @@ class Level extends Seabed {
         }
       });
     });
+
+    let previousArrow = this.add.image(
+      0, this.world.centerY, 'submarine'
+    );
+    // previousArrow.position.x -= previousArrow.width * 0.3;
+    previousArrow.anchor.setTo(-0.3, 0.5);
+    previousArrow.scale.x = -1;
+
+    let nextArrow = this.add.image(
+      this.world.width, this.world.centerY, 'submarine'
+    );
+    // nextArrow.position.x += nextArrow.width * 0.3;
+    nextArrow.anchor.setTo(-0.3, 0.5);
   }
 
   shine(image) {

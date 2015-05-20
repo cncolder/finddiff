@@ -37,9 +37,9 @@ class App {
             } = json;
 
             if (latest) {
-              console.log('[App] my version is updated');
+              console.log('[App][Android] my version is updated');
             } else {
-              console.log('[App] new version', version, download);
+              console.log('[App][Android] new version', version, download);
 
               navigator.notification.confirm(
                 // jscs: disable maximumLineLength
@@ -50,10 +50,10 @@ class App {
                     cordova.plugins.FileOpener.openFile(
                       updateServer + download,
                       data => {
-                        console.log('[Opener]', data.message);
+                        console.log('[Opener][Android]', data.message);
                       },
                       err => {
-                        console.log('[Opener] error', err.message);
+                        console.log('[Opener][Android] error', err.message);
                       },
                       true);
                   }
@@ -62,7 +62,7 @@ class App {
               );
             }
           })
-          .catch(ex => console.log('[App] check version error', ex));
+          .catch(ex => console.log('[App][Android] check version error', ex));
       }
     }
   }
@@ -113,7 +113,7 @@ class App {
     // fix ios background crash gpus_ReturnNotPermittedKillClient
     // Background Apps May Not Execute Commands on the Graphics Hardware https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/ImplementingaMultitasking-awareOpenGLESApplication/ImplementingaMultitasking-awareOpenGLESApplication.html#//apple_ref/doc/uid/TP40008793-CH5-SW1
     if (window.game && game.device.iOS && game.renderType == Phaser.WEBGL) {
-      console.log('[App] turn on lockRender to prevent background crash.');
+      console.log('[App][iOS] turn on lockRender to prevent background crash.');
 
       this.gameLockRenderBeforePause = game.lockRender;
       game.lockRender = true;

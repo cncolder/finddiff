@@ -5375,9 +5375,9 @@ var App = (function () {
             var download = json.download;
 
             if (latest) {
-              console.log('[App] my version is updated');
+              console.log('[App][Android] my version is updated');
             } else {
-              console.log('[App] new version', version, download);
+              console.log('[App][Android] new version', version, download);
 
               navigator.notification.confirm(
               // jscs: disable maximumLineLength
@@ -5386,15 +5386,15 @@ var App = (function () {
               function (buttonIndex) {
                 if (buttonIndex == 1) {
                   cordova.plugins.FileOpener.openFile(updateServer + download, function (data) {
-                    console.log('[Opener]', data.message);
+                    console.log('[Opener][Android]', data.message);
                   }, function (err) {
-                    console.log('[Opener] error', err.message);
+                    console.log('[Opener][Android] error', err.message);
                   }, true);
                 }
               }, t(_taggedTemplateLiteral(['There is a new version'], ['There is a new version'])), [t(_taggedTemplateLiteral(['Update'], ['Update'])), t(_taggedTemplateLiteral(['Later'], ['Later']))]);
             }
           })['catch'](function (ex) {
-            return console.log('[App] check version error', ex);
+            return console.log('[App][Android] check version error', ex);
           });
         }
       }
@@ -5439,7 +5439,7 @@ var App = (function () {
       // fix ios background crash gpus_ReturnNotPermittedKillClient
       // Background Apps May Not Execute Commands on the Graphics Hardware https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/ImplementingaMultitasking-awareOpenGLESApplication/ImplementingaMultitasking-awareOpenGLESApplication.html#//apple_ref/doc/uid/TP40008793-CH5-SW1
       if (window.game && game.device.iOS && game.renderType == Phaser.WEBGL) {
-        console.log('[App] turn on lockRender to prevent background crash.');
+        console.log('[App][iOS] turn on lockRender to prevent background crash.');
 
         this.gameLockRenderBeforePause = game.lockRender;
         game.lockRender = true;
@@ -6962,6 +6962,8 @@ var Level = (function (_Seabed) {
         });
       });
 
+      this.load.image('submarine', 'img/1008.png');
+
       this.loadAudio('bell', 'sounds/Bell Transition.m4a');
     }
   }, {
@@ -7057,6 +7059,15 @@ var Level = (function (_Seabed) {
           }
         });
       });
+
+      var previousArrow = this.add.image(0, this.world.centerY, 'submarine');
+      // previousArrow.position.x -= previousArrow.width * 0.3;
+      previousArrow.anchor.setTo(-0.3, 0.5);
+      previousArrow.scale.x = -1;
+
+      var nextArrow = this.add.image(this.world.width, this.world.centerY, 'submarine');
+      // nextArrow.position.x += nextArrow.width * 0.3;
+      nextArrow.anchor.setTo(-0.3, 0.5);
     }
   }, {
     key: 'shine',
@@ -7317,9 +7328,6 @@ var State = (function (_Phaser$State) {
       }
     }
   }, {
-    key: 'preload',
-    value: function preload() {}
-  }, {
     key: 'render',
     value: function render() {
       if (!this.game.paused && !this.game.device.cocoonJSApp) {
@@ -7498,7 +7506,9 @@ var State = (function (_Phaser$State) {
 
     // slide camera left or right. down is first time.
     value: function onMove(pointer, x, y, down) {
-      if (pointer.isDown && !down && !pointer.justPressed()) {
+      var distance = Math.abs(x - pointer.positionDown.x);
+
+      if (pointer.isDown && !down && distance > this.inputCircle.radius) {
         // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
         if (x > this.camera.width - this.camera.width / 100) {
           this.onUp();
@@ -7514,10 +7524,6 @@ var State = (function (_Phaser$State) {
 
 exports['default'] = State;
 module.exports = exports['default'];
-
-// this.loadImage('previous', 'img/previous.png');
-// this.loadImage('next', 'img/next.png');
-// this.load.image('sound', 'asset/sound.png');
 
 },{"lodash/function/throttle":96}]},{},[1])
 

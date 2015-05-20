@@ -31,12 +31,6 @@ class State extends Phaser.State {
     }
   }
 
-  preload() {
-    // this.loadImage('previous', 'img/previous.png');
-    // this.loadImage('next', 'img/next.png');
-    // this.load.image('sound', 'asset/sound.png');
-  }
-
   render() {
     if (!this.game.paused && !this.game.device.cocoonJSApp) {
       this.renderFps();
@@ -196,7 +190,9 @@ class State extends Phaser.State {
 
   // slide camera left or right. down is first time.
   onMove(pointer, x, y, down) {
-    if (pointer.isDown && !down && !pointer.justPressed()) {
+    let distance = Math.abs(x - pointer.positionDown.x);
+
+    if (pointer.isDown && !down && distance > this.inputCircle.radius) {
       // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
       if (x > this.camera.width - this.camera.width / 100) {
         this.onUp();

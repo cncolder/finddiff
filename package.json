@@ -59,8 +59,7 @@
         "url": "https://github.com/cncolder/finddiff.git"
     },
     "scripts": {
-        "loga": "./platforms/android/cordova/log | grep Console",
-        "loga5": "./platforms/android/cordova/log | grep CONSOLE",
+        "loga": "./platforms/android/cordova/log | grep -i console",
         "logi": "./platforms/ios/cordova/log | grep FindDiff",
         "runa": "cordova run android --device",
         "runi": "cordova run ios --device",
