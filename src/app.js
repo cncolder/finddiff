@@ -16,15 +16,15 @@ class App {
 
   // check new version. if there is, return apk download link.
   checkVersion() {
-    let t = this.t;
-    let appVersion = cordova.plugins.version.getAppVersion();
-    let updateServer = 'http://haoduo.vitarn.com';
-    let updateUrl = `${updateServer}/update.json?version=${appVersion}`;
+    let appVersion = cordova.compileTime.version;
 
     console.log('[App] current version', appVersion);
 
     if (navigator.connection.type == Connection.WIFI) {
+      let updateServer = 'http://haoduo.vitarn.com';
+      let updateUrl = `${updateServer}/update.json?version=${appVersion}`;
       let platform = device.platform.toLowerCase();
+      let t = this.t;
 
       if (platform == 'android') {
         let url = `${updateUrl}&platform=${platform}`;

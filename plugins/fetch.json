@@ -55,14 +55,6 @@
         "is_top_level": true,
         "variables": {}
     },
-    "org.binarypark.cordova.plugins.version": {
-        "source": {
-            "type": "registry",
-            "id": "org.binarypark.cordova.plugins.version"
-        },
-        "is_top_level": true,
-        "variables": {}
-    },
     "cordova-plugin-globalization": {
         "source": {
             "type": "registry",
@@ -99,6 +91,14 @@
         "source": {
             "type": "registry",
             "id": "cordova-plugin-crosswalk-webview"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-compile-time": {
+        "source": {
+            "type": "local",
+            "path": "../cordova_compile_time_plugin"
         },
         "is_top_level": true,
         "variables": {}

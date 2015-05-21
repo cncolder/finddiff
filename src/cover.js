@@ -61,7 +61,7 @@ class Cover extends Seabed {
     });
 
     // find difference
-    this.img2.events.onInputUp.add(this.game.next, this.game);
+    this.img2.events.onInputUp.add(this.onInputUp, this);
 
     // rainbow
     this.img4.sendToBack();
@@ -131,7 +131,19 @@ class Cover extends Seabed {
     this.sound.mute = !this.sound.mute;
   }
 
-  onInputUp(e) {
+  onInputUp(image, pointor, over) {
+    let distance = pointer.position.distance(pointer.positionDown);
+
+    // not tap, is drag move.
+    if (!over || distance > this.inputCircle.radius) {
+      return;
+    }
+
+    // find difference
+    if (image.key == 'img2') {
+      this.game.next();
+    }
+
     // whale roar sound
     if (e.key == 'img4') {
       this.soundEffect.whale.play();

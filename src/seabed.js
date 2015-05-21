@@ -1,11 +1,11 @@
 /*
 Seabed
-  the magic seabed world.
+  the magical seabed world.
 */
 
 import State from './state';
 
-class Seabed extends State {
+export default class Seabed extends State {
   constructor() {
     super();
   }
@@ -21,5 +21,3 @@ class Seabed extends State {
     this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
   }
 }
-
-export default Seabed;

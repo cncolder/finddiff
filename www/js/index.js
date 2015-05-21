@@ -5354,49 +5354,53 @@ var App = (function () {
 
     // check new version. if there is, return apk download link.
     value: function checkVersion() {
-      var t = this.t;
-      var appVersion = cordova.plugins.version.getAppVersion();
-      var updateServer = 'http://haoduo.vitarn.com';
-      var updateUrl = '' + updateServer + '/update.json?version=' + appVersion;
+      var _this = this;
+
+      var appVersion = cordova.compileTime.version;
 
       console.log('[App] current version', appVersion);
 
       if (navigator.connection.type == Connection.WIFI) {
-        var platform = device.platform.toLowerCase();
+        (function () {
+          var updateServer = 'http://haoduo.vitarn.com';
+          var updateUrl = '' + updateServer + '/update.json?version=' + appVersion;
+          var platform = device.platform.toLowerCase();
+          var t = _this.t;
 
-        if (platform == 'android') {
-          var url = '' + updateUrl + '&platform=' + platform;
+          if (platform == 'android') {
+            var url = '' + updateUrl + '&platform=' + platform;
 
-          fetch(url).then(function (res) {
-            return res.json();
-          }).then(function (json) {
-            var latest = json.latest;
-            var version = json.version;
-            var download = json.download;
+            fetch(url).then(function (res) {
+              return res.json();
+            }).then(function (json) {
+              var latest = json.latest;
+              var version = json.version;
+              var download = json.download;
 
-            if (latest) {
-              console.log('[App][Android] my version is updated');
-            } else {
-              console.log('[App][Android] new version', version, download);
+              if (latest) {
+                console.log('[App][Android] my version is updated');
+              } else {
+                console.log('[App][Android] new version', version, download);
 
-              navigator.notification.confirm(
-              // jscs: disable maximumLineLength
-              t(_taggedTemplateLiteral(['Your app running currently ', ' was outdated. Please download and install the newer version ', '.'], ['Your app running currently ', ' was outdated. Please download and install the newer version ', '.']), appVersion, version),
-              // jscs: enable maximumLineLength
-              function (buttonIndex) {
-                if (buttonIndex == 1) {
-                  cordova.plugins.FileOpener.openFile(updateServer + download, function (data) {
-                    console.log('[Opener][Android]', data.message);
-                  }, function (err) {
-                    console.log('[Opener][Android] error', err.message);
-                  }, true);
-                }
-              }, t(_taggedTemplateLiteral(['There is a new version'], ['There is a new version'])), [t(_taggedTemplateLiteral(['Update'], ['Update'])), t(_taggedTemplateLiteral(['Later'], ['Later']))]);
-            }
-          })['catch'](function (ex) {
-            return console.log('[App][Android] check version error', ex);
-          });
-        }
+                navigator.notification.confirm(
+                // jscs: disable maximumLineLength
+                t(_taggedTemplateLiteral(['Your app running currently ', ' was outdated. Please download and install the newer version ', '.'], ['Your app running currently ', ' was outdated. Please download and install the newer version ', '.']), appVersion, version),
+                // jscs: enable maximumLineLength
+                function (buttonIndex) {
+                  if (buttonIndex == 1) {
+                    cordova.plugins.FileOpener.openFile(updateServer + download, function (data) {
+                      console.log('[Opener][Android]', data.message);
+                    }, function (err) {
+                      console.log('[Opener][Android] error', err.message);
+                    }, true);
+                  }
+                }, t(_taggedTemplateLiteral(['There is a new version'], ['There is a new version'])), [t(_taggedTemplateLiteral(['Update'], ['Update'])), t(_taggedTemplateLiteral(['Later'], ['Later']))]);
+              }
+            })['catch'](function (ex) {
+              return console.log('[App][Android] check version error', ex);
+            });
+          }
+        })();
       }
     }
   }, {
@@ -5584,7 +5588,7 @@ var Cover = (function (_Seabed) {
       });
 
       // find difference
-      this.img2.events.onInputUp.add(this.game.next, this.game);
+      this.img2.events.onInputUp.add(this.onInputUp, this);
 
       // rainbow
       this.img4.sendToBack();
@@ -5658,7 +5662,19 @@ var Cover = (function (_Seabed) {
     }
   }, {
     key: 'onInputUp',
-    value: function onInputUp(e) {
+    value: function onInputUp(image, pointor, over) {
+      var distance = pointer.position.distance(pointer.positionDown);
+
+      // not tap, is drag move.
+      if (!over || distance > this.inputCircle.radius) {
+        return;
+      }
+
+      // find difference
+      if (image.key == 'img2') {
+        this.game.next();
+      }
+
       // whale roar sound
       if (e.key == 'img4') {
         this.soundEffect.whale.play();
@@ -7234,7 +7250,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 
 /*
 Seabed
-  the magic seabed world.
+  the magical seabed world.
 */
 
 var _state = require('./state');

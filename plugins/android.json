@@ -85,9 +85,6 @@
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.vitarn.finddiff"
         },
-        "org.binarypark.cordova.plugins.version": {
-            "PACKAGE_NAME": "com.vitarn.finddiff"
-        },
         "cordova-plugin-globalization": {
             "PACKAGE_NAME": "com.vitarn.finddiff"
         },
@@ -95,6 +92,9 @@
             "PACKAGE_NAME": "com.vitarn.finddiff"
         },
         "cordova-plugin-crosswalk-webview": {
+            "PACKAGE_NAME": "com.vitarn.finddiff"
+        },
+        "cordova-plugin-compile-time": {
             "PACKAGE_NAME": "com.vitarn.finddiff"
         }
     },

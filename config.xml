@@ -26,8 +26,8 @@
     <plugin name="cordova-plugin-network-information" spec="^1.0.0"/>
     <plugin name="cordova-plugin-inappbrowser" spec="^1.0.0"/>
     <plugin name="cordova-plugin-crosswalk-webview" spec="^1.2.0"/>
-    <plugin name="org.binarypark.cordova.plugins.version" spec="^0.1.0"/>
     <plugin name="cordova-plugin-fileopener" spec="^1.0.2"/>
+    <plugin name="cordova-plugin-compile-time" spec="^0.3.1"/>
     <icon src="res/icon.png"/>
     <platform name="ios">
         <preference name="BackupWebStorage" value="none"/>
