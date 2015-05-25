@@ -32,10 +32,6 @@ var _level = require('./level');
 
 var _level2 = _interopRequireDefault(_level);
 
-var _ending = require('./ending');
-
-var _ending2 = _interopRequireDefault(_ending);
-
 var _dataSeabed = require('./data/seabed');
 
 var _dataSeabed2 = _interopRequireDefault(_dataSeabed);
@@ -53,16 +49,11 @@ game.state.add('cover', new _cover2['default'](_dataSeabed2['default'].cover), t
 _dataSeabed2['default'].levels.forEach(function (level, index) {
   game.state.add(index, new _level2['default'](level));
 });
-
 game.levelCount = _dataSeabed2['default'].levels.length;
-
-game.state.add('ending', new _ending2['default']());
-
-game.state.start('cover');
 
 }).call(this,require('_process'))
 
-},{"./app":103,"./cover":104,"./data/seabed":105,"./ending":106,"./game":109,"./level":111,"./log":112,"_process":91,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":102}],2:[function(require,module,exports){
+},{"./app":103,"./cover":104,"./data/seabed":105,"./game":106,"./level":108,"./log":109,"_process":91,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":102}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -5497,7 +5488,7 @@ var App = (function () {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"./i18n":110}],104:[function(require,module,exports){
+},{"./i18n":107}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5509,6 +5500,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -5597,13 +5590,36 @@ var Cover = (function (_Seabed) {
       // rainbow
       this.img4.sendToBack();
 
+      // add animate tweens
+      this.addTextScaleTweens();
       this.addWaveTweens();
-
       this.addBubbleEmitter();
 
       this.soundEffect = {
         whale: this.playAudio('whale', 0.4),
         sweep: this.playAudio('sweep', 0.6) };
+    }
+  }, {
+    key: 'shutdown',
+    value: function shutdown() {
+      _get(Object.getPrototypeOf(Cover.prototype), 'shutdown', this).call(this);
+
+      Object.entries(this.soundEffect).forEach(function (_ref3) {
+        var _ref32 = _slicedToArray(_ref3, 2);
+
+        var key = _ref32[0];
+        var value = _ref32[1];
+        return value.stop();
+      });
+    }
+  }, {
+    key: 'addTextScaleTweens',
+    value: function addTextScaleTweens() {
+      var x = 1.05;
+      var y = x;
+
+      this.add.tween(this.img2.scale).to({
+        x: x, y: y }, 1500, Phaser.Easing.Default, true, 0, -1, true);
     }
   }, {
     key: 'addWaveTweens',
@@ -5615,7 +5631,7 @@ var Cover = (function (_Seabed) {
       [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
         var img = _this3['img' + i];
         var duration = _this3.rnd.between(1000, 2000); // animate speed
-        var distance = _this3.rnd.between(4, 8); // animate offset
+        var distance = _this3.rnd.between(3, 5); // animate offset
 
         _this3.add.tween(img).to({
           y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
@@ -5724,7 +5740,7 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./seabed":113}],105:[function(require,module,exports){
+},{"./seabed":110}],105:[function(require,module,exports){
 module.exports={
     "background": {
         "color": "#aaddf2",
@@ -6588,150 +6604,6 @@ module.exports={
 }
 
 },{}],106:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-/*
-Ending
-  the ending of magic seabed world.
-*/
-
-var _seabed = require('./seabed');
-
-var _seabed2 = _interopRequireDefault(_seabed);
-
-// import SeabedSprite from './filter/seabed-sprite';
-
-var _filterSeabedFilterJs = require('./filter/seabed-filter.js');
-
-var _filterSeabedFilterJs2 = _interopRequireDefault(_filterSeabedFilterJs);
-
-var Ending = (function (_Seabed) {
-  function Ending() {
-    _classCallCheck(this, Ending);
-
-    _get(Object.getPrototypeOf(Ending.prototype), 'constructor', this).call(this);
-  }
-
-  _inherits(Ending, _Seabed);
-
-  _createClass(Ending, [{
-    key: 'preload',
-    value: function preload() {
-      _get(Object.getPrototypeOf(Ending.prototype), 'preload', this).call(this);
-    }
-  }, {
-    key: 'create',
-    value: function create() {
-      _get(Object.getPrototypeOf(Ending.prototype), 'create', this).call(this);
-
-      var text = this.add.text(this.world.centerX, this.world.centerY, {
-        align: 'center',
-        font: 'Arial',
-        fontWeight: 'bold',
-        fontSize: 120 });
-      text.anchor.setTo(0.5, 0.5);
-      text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
-      text.text = '任务完成! Mission Complete!';
-
-      var grd = text.context.createLinearGradient(0, 0, 0, text.height);
-      grd.addColorStop(0, '#8ED6FF');
-      grd.addColorStop(1, '#004CB3');
-      text.fill = grd;
-
-      // let y = this.game.device.iPad ? 20 : 0;
-      //
-      // let sprite = this.sprite = this.add.sprite(0, y);
-      //
-      // sprite.width = this.world.width;
-      // sprite.height = this.world.height - y;
-      // sprite.filters = [new SeabedFilter(this.game)];
-    }
-  }, {
-    key: 'update',
-    value: function update() {
-      _get(Object.getPrototypeOf(Ending.prototype), 'update', this).call(this);
-
-      // this.sprite.filters[0].update();
-    }
-  }, {
-    key: 'shutdown',
-    value: function shutdown() {
-      _get(Object.getPrototypeOf(Ending.prototype), 'shutdown', this).call(this);
-    }
-  }]);
-
-  return Ending;
-})(_seabed2['default']);
-
-exports['default'] = Ending;
-module.exports = exports['default'];
-
-},{"./filter/seabed-filter.js":108,"./seabed":113}],107:[function(require,module,exports){
-module.exports = '// http://glslsandbox.com/e#20193.0\n\nprecision mediump float;\n\nuniform float time;\nuniform vec2 resolution;\nuniform vec2 mouse;\n\nfloat length2(vec2 p) {\n  return dot(p, p);\n}\n\nfloat noise(vec2 p) {\n  return fract(sin(fract(sin(p.x) * (43.13311)) + p.y) * 31.0011);\n}\n\nfloat worley(vec2 p) {\n  float d = 1e30;\n  for (int xo = -1; xo <= 1; ++xo) {\n    for (int yo = -1; yo <= 1; ++yo) {\n      vec2 tp = floor(p) + vec2(xo, yo);\n      d = min(d, length2(p - tp - vec2(noise(tp))));\n    }\n  }\n  return 3.0 * exp(-4.0 * abs(2.0 * d - 1.0));\n}\n\nfloat fworley(vec2 p) {\n  return sqrt(sqrt(sqrt(\n    1.1 * // light\n    worley(p * 5. + .3 + time * .0525) *\n    sqrt(worley(p * 50. + 0.3 + time * -0.15)) *\n    sqrt(sqrt(worley(p * -10. + 9.3))))));\n}\n\nvoid main() {\n  vec2 uv = gl_FragCoord.xy / resolution.xy;\n  float t = fworley(uv * resolution.xy / 1500.0);\n  t *= exp(-length2(abs(0.7 * uv - 1.0)));\n  gl_FragColor = vec4(t * vec3(0.1, 1.5 * t, 1.2 * t + pow(t, 0.5 - t)), 1.0);\n}\n';
-},{}],108:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-var _bacteriaShader = require('./bacteria.shader');
-
-var _bacteriaShader2 = _interopRequireDefault(_bacteriaShader);
-
-var SeabedFilter = (function (_Phaser$Filter) {
-  function SeabedFilter(game, uniforms) {
-    _classCallCheck(this, SeabedFilter);
-
-    _get(Object.getPrototypeOf(SeabedFilter.prototype), 'constructor', this).call(this, game, uniforms, [_bacteriaShader2['default']]);
-  }
-
-  _inherits(SeabedFilter, _Phaser$Filter);
-
-  _createClass(SeabedFilter, [{
-    key: 'init',
-    value: function init() {
-      _get(Object.getPrototypeOf(SeabedFilter.prototype), 'init', this).call(this);
-
-      // let {
-      //   width, height
-      // } = this.game.world;
-      //
-      // this.setResolution(width, height);
-    }
-  }]);
-
-  return SeabedFilter;
-})(Phaser.Filter);
-
-exports['default'] = SeabedFilter;
-module.exports = exports['default'];
-
-},{"./bacteria.shader":107}],109:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -6798,8 +6670,6 @@ var Game = (function (_Phaser$Game) {
       var current = this.state.current;
 
       if (current == 'cover') {
-        return;
-      } else if (current == 'ending') {
         return this.levelCount - 1;
       } else if (current == '0') {
         return 'cover';
@@ -6831,10 +6701,8 @@ var Game = (function (_Phaser$Game) {
 
       if (current == 'cover') {
         return '0';
-      } else if (current == 'ending') {
-        return;
       } else if (!this.state.states[parseInt(current, 10) + 1]) {
-        return 'ending';
+        return 'cover';
       } else {
         return '' + (parseInt(current, 10) + 1);
       }
@@ -6895,7 +6763,7 @@ module.exports = exports['default'];
 
 }).call(this,require('_process'))
 
-},{"_process":91}],110:[function(require,module,exports){
+},{"_process":91}],107:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7027,7 +6895,7 @@ exports['default'] = I18n;
 
 // jscs: enable
 
-},{"assert":89}],111:[function(require,module,exports){
+},{"assert":89}],108:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7389,7 +7257,7 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./seabed":113}],112:[function(require,module,exports){
+},{"./seabed":110}],109:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7423,7 +7291,7 @@ window.onerror = function (msg, url, line, column, err) {
 exports['default'] = log;
 module.exports = exports['default'];
 
-},{}],113:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7540,7 +7408,7 @@ var Seabed = (function (_State) {
 exports['default'] = Seabed;
 module.exports = exports['default'];
 
-},{"./state":114}],114:[function(require,module,exports){
+},{"./state":111}],111:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {

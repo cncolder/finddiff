@@ -34,8 +34,6 @@ class Game extends Phaser.Game {
     let current = this.state.current;
 
     if (current == 'cover') {
-      return;
-    } else if (current == 'ending') {
       return this.levelCount - 1;
     } else if (current == '0') {
       return 'cover';
@@ -68,10 +66,8 @@ class Game extends Phaser.Game {
 
     if (current == 'cover') {
       return '0';
-    } else if (current == 'ending') {
-      return;
     } else if (!this.state.states[parseInt(current, 10) + 1]) {
-      return 'ending';
+      return 'cover';
     } else {
       return `${parseInt(current, 10) + 1}`;
     }

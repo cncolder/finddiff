@@ -65,8 +65,9 @@ class Cover extends Seabed {
     // rainbow
     this.img4.sendToBack();
 
+    // add animate tweens
+    this.addTextScaleTweens();
     this.addWaveTweens();
-
     this.addBubbleEmitter();
 
     this.soundEffect = {
@@ -75,12 +76,27 @@ class Cover extends Seabed {
     };
   }
 
+  shutdown() {
+    super.shutdown();
+
+    Object.entries(this.soundEffect).forEach(([key, value]) => value.stop());
+  }
+
+  addTextScaleTweens() {
+    let x = 1.05;
+    let y = x;
+
+    this.add.tween(this.img2.scale).to({
+      x, y,
+    }, 1500, Phaser.Easing.Default, true, 0, -1, true);
+  }
+
   // up down animate, like swiming.
   addWaveTweens() {
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
       let img = this[`img${i}`];
       let duration = this.rnd.between(1000, 2000); // animate speed
-      let distance = this.rnd.between(4, 8); // animate offset
+      let distance = this.rnd.between(3, 5); // animate offset
 
       this.add.tween(img).to({
         y: img.position.y + distance,
