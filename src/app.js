@@ -118,7 +118,6 @@ class App {
       this.gameLockRenderBeforePause = game.lockRender;
       game.lockRender = true;
     }
-
   }
 
   onResume() {

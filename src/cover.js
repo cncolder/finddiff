@@ -14,15 +14,6 @@ class Cover extends Seabed {
 
   init() {
     super.init();
-
-    this.stage.backgroundColor = this.data.backgroundColor;
-
-    if (!this.game.onPause.has(this.onPause, this)) {
-      this.game.onPause.add(this.onPause, this);
-    }
-    if (!this.game.onResume.has(this.onResume, this)) {
-      this.game.onResume.add(this.onResume, this);
-    }
   }
 
   preload() {
@@ -37,6 +28,9 @@ class Cover extends Seabed {
     });
 
     this.loadImage('bubble', 'img/bubble.png');
+
+    this.loadAudio('whale', 'sounds/Whale Sounds.m4a');
+    this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
   }
 
   create() {
@@ -47,6 +41,11 @@ class Cover extends Seabed {
     }) => {
       let x = this.world.width * h;
       let y = this.world.height * v;
+
+      if (this.game.device.iPad) {
+        y += this.iPadTop;
+      }
+
       let item = this[`img${i}`] = this.add.image(x, y, `img${i}`);
 
       item.anchor.setTo(0.5, 0.5);
@@ -55,7 +54,7 @@ class Cover extends Seabed {
       item.events.onInputUp.add(this.onInputUp, this);
       item.events.onDragStop.add(this.onDragStop, this);
 
-      if (this.env == 'development') {
+      if (this.env == 'development' && this.game.device.chrome) {
         item.input.enableDrag();
       }
     });
@@ -70,9 +69,10 @@ class Cover extends Seabed {
 
     this.addBubbleEmitter();
 
-    this.addMusic();
-
-    // this.add.button(96 + 50, 0, 'sound', this.mute, this);
+    this.soundEffect = {
+      whale: this.playAudio('whale', 0.4),
+      sweep: this.playAudio('sweep', 0.6),
+    };
   }
 
   // up down animate, like swiming.
@@ -80,7 +80,7 @@ class Cover extends Seabed {
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(i => {
       let img = this[`img${i}`];
       let duration = this.rnd.between(1000, 2000); // animate speed
-      let distance = this.rnd.between(3, 5); // animate offset
+      let distance = this.rnd.between(4, 8); // animate offset
 
       this.add.tween(img).to({
         y: img.position.y + distance,
@@ -105,33 +105,11 @@ class Cover extends Seabed {
     emitter.start(false, 2500, 200, 0);
   }
 
-  addMusic() {
-    // background music
-    if (!this.backgroundMusic) {
-      let bg = this.playAudio('bg', 0.5, true);
-      let water = this.playAudio('water', 0.2, true);
-
-      this.backgroundMusic = {
-        bg, water,
-      };
-    }
-
-    // sound effect
-    if (!this.soundEffect) {
-      let whale = this.playAudio('whale', 0.4);
-      let sweep = this.playAudio('sweep', 0.6);
-
-      this.soundEffect = {
-        whale, sweep,
-      };
-    }
-  }
-
   mute() {
     this.sound.mute = !this.sound.mute;
   }
 
-  onInputUp(image, pointor, over) {
+  onInputUp(image, pointer, over) {
     let distance = pointer.position.distance(pointer.positionDown);
 
     // not tap, is drag move.
@@ -141,17 +119,21 @@ class Cover extends Seabed {
 
     // find difference
     if (image.key == 'img2') {
-      this.game.next();
+      return this.game.next();
     }
 
     // whale roar sound
-    if (e.key == 'img4') {
-      this.soundEffect.whale.play();
+    if (image.key == 'img4') {
+      let sound = this.soundEffect.whale;
+
+      return sound.isPlaying || sound.play();
     }
 
     // submarine sound
-    if (e.key == 'img8') {
-      this.soundEffect.sweep.play();
+    if (image.key == 'img8') {
+      let sound = this.soundEffect.sweep;
+
+      return sound.isPlaying || sound.play();
     }
   }
 
@@ -165,36 +147,36 @@ class Cover extends Seabed {
     console.log('drag', e.key, x, y, h, v);
   }
 
-  onPause() {
-    Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
-      value.pause();
-    });
-    Object.entries(this.soundEffect || {}).forEach(([key, value]) => {
-      value.stop();
-    });
-
-    // let device = this.game.device;
-    //
-    // if (device.android && !device.webAudio) {
-    //   let entries = Object.entries(this.backgroundMusic || {});
-    //
-    //   entries.forEach(([key, value]) => value.pause());
-    // }
-  }
-
-  onResume() {
-    Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
-      value.resume();
-    });
-
-    // let device = this.game.device;
-    //
-    // if (device.android && !device.webAudio) {
-    //   let entries = Object.entries(this.backgroundMusic || {});
-    //
-    //   entries.forEach(([key, value]) => value.resume());
-    // }
-  }
+  // onPause() {
+  //   Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+  //     value.pause();
+  //   });
+  //   Object.entries(this.soundEffect || {}).forEach(([key, value]) => {
+  //     value.stop();
+  //   });
+  //
+  //   // let device = this.game.device;
+  //   //
+  //   // if (device.android && !device.webAudio) {
+  //   //   let entries = Object.entries(this.backgroundMusic || {});
+  //   //
+  //   //   entries.forEach(([key, value]) => value.pause());
+  //   // }
+  // }
+  //
+  // onResume() {
+  //   Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+  //     value.resume();
+  //   });
+  //
+  //   // let device = this.game.device;
+  //   //
+  //   // if (device.android && !device.webAudio) {
+  //   //   let entries = Object.entries(this.backgroundMusic || {});
+  //   //
+  //   //   entries.forEach(([key, value]) => value.resume());
+  //   // }
+  // }
 }
 
 export default Cover;

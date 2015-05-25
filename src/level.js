@@ -4,6 +4,7 @@ Level
 */
 
 import Seabed from './seabed';
+// import SeabedFilter from './filter/seabed-filter.js';
 
 var colorIndex = 0;
 const colors = Phaser.Color.HSLColorWheel();
@@ -34,8 +35,15 @@ class Level extends Seabed {
 
     let code = this.data.code;
 
-    this.load.image('img1', `img/${code}1.png`);
-    this.load.image('img2', `img/${code}2.png`);
+    this.load.image('img1', `img/${code}1.jpg`);
+    this.load.image('img2', `img/${code}2.jpg`);
+
+    if (this.game.device.iPad) {
+      this.load.image('whale', 'img/whale.png');
+      // this.load.image('img3', 'img/1003.png');
+      this.load.image('girl', 'img/1005.png');
+      // this.load.image('img5', 'img/1006.png');
+    }
 
     [1, 2].forEach(i => {
       this.data.difference[i - 1].forEach(({
@@ -62,22 +70,60 @@ class Level extends Seabed {
   create() {
     super.create();
 
-    this.img1 = this.add.image(0, 0, 'img1');
-    this.img2 = this.add.image(this.world.centerX, 0, 'img2');
+    // let bgSprite = this.bgSprite = this.add.sprite();
+    // bgSprite.width = this.world.width;
+    // bgSprite.height = this.world.height;
+    // bgSprite.filters = [new SeabedFilter(this.game)];
+
+    let y = this.game.device.iPad ? this.iPadTop : 0;
+
+    // background images
+    this.img1 = this.add.image(0, y, 'img1');
+    this.img2 = this.add.image(this.world.centerX, y, 'img2');
     // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
     // this.img1.smoothed = this.img2.smoothed = false;
 
+    if (this.game.device.iPad) {
+      let whale = this.add.image(0, this.iPadBottom, 'whale');
+      whale.scale.setTo(0.5);
+
+      let girl = this.add.image(
+        this.world.width, this.iPadStatusBarHeight, 'girl'
+      );
+      girl.anchor.setTo(1.5, 0);
+
+      //   let img3 = this.add.image(this.world.centerX, this.img1.bottom, 'img3');
+      //   img3.anchor.setTo(0.5, -0.5);
+      //
+      //   let img4 = this.add.image(0, this.img1.bottom, 'img4');
+      //   img4.anchor.setTo(-1, -0.1);
+      //
+      //   let img5 = this.add.image(this.world.width, this.img1.bottom, 'img5');
+      //   img5.anchor.setTo(3, -2);
+      //
+      [whale, girl].forEach(image => {
+        image.sendToBack();
+
+        let duration = this.rnd.between(2000, 3000); // animate speed
+        let distance = this.rnd.between(4, 8); // animate offset
+
+        this.add.tween(image).to({
+          y: image.position.y + distance,
+        }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+      });
+    }
+
     // show spliter
-    let spliter = this.add.graphics(this.world.centerX, 0);
+    let spliter = this.add.graphics(this.world.centerX, y);
     spliter.lineStyle(this.world.width / 500, 0xffffff);
-    spliter.lineTo(0, this.img1.bottom);
+    spliter.lineTo(0, this.img1.height);
 
     // level up progress
     this.levelup = this.add.graphics(this.world.centerX, this.img1.bottom);
 
     // show level number
     let level = parseInt(this.data.code) - 100;
-    let text = this.add.text(this.world.centerX, 0, ` ${level} `, {
+    let text = this.add.text(this.world.centerX, y, ` ${level} `, {
       align: 'center',
       font: 'Arial',
       fontWeight: 'bold',
@@ -85,21 +131,16 @@ class Level extends Seabed {
     });
     text.anchor.setTo(0.5, 0);
     text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
+    if (this.game.device.iPad) {
+      text.y = this.iPadStatusBarHeight;
+    }
 
     let grd = text.context.createLinearGradient(0, 0, 0, text.height);
     grd.addColorStop(0, '#8ED6FF');
     grd.addColorStop(1, '#004CB3');
     text.fill = grd;
 
-    // a crab indicator for game progress.
-    // let crab = this.crab = this.add.image(
-    //   this.world.centerX,
-    //   this.img1.top + this.img1.height,
-    //   'img7'
-    // );
-    // crab.anchor.setTo(0.5, 0.5);
-    // crab.scale.setTo(0.5, 0.5);
-
+    // different items
     [0, 1].forEach(i => {
       this.data.difference[i].forEach(({
         h, v
@@ -116,6 +157,7 @@ class Level extends Seabed {
           let item = this.add.graphics(x, y);
 
           item.index = j;
+          // this.found[j].items[i] = item;
 
           item.hitArea = this.inputCircle;
 
@@ -131,7 +173,7 @@ class Level extends Seabed {
         let item = this[key] = this.add.image(x, y, key);
 
         item.index = j;
-        this.found[item.index].items[i] = item;
+        this.found[j].items[i] = item;
 
         item.anchor.setTo(0.5, 0.5);
 
@@ -142,7 +184,7 @@ class Level extends Seabed {
         item.inputEnabled = true;
         item.events.onInputUp.add(this.onInputUp, this);
 
-        if (this.env == 'development') {
+        if (this.env == 'development' && this.game.device.chrome) {
           item.input.enableDrag();
           item.events.onDragStop.add(this.onDragStop, this);
         }
@@ -152,15 +194,30 @@ class Level extends Seabed {
     let previousArrow = this.add.image(
       0, this.world.centerY, 'submarine'
     );
-    // previousArrow.position.x -= previousArrow.width * 0.3;
     previousArrow.anchor.setTo(-0.3, 0.5);
     previousArrow.scale.x = -1;
 
     let nextArrow = this.add.image(
       this.world.width, this.world.centerY, 'submarine'
     );
-    // nextArrow.position.x += nextArrow.width * 0.3;
     nextArrow.anchor.setTo(-0.3, 0.5);
+
+    [previousArrow, nextArrow].forEach(image => {
+      image.sendToBack();
+
+      let duration = this.rnd.between(2000, 3000); // animate speed
+      let distance = this.rnd.between(4, 8); // animate offset
+
+      this.add.tween(image).to({
+        y: image.position.y + distance,
+      }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+    });
+  }
+
+  update() {
+    super.update();
+
+    // this.bgSprite.filters[0].update();
   }
 
   shine(image) {
@@ -237,6 +294,10 @@ class Level extends Seabed {
 
     // shine and scale animate for both item.
     found.items.forEach(item => {
+      // if (item.type == Phaser.GRAPHICS) {
+      //   item.lineStyle(this.inputCircle.radius / 20, 0xffffff);
+      //   item.drawCircle(0, 0, this.inputCircle.radius);
+      // }
       if (item) {
         this.shine(item);
       }

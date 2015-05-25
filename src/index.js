@@ -9,17 +9,21 @@ import App from './app';
 import Game from './game';
 import Cover from './cover';
 import Level from './level';
-import data from './data';
+import Ending from './ending';
+import seabedData from './data/seabed';
 
 window.app = new App();
 
 let game = window.game = new Game();
 
-game.state.add('cover', new Cover(data.seabed.cover), true);
+game.state.add('cover', new Cover(seabedData.cover), true);
 
-data.seabed.levels.forEach((level, index) => {
-  let key = `level${index + 1}`;
-
-  game.state.add(key, new Level(level));
-  game.levels.push(key);
+seabedData.levels.forEach((level, index) => {
+  game.state.add(index, new Level(level));
 });
+
+game.levelCount = seabedData.levels.length;
+
+game.state.add('ending', new Ending());
+
+game.state.start('cover');

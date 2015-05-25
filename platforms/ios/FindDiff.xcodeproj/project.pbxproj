@@ -7,7 +7,6 @@
 	objects = {
 /* Begin PBXBuildFile section */
 		06BA3F129C754696932A3A16 /* CDVNotification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = CAE1A975C5594FF7B6C72031 /* CDVNotification.bundle */; };
-		0C87B53E1B0B203F00D4CF6C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0C87B5401B0B203F00D4CF6C /* InfoPlist.strings */; };
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		251DAD23DE494848A423D463 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E11EC2969574976AFE16EC2 /* AudioToolbox.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -388,7 +387,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E7966E41810823500FA85AD /* icon-76.png in Resources */,
-				0C87B53E1B0B203F00D4CF6C /* InfoPlist.strings in Resources */,
 				7E7966DF1810823500FA85AD /* icon-40@2x.png in Resources */,
 				308D05371370CCF300D202BF /* icon-72.png in Resources */,
 				30B4F30119D5E07200D9F7D8 /* Default-736h.png in Resources */,

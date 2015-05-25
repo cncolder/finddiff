@@ -32,9 +32,13 @@ var _level = require('./level');
 
 var _level2 = _interopRequireDefault(_level);
 
-var _data = require('./data');
+var _ending = require('./ending');
 
-var _data2 = _interopRequireDefault(_data);
+var _ending2 = _interopRequireDefault(_ending);
+
+var _dataSeabed = require('./data/seabed');
+
+var _dataSeabed2 = _interopRequireDefault(_dataSeabed);
 
 process.env.BROWSER_ENV = location.host == 'localhost:3000' ? 'development' : 'production';
 
@@ -44,18 +48,21 @@ window.app = new _app2['default']();
 
 var game = window.game = new _game2['default']();
 
-game.state.add('cover', new _cover2['default'](_data2['default'].seabed.cover), true);
+game.state.add('cover', new _cover2['default'](_dataSeabed2['default'].cover), true);
 
-_data2['default'].seabed.levels.forEach(function (level, index) {
-  var key = 'level' + (index + 1);
-
-  game.state.add(key, new _level2['default'](level));
-  game.levels.push(key);
+_dataSeabed2['default'].levels.forEach(function (level, index) {
+  game.state.add(index, new _level2['default'](level));
 });
+
+game.levelCount = _dataSeabed2['default'].levels.length;
+
+game.state.add('ending', new _ending2['default']());
+
+game.state.start('cover');
 
 }).call(this,require('_process'))
 
-},{"./app":103,"./cover":104,"./data":105,"./game":106,"./level":108,"./log":109,"_process":91,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":102}],2:[function(require,module,exports){
+},{"./app":103,"./cover":104,"./data/seabed":105,"./ending":106,"./game":109,"./level":111,"./log":112,"_process":91,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":102}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -5490,7 +5497,7 @@ var App = (function () {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"./i18n":107}],104:[function(require,module,exports){
+},{"./i18n":110}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5502,8 +5509,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -5533,15 +5538,6 @@ var Cover = (function (_Seabed) {
     key: 'init',
     value: function init() {
       _get(Object.getPrototypeOf(Cover.prototype), 'init', this).call(this);
-
-      this.stage.backgroundColor = this.data.backgroundColor;
-
-      if (!this.game.onPause.has(this.onPause, this)) {
-        this.game.onPause.add(this.onPause, this);
-      }
-      if (!this.game.onResume.has(this.onResume, this)) {
-        this.game.onResume.add(this.onResume, this);
-      }
     }
   }, {
     key: 'preload',
@@ -5559,6 +5555,9 @@ var Cover = (function (_Seabed) {
       });
 
       this.loadImage('bubble', 'img/bubble.png');
+
+      this.loadAudio('whale', 'sounds/Whale Sounds.m4a');
+      this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
     }
   }, {
     key: 'create',
@@ -5574,6 +5573,11 @@ var Cover = (function (_Seabed) {
 
         var x = _this2.world.width * h;
         var y = _this2.world.height * v;
+
+        if (_this2.game.device.iPad) {
+          y += _this2.iPadTop;
+        }
+
         var item = _this2['img' + i] = _this2.add.image(x, y, 'img' + i);
 
         item.anchor.setTo(0.5, 0.5);
@@ -5582,7 +5586,7 @@ var Cover = (function (_Seabed) {
         item.events.onInputUp.add(_this2.onInputUp, _this2);
         item.events.onDragStop.add(_this2.onDragStop, _this2);
 
-        if (_this2.env == 'development') {
+        if (_this2.env == 'development' && _this2.game.device.chrome) {
           item.input.enableDrag();
         }
       });
@@ -5597,9 +5601,9 @@ var Cover = (function (_Seabed) {
 
       this.addBubbleEmitter();
 
-      this.addMusic();
-
-      // this.add.button(96 + 50, 0, 'sound', this.mute, this);
+      this.soundEffect = {
+        whale: this.playAudio('whale', 0.4),
+        sweep: this.playAudio('sweep', 0.6) };
     }
   }, {
     key: 'addWaveTweens',
@@ -5611,7 +5615,7 @@ var Cover = (function (_Seabed) {
       [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
         var img = _this3['img' + i];
         var duration = _this3.rnd.between(1000, 2000); // animate speed
-        var distance = _this3.rnd.between(3, 5); // animate offset
+        var distance = _this3.rnd.between(4, 8); // animate offset
 
         _this3.add.tween(img).to({
           y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
@@ -5635,34 +5639,13 @@ var Cover = (function (_Seabed) {
       emitter.start(false, 2500, 200, 0);
     }
   }, {
-    key: 'addMusic',
-    value: function addMusic() {
-      // background music
-      if (!this.backgroundMusic) {
-        var bg = this.playAudio('bg', 0.5, true);
-        var water = this.playAudio('water', 0.2, true);
-
-        this.backgroundMusic = {
-          bg: bg, water: water };
-      }
-
-      // sound effect
-      if (!this.soundEffect) {
-        var whale = this.playAudio('whale', 0.4);
-        var sweep = this.playAudio('sweep', 0.6);
-
-        this.soundEffect = {
-          whale: whale, sweep: sweep };
-      }
-    }
-  }, {
     key: 'mute',
     value: function mute() {
       this.sound.mute = !this.sound.mute;
     }
   }, {
     key: 'onInputUp',
-    value: function onInputUp(image, pointor, over) {
+    value: function onInputUp(image, pointer, over) {
       var distance = pointer.position.distance(pointer.positionDown);
 
       // not tap, is drag move.
@@ -5672,17 +5655,21 @@ var Cover = (function (_Seabed) {
 
       // find difference
       if (image.key == 'img2') {
-        this.game.next();
+        return this.game.next();
       }
 
       // whale roar sound
-      if (e.key == 'img4') {
-        this.soundEffect.whale.play();
+      if (image.key == 'img4') {
+        var sound = this.soundEffect.whale;
+
+        return sound.isPlaying || sound.play();
       }
 
       // submarine sound
-      if (e.key == 'img8') {
-        this.soundEffect.sweep.play();
+      if (image.key == 'img8') {
+        var sound = this.soundEffect.sweep;
+
+        return sound.isPlaying || sound.play();
       }
     }
   }, {
@@ -5697,54 +5684,38 @@ var Cover = (function (_Seabed) {
 
       console.log('drag', e.key, x, y, h, v);
     }
-  }, {
-    key: 'onPause',
-    value: function onPause() {
-      Object.entries(this.backgroundMusic || {}).forEach(function (_ref3) {
-        var _ref32 = _slicedToArray(_ref3, 2);
 
-        var key = _ref32[0];
-        var value = _ref32[1];
+    // onPause() {
+    //   Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+    //     value.pause();
+    //   });
+    //   Object.entries(this.soundEffect || {}).forEach(([key, value]) => {
+    //     value.stop();
+    //   });
+    //
+    //   // let device = this.game.device;
+    //   //
+    //   // if (device.android && !device.webAudio) {
+    //   //   let entries = Object.entries(this.backgroundMusic || {});
+    //   //
+    //   //   entries.forEach(([key, value]) => value.pause());
+    //   // }
+    // }
+    //
+    // onResume() {
+    //   Object.entries(this.backgroundMusic || {}).forEach(([key, value]) => {
+    //     value.resume();
+    //   });
+    //
+    //   // let device = this.game.device;
+    //   //
+    //   // if (device.android && !device.webAudio) {
+    //   //   let entries = Object.entries(this.backgroundMusic || {});
+    //   //
+    //   //   entries.forEach(([key, value]) => value.resume());
+    //   // }
+    // }
 
-        value.pause();
-      });
-      Object.entries(this.soundEffect || {}).forEach(function (_ref4) {
-        var _ref42 = _slicedToArray(_ref4, 2);
-
-        var key = _ref42[0];
-        var value = _ref42[1];
-
-        value.stop();
-      });
-
-      // let device = this.game.device;
-      //
-      // if (device.android && !device.webAudio) {
-      //   let entries = Object.entries(this.backgroundMusic || {});
-      //
-      //   entries.forEach(([key, value]) => value.pause());
-      // }
-    }
-  }, {
-    key: 'onResume',
-    value: function onResume() {
-      Object.entries(this.backgroundMusic || {}).forEach(function (_ref5) {
-        var _ref52 = _slicedToArray(_ref5, 2);
-
-        var key = _ref52[0];
-        var value = _ref52[1];
-
-        value.resume();
-      });
-
-      // let device = this.game.device;
-      //
-      // if (device.android && !device.webAudio) {
-      //   let entries = Object.entries(this.backgroundMusic || {});
-      //
-      //   entries.forEach(([key, value]) => value.resume());
-      // }
-    }
   }]);
 
   return Cover;
@@ -5753,865 +5724,1014 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./seabed":110}],105:[function(require,module,exports){
+},{"./seabed":113}],105:[function(require,module,exports){
 module.exports={
-    "seabed": {
-        "cover": {
-            "backgroundColor": "#aaddf2",
-            "code": "100",
-            "images": [
-                {
-                    "h": 0.5,
-                    "i": 1,
-                    "v": 0.19
-                },
-                {
-                    "h": 0.5,
-                    "i": 2,
-                    "v": 0.4
-                },
-                {
-                    "h": 0.5,
-                    "i": 3,
-                    "v": 0.56
-                },
-                {
-                    "h": 0.388,
-                    "i": 4,
-                    "v": 0.177
-                },
-                {
-                    "h": 0.7,
-                    "i": 5,
-                    "v": 0.24
-                },
-                {
-                    "h": 0.8,
-                    "i": 6,
-                    "v": 0.24
-                },
-                {
-                    "h": 0.45,
-                    "i": 7,
-                    "v": 0.46
-                },
-                {
-                    "h": 0.15,
-                    "i": 8,
-                    "v": 0.6
-                },
-                {
-                    "h": 0.83,
-                    "i": 9,
-                    "v": 0.62
-                }
-            ]
-        },
-        "levels": [
+    "background": {
+        "color": "#aaddf2",
+        "music": "music/Romanesca.m4a",
+        "sound": "sounds/Water Lake.m4a"
+    },
+    "cover": {
+        "code": "100",
+        "images": [
             {
-                "code": "101",
-                "difference": [
-                    [
-                        {
-                            "h": 0.745,
-                            "v": 0.249
-                        },
-                        {
-                            "h": 0.625,
-                            "v": 0.449
-                        },
-                        {
-                            "h": 0.465,
-                            "v": 0.514
-                        },
-                        {
-                            "h": 0.646,
-                            "v": 0.692
-                        },
-                        {}
-                    ],
-                    [
-                        {
-                            "h": 0.691,
-                            "v": 0.276
-                        },
-                        {
-                            "h": 0.632,
-                            "v": 0.443
-                        },
-                        {
-                            "h": 0.465,
-                            "v": 0.514
-                        },
-                        {
-                            "h": 0.649,
-                            "v": 0.69
-                        },
-                        {
-                            "h": 0.302,
-                            "v": 0.792
-                        }
-                    ]
-                ]
+                "h": 0.5,
+                "i": 1,
+                "v": 0.19
             },
             {
-                "code": "102",
-                "difference": [
-                    [
-                        {
-                            "h": 0.212,
-                            "v": 0.4
-                        },
-                        {
-                            "h": 0.303,
-                            "v": 0.517
-                        },
-                        {
-                            "h": 0.56,
-                            "v": 0.468
-                        },
-                        {},
-                        {
-                            "h": 0.588,
-                            "v": 0.564
-                        },
-                        {
-                            "h": 0.154,
-                            "v": 0.858
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.223,
-                            "v": 0.402
-                        },
-                        {
-                            "h": 0.294,
-                            "v": 0.505
-                        },
-                        {
-                            "h": 0.577,
-                            "v": 0.466
-                        },
-                        {
-                            "h": 0.961,
-                            "v": 0.56
-                        },
-                        {
-                            "h": 0.6,
-                            "v": 0.562
-                        },
-                        {
-                            "h": 0.161,
-                            "v": 0.856
-                        }
-                    ]
-                ]
+                "h": 0.5,
+                "i": 2,
+                "v": 0.4
             },
             {
-                "code": "103",
-                "difference": [
-                    [
-                        {
-                            "h": 0.523,
-                            "v": 0.337
-                        },
-                        {
-                            "h": 0.936,
-                            "v": 0.366
-                        },
-                        {},
-                        {
-                            "h": 0.815,
-                            "v": 0.706
-                        },
-                        {
-                            "h": 0.616,
-                            "v": 0.922
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.523,
-                            "v": 0.339
-                        },
-                        {
-                            "h": 0.932,
-                            "v": 0.379
-                        },
-                        {
-                            "h": 0.109,
-                            "v": 0.712
-                        },
-                        {
-                            "h": 0.815,
-                            "v": 0.706
-                        },
-                        {
-                            "h": 0.602,
-                            "v": 0.908
-                        }
-                    ]
-                ]
+                "h": 0.5,
+                "i": 3,
+                "v": 0.56
             },
             {
-                "code": "104",
-                "difference": [
-                    [
-                        {
-                            "h": 0.286,
-                            "v": 0.195
-                        },
-                        {
-                            "h": 0.135,
-                            "v": 0.324
-                        },
-                        {
-                            "h": 0.269,
-                            "v": 0.48
-                        },
-                        {
-                            "h": 0.751,
-                            "v": 0.543
-                        },
-                        {
-                            "h": 0.421,
-                            "v": 0.669
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.293,
-                            "v": 0.195
-                        },
-                        {
-                            "h": 0.138,
-                            "v": 0.32
-                        },
-                        {
-                            "h": 0.226,
-                            "v": 0.486
-                        },
-                        {
-                            "h": 0.751,
-                            "v": 0.53
-                        },
-                        {
-                            "h": 0.865,
-                            "v": 0.785
-                        }
-                    ]
-                ]
+                "h": 0.388,
+                "i": 4,
+                "v": 0.177
             },
             {
-                "code": "105",
-                "difference": [
-                    [
-                        {
-                            "h": 0.816,
-                            "v": 0.311
-                        },
-                        {
-                            "h": 0.595,
-                            "v": 0.568
-                        },
-                        {
-                            "h": 0.064,
-                            "v": 0.872
-                        },
-                        {
-                            "h": 0.563,
-                            "v": 0.905
-                        },
-                        {
-                            "h": 0.912,
-                            "v": 0.877
-                        }
-                    ],
-                    [
-                        {},
-                        {
-                            "h": 0.545,
-                            "v": 0.589
-                        },
-                        {},
-                        {
-                            "h": 0.57,
-                            "v": 0.902
-                        },
-                        {
-                            "h": 0.911,
-                            "v": 0.877
-                        }
-                    ]
-                ]
+                "h": 0.7,
+                "i": 5,
+                "v": 0.24
             },
             {
-                "code": "106",
-                "difference": [
-                    [
-                        {},
-                        {},
-                        {
-                            "h": 0.538,
-                            "v": 0.436
-                        },
-                        {
-                            "h": 0.699,
-                            "v": 0.793
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.137,
-                            "v": 0.131
-                        },
-                        {
-                            "h": 0.606,
-                            "v": 0.096
-                        },
-                        {},
-                        {
-                            "h": 0.698,
-                            "v": 0.793
-                        }
-                    ]
-                ]
+                "h": 0.8,
+                "i": 6,
+                "v": 0.24
             },
             {
-                "code": "107",
-                "difference": [
-                    [
-                        {
-                            "h": 0.238,
-                            "v": 0.106
-                        },
-                        {
-                            "h": 0.423,
-                            "v": 0.265
-                        },
-                        {
-                            "h": 0.688,
-                            "v": 0.404
-                        },
-                        {},
-                        {
-                            "h": 0.855,
-                            "v": 0.724
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.237,
-                            "v": 0.106
-                        },
-                        {},
-                        {
-                            "h": 0.686,
-                            "v": 0.405
-                        },
-                        {
-                            "h": 0.257,
-                            "v": 0.526
-                        },
-                        {
-                            "h": 0.826,
-                            "v": 0.705
-                        }
-                    ]
-                ]
+                "h": 0.45,
+                "i": 7,
+                "v": 0.46
             },
             {
-                "code": "108",
-                "difference": [
-                    [
-                        {
-                            "h": 0.397,
-                            "v": 0.22
-                        },
-                        {},
-                        {},
-                        {
-                            "h": 0.169,
-                            "v": 0.621
-                        },
-                        {
-                            "h": 0.843,
-                            "v": 0.899
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.38,
-                            "v": 0.212
-                        },
-                        {
-                            "h": 0.247,
-                            "v": 0.411
-                        },
-                        {
-                            "h": 0.56,
-                            "v": 0.603
-                        },
-                        {},
-                        {
-                            "h": 0.842,
-                            "v": 0.888
-                        }
-                    ]
-                ]
+                "h": 0.22,
+                "i": 8,
+                "v": 0.6
             },
             {
-                "code": "109",
-                "difference": [
-                    [
-                        {
-                            "h": 0.171,
-                            "v": 0.184
-                        },
-                        {
-                            "h": 0.859,
-                            "v": 0.441
-                        },
-                        {
-                            "h": 0.57,
-                            "v": 0.871
-                        },
-                        {
-                            "h": 0.638,
-                            "v": 0.861
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.093,
-                            "v": 0.218
-                        },
-                        {
-                            "h": 0.857,
-                            "v": 0.44
-                        },
-                        {
-                            "h": 0.576,
-                            "v": 0.874
-                        },
-                        {
-                            "h": 0.652,
-                            "v": 0.86
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "110",
-                "difference": [
-                    [
-                        {},
-                        {},
-                        {},
-                        {},
-                        {}
-                    ],
-                    [
-                        {
-                            "h": 0.128,
-                            "v": 0.164
-                        },
-                        {
-                            "h": 0.252,
-                            "v": 0.523
-                        },
-                        {
-                            "h": 0.585,
-                            "v": 0.5
-                        },
-                        {
-                            "h": 0.546,
-                            "v": 0.665
-                        },
-                        {
-                            "h": 0.671,
-                            "v": 0.799
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "111",
-                "difference": [
-                    [
-                        {
-                            "h": 0.126,
-                            "v": 0.307
-                        },
-                        {},
-                        {},
-                        {
-                            "h": 0.929,
-                            "v": 0.752
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.125,
-                            "v": 0.309
-                        },
-                        {
-                            "h": 0.253,
-                            "v": 0.588
-                        },
-                        {
-                            "h": 0.097,
-                            "v": 0.74
-                        },
-                        {
-                            "h": 0.931,
-                            "v": 0.753
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "112",
-                "difference": [
-                    [
-                        {
-                            "h": 0.1,
-                            "v": 0.254
-                        },
-                        {},
-                        {},
-                        {
-                            "h": 0.445,
-                            "v": 0.856
-                        },
-                        {}
-                    ],
-                    [
-                        {
-                            "h": 0.1,
-                            "v": 0.254
-                        },
-                        {
-                            "h": 0.896,
-                            "v": 0.339
-                        },
-                        {
-                            "h": 0.059,
-                            "v": 0.506
-                        },
-                        {
-                            "h": 0.445,
-                            "v": 0.828
-                        },
-                        {
-                            "h": 0.682,
-                            "v": 0.817
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "113",
-                "difference": [
-                    [
-                        {},
-                        {
-                            "h": 0.184,
-                            "v": 0.527
-                        },
-                        {},
-                        {
-                            "h": 0.606,
-                            "v": 0.87
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.515,
-                            "v": 0.323
-                        },
-                        {
-                            "h": 0.226,
-                            "v": 0.528
-                        },
-                        {
-                            "h": 0.483,
-                            "v": 0.67
-                        },
-                        {
-                            "h": 0.606,
-                            "v": 0.863
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "114",
-                "difference": [
-                    [
-                        {
-                            "h": 0.51,
-                            "v": 0.316
-                        },
-                        {},
-                        {
-                            "h": 0.222,
-                            "v": 0.681
-                        },
-                        {
-                            "h": 0.294,
-                            "v": 0.73
-                        },
-                        {}
-                    ],
-                    [
-                        {
-                            "h": 0.513,
-                            "v": 0.316
-                        },
-                        {
-                            "h": 0.574,
-                            "v": 0.528
-                        },
-                        {
-                            "h": 0.223,
-                            "v": 0.683
-                        },
-                        {
-                            "h": 0.294,
-                            "v": 0.732
-                        },
-                        {
-                            "h": 0.635,
-                            "v": 0.806
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "115",
-                "difference": [
-                    [
-                        {
-                            "h": 0.212,
-                            "v": 0.089
-                        },
-                        {
-                            "h": 0.823,
-                            "v": 0.156
-                        },
-                        {},
-                        {},
-                        {}
-                    ],
-                    [
-                        {},
-                        {},
-                        {
-                            "h": 0.078,
-                            "v": 0.433
-                        },
-                        {
-                            "h": 0.877,
-                            "v": 0.524
-                        },
-                        {
-                            "h": 0.293,
-                            "v": 0.833
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "116",
-                "difference": [
-                    [
-                        {
-                            "h": 0.183,
-                            "v": 0.316
-                        },
-                        {
-                            "h": 0.571,
-                            "v": 0.437
-                        },
-                        {
-                            "h": 0.815,
-                            "v": 0.404
-                        },
-                        {
-                            "h": 0.614,
-                            "v": 0.855
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.171,
-                            "v": 0.334
-                        },
-                        {
-                            "h": 0.56,
-                            "v": 0.438
-                        },
-                        {
-                            "h": 0.816,
-                            "v": 0.403
-                        },
-                        {
-                            "h": 0.612,
-                            "v": 0.853
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "117",
-                "difference": [
-                    [
-                        {
-                            "h": 0.117,
-                            "v": 0.093
-                        },
-                        {
-                            "h": 0.43,
-                            "v": 0.235
-                        },
-                        {},
-                        {}
-                    ],
-                    [
-                        {},
-                        {
-                            "h": 0.475,
-                            "v": 0.211
-                        },
-                        {
-                            "h": 0.731,
-                            "v": 0.655
-                        },
-                        {
-                            "h": 0.112,
-                            "v": 0.793
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "118",
-                "difference": [
-                    [
-                        {},
-                        {
-                            "h": 0.857,
-                            "v": 0.429
-                        },
-                        {
-                            "h": 0.175,
-                            "v": 0.769
-                        },
-                        {},
-                        {
-                            "h": 0.801,
-                            "v": 0.886
-                        }
-                    ],
-                    [
-                        {
-                            "h": 0.123,
-                            "v": 0.161
-                        },
-                        {
-                            "h": 0.863,
-                            "v": 0.411
-                        },
-                        {},
-                        {
-                            "h": 0.605,
-                            "v": 0.889
-                        },
-                        {
-                            "h": 0.8,
-                            "v": 0.885
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "119",
-                "difference": [
-                    [
-                        {},
-                        {},
-                        {
-                            "h": 0.888,
-                            "v": 0.527
-                        },
-                        {
-                            "h": 0.137,
-                            "v": 0.709
-                        },
-                        {}
-                    ],
-                    [
-                        {
-                            "h": 0.1,
-                            "v": 0.202
-                        },
-                        {
-                            "h": 0.189,
-                            "v": 0.499
-                        },
-                        {
-                            "h": 0.889,
-                            "v": 0.526
-                        },
-                        {},
-                        {
-                            "h": 0.49,
-                            "v": 0.714
-                        }
-                    ]
-                ]
-            },
-            {
-                "code": "120",
-                "difference": [
-                    [
-                        {},
-                        {},
-                        {},
-                        {
-                            "h": 0.054,
-                            "v": 0.863
-                        },
-                        {}
-                    ],
-                    [
-                        {
-                            "h": 0.452,
-                            "v": 0.394
-                        },
-                        {
-                            "h": 0.483,
-                            "v": 0.641
-                        },
-                        {
-                            "h": 0.851,
-                            "v": 0.622
-                        },
-                        {},
-                        {
-                            "h": 0.964,
-                            "v": 0.883
-                        }
-                    ]
-                ]
+                "h": 0.82,
+                "i": 9,
+                "v": 0.62
             }
         ]
-    }
+    },
+    "ending": {
+        "music": "music/Laureate.m4a"
+    },
+    "levels": [
+        {
+            "code": "101",
+            "difference": [
+                [
+                    {
+                        "h": 0.745,
+                        "v": 0.249
+                    },
+                    {
+                        "h": 0.625,
+                        "v": 0.449
+                    },
+                    {
+                        "h": 0.465,
+                        "v": 0.514
+                    },
+                    {
+                        "h": 0.646,
+                        "v": 0.692
+                    },
+                    {}
+                ],
+                [
+                    {
+                        "h": 0.691,
+                        "v": 0.276
+                    },
+                    {
+                        "h": 0.632,
+                        "v": 0.443
+                    },
+                    {
+                        "h": 0.465,
+                        "v": 0.514
+                    },
+                    {
+                        "h": 0.649,
+                        "v": 0.69
+                    },
+                    {
+                        "h": 0.302,
+                        "v": 0.792
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "102",
+            "difference": [
+                [
+                    {
+                        "h": 0.212,
+                        "v": 0.4
+                    },
+                    {
+                        "h": 0.303,
+                        "v": 0.517
+                    },
+                    {
+                        "h": 0.56,
+                        "v": 0.468
+                    },
+                    {},
+                    {
+                        "h": 0.588,
+                        "v": 0.564
+                    },
+                    {
+                        "h": 0.154,
+                        "v": 0.858
+                    }
+                ],
+                [
+                    {
+                        "h": 0.223,
+                        "v": 0.402
+                    },
+                    {
+                        "h": 0.294,
+                        "v": 0.505
+                    },
+                    {
+                        "h": 0.577,
+                        "v": 0.466
+                    },
+                    {
+                        "h": 0.961,
+                        "v": 0.56
+                    },
+                    {
+                        "h": 0.6,
+                        "v": 0.562
+                    },
+                    {
+                        "h": 0.161,
+                        "v": 0.856
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "103",
+            "difference": [
+                [
+                    {
+                        "h": 0.523,
+                        "v": 0.337
+                    },
+                    {
+                        "h": 0.936,
+                        "v": 0.366
+                    },
+                    {},
+                    {
+                        "h": 0.815,
+                        "v": 0.706
+                    },
+                    {
+                        "h": 0.616,
+                        "v": 0.922
+                    }
+                ],
+                [
+                    {
+                        "h": 0.523,
+                        "v": 0.339
+                    },
+                    {
+                        "h": 0.932,
+                        "v": 0.379
+                    },
+                    {
+                        "h": 0.109,
+                        "v": 0.712
+                    },
+                    {
+                        "h": 0.815,
+                        "v": 0.706
+                    },
+                    {
+                        "h": 0.602,
+                        "v": 0.908
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "104",
+            "difference": [
+                [
+                    {
+                        "h": 0.286,
+                        "v": 0.195
+                    },
+                    {
+                        "h": 0.135,
+                        "v": 0.324
+                    },
+                    {
+                        "h": 0.269,
+                        "v": 0.48
+                    },
+                    {
+                        "h": 0.751,
+                        "v": 0.543
+                    },
+                    {
+                        "h": 0.421,
+                        "v": 0.669
+                    }
+                ],
+                [
+                    {
+                        "h": 0.293,
+                        "v": 0.195
+                    },
+                    {
+                        "h": 0.138,
+                        "v": 0.32
+                    },
+                    {
+                        "h": 0.226,
+                        "v": 0.486
+                    },
+                    {
+                        "h": 0.751,
+                        "v": 0.53
+                    },
+                    {
+                        "h": 0.865,
+                        "v": 0.785
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "105",
+            "difference": [
+                [
+                    {
+                        "h": 0.816,
+                        "v": 0.311
+                    },
+                    {
+                        "h": 0.595,
+                        "v": 0.568
+                    },
+                    {
+                        "h": 0.064,
+                        "v": 0.872
+                    },
+                    {
+                        "h": 0.563,
+                        "v": 0.905
+                    },
+                    {
+                        "h": 0.912,
+                        "v": 0.877
+                    }
+                ],
+                [
+                    {},
+                    {
+                        "h": 0.545,
+                        "v": 0.589
+                    },
+                    {},
+                    {
+                        "h": 0.57,
+                        "v": 0.902
+                    },
+                    {
+                        "h": 0.911,
+                        "v": 0.877
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "106",
+            "difference": [
+                [
+                    {},
+                    {},
+                    {
+                        "h": 0.538,
+                        "v": 0.436
+                    },
+                    {
+                        "h": 0.699,
+                        "v": 0.793
+                    }
+                ],
+                [
+                    {
+                        "h": 0.137,
+                        "v": 0.131
+                    },
+                    {
+                        "h": 0.606,
+                        "v": 0.096
+                    },
+                    {},
+                    {
+                        "h": 0.698,
+                        "v": 0.793
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "107",
+            "difference": [
+                [
+                    {
+                        "h": 0.238,
+                        "v": 0.106
+                    },
+                    {
+                        "h": 0.423,
+                        "v": 0.265
+                    },
+                    {
+                        "h": 0.688,
+                        "v": 0.404
+                    },
+                    {},
+                    {
+                        "h": 0.855,
+                        "v": 0.724
+                    }
+                ],
+                [
+                    {
+                        "h": 0.237,
+                        "v": 0.106
+                    },
+                    {},
+                    {
+                        "h": 0.686,
+                        "v": 0.405
+                    },
+                    {
+                        "h": 0.257,
+                        "v": 0.526
+                    },
+                    {
+                        "h": 0.826,
+                        "v": 0.705
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "108",
+            "difference": [
+                [
+                    {
+                        "h": 0.397,
+                        "v": 0.22
+                    },
+                    {},
+                    {},
+                    {
+                        "h": 0.169,
+                        "v": 0.621
+                    },
+                    {
+                        "h": 0.843,
+                        "v": 0.899
+                    }
+                ],
+                [
+                    {
+                        "h": 0.38,
+                        "v": 0.212
+                    },
+                    {
+                        "h": 0.247,
+                        "v": 0.411
+                    },
+                    {
+                        "h": 0.56,
+                        "v": 0.603
+                    },
+                    {},
+                    {
+                        "h": 0.842,
+                        "v": 0.888
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "109",
+            "difference": [
+                [
+                    {
+                        "h": 0.171,
+                        "v": 0.184
+                    },
+                    {
+                        "h": 0.859,
+                        "v": 0.441
+                    },
+                    {
+                        "h": 0.57,
+                        "v": 0.871
+                    },
+                    {
+                        "h": 0.638,
+                        "v": 0.861
+                    }
+                ],
+                [
+                    {
+                        "h": 0.093,
+                        "v": 0.218
+                    },
+                    {
+                        "h": 0.857,
+                        "v": 0.44
+                    },
+                    {
+                        "h": 0.576,
+                        "v": 0.874
+                    },
+                    {
+                        "h": 0.652,
+                        "v": 0.86
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "110",
+            "difference": [
+                [
+                    {},
+                    {},
+                    {},
+                    {},
+                    {}
+                ],
+                [
+                    {
+                        "h": 0.128,
+                        "v": 0.164
+                    },
+                    {
+                        "h": 0.252,
+                        "v": 0.523
+                    },
+                    {
+                        "h": 0.585,
+                        "v": 0.5
+                    },
+                    {
+                        "h": 0.546,
+                        "v": 0.665
+                    },
+                    {
+                        "h": 0.671,
+                        "v": 0.799
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "111",
+            "difference": [
+                [
+                    {
+                        "h": 0.126,
+                        "v": 0.307
+                    },
+                    {},
+                    {},
+                    {
+                        "h": 0.929,
+                        "v": 0.752
+                    }
+                ],
+                [
+                    {
+                        "h": 0.125,
+                        "v": 0.309
+                    },
+                    {
+                        "h": 0.253,
+                        "v": 0.588
+                    },
+                    {
+                        "h": 0.097,
+                        "v": 0.74
+                    },
+                    {
+                        "h": 0.931,
+                        "v": 0.753
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "112",
+            "difference": [
+                [
+                    {
+                        "h": 0.1,
+                        "v": 0.254
+                    },
+                    {},
+                    {},
+                    {
+                        "h": 0.445,
+                        "v": 0.856
+                    },
+                    {}
+                ],
+                [
+                    {
+                        "h": 0.1,
+                        "v": 0.254
+                    },
+                    {
+                        "h": 0.896,
+                        "v": 0.339
+                    },
+                    {
+                        "h": 0.059,
+                        "v": 0.506
+                    },
+                    {
+                        "h": 0.445,
+                        "v": 0.828
+                    },
+                    {
+                        "h": 0.682,
+                        "v": 0.817
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "113",
+            "difference": [
+                [
+                    {},
+                    {
+                        "h": 0.184,
+                        "v": 0.527
+                    },
+                    {},
+                    {
+                        "h": 0.606,
+                        "v": 0.87
+                    }
+                ],
+                [
+                    {
+                        "h": 0.515,
+                        "v": 0.323
+                    },
+                    {
+                        "h": 0.226,
+                        "v": 0.528
+                    },
+                    {
+                        "h": 0.483,
+                        "v": 0.67
+                    },
+                    {
+                        "h": 0.606,
+                        "v": 0.863
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "114",
+            "difference": [
+                [
+                    {
+                        "h": 0.51,
+                        "v": 0.316
+                    },
+                    {},
+                    {
+                        "h": 0.222,
+                        "v": 0.681
+                    },
+                    {
+                        "h": 0.294,
+                        "v": 0.73
+                    },
+                    {}
+                ],
+                [
+                    {
+                        "h": 0.513,
+                        "v": 0.316
+                    },
+                    {
+                        "h": 0.574,
+                        "v": 0.528
+                    },
+                    {
+                        "h": 0.223,
+                        "v": 0.683
+                    },
+                    {
+                        "h": 0.294,
+                        "v": 0.732
+                    },
+                    {
+                        "h": 0.635,
+                        "v": 0.806
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "115",
+            "difference": [
+                [
+                    {
+                        "h": 0.212,
+                        "v": 0.089
+                    },
+                    {
+                        "h": 0.823,
+                        "v": 0.156
+                    },
+                    {},
+                    {},
+                    {}
+                ],
+                [
+                    {},
+                    {},
+                    {
+                        "h": 0.078,
+                        "v": 0.433
+                    },
+                    {
+                        "h": 0.877,
+                        "v": 0.524
+                    },
+                    {
+                        "h": 0.293,
+                        "v": 0.833
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "116",
+            "difference": [
+                [
+                    {
+                        "h": 0.183,
+                        "v": 0.316
+                    },
+                    {
+                        "h": 0.571,
+                        "v": 0.437
+                    },
+                    {
+                        "h": 0.815,
+                        "v": 0.404
+                    },
+                    {
+                        "h": 0.614,
+                        "v": 0.855
+                    }
+                ],
+                [
+                    {
+                        "h": 0.171,
+                        "v": 0.334
+                    },
+                    {
+                        "h": 0.56,
+                        "v": 0.438
+                    },
+                    {
+                        "h": 0.816,
+                        "v": 0.403
+                    },
+                    {
+                        "h": 0.612,
+                        "v": 0.853
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "117",
+            "difference": [
+                [
+                    {
+                        "h": 0.117,
+                        "v": 0.093
+                    },
+                    {
+                        "h": 0.43,
+                        "v": 0.235
+                    },
+                    {},
+                    {}
+                ],
+                [
+                    {},
+                    {
+                        "h": 0.475,
+                        "v": 0.211
+                    },
+                    {
+                        "h": 0.731,
+                        "v": 0.655
+                    },
+                    {
+                        "h": 0.112,
+                        "v": 0.793
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "118",
+            "difference": [
+                [
+                    {},
+                    {
+                        "h": 0.857,
+                        "v": 0.429
+                    },
+                    {
+                        "h": 0.175,
+                        "v": 0.769
+                    },
+                    {},
+                    {
+                        "h": 0.801,
+                        "v": 0.886
+                    }
+                ],
+                [
+                    {
+                        "h": 0.123,
+                        "v": 0.161
+                    },
+                    {
+                        "h": 0.863,
+                        "v": 0.411
+                    },
+                    {},
+                    {
+                        "h": 0.605,
+                        "v": 0.889
+                    },
+                    {
+                        "h": 0.8,
+                        "v": 0.885
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "119",
+            "difference": [
+                [
+                    {},
+                    {},
+                    {
+                        "h": 0.888,
+                        "v": 0.527
+                    },
+                    {
+                        "h": 0.137,
+                        "v": 0.709
+                    },
+                    {}
+                ],
+                [
+                    {
+                        "h": 0.1,
+                        "v": 0.202
+                    },
+                    {
+                        "h": 0.189,
+                        "v": 0.499
+                    },
+                    {
+                        "h": 0.889,
+                        "v": 0.526
+                    },
+                    {},
+                    {
+                        "h": 0.49,
+                        "v": 0.714
+                    }
+                ]
+            ]
+        },
+        {
+            "code": "120",
+            "difference": [
+                [
+                    {},
+                    {},
+                    {},
+                    {
+                        "h": 0.054,
+                        "v": 0.863
+                    },
+                    {}
+                ],
+                [
+                    {
+                        "h": 0.452,
+                        "v": 0.394
+                    },
+                    {
+                        "h": 0.483,
+                        "v": 0.641
+                    },
+                    {
+                        "h": 0.851,
+                        "v": 0.622
+                    },
+                    {},
+                    {
+                        "h": 0.964,
+                        "v": 0.883
+                    }
+                ]
+            ]
+        }
+    ]
 }
 
 },{}],106:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+/*
+Ending
+  the ending of magic seabed world.
+*/
+
+var _seabed = require('./seabed');
+
+var _seabed2 = _interopRequireDefault(_seabed);
+
+// import SeabedSprite from './filter/seabed-sprite';
+
+var _filterSeabedFilterJs = require('./filter/seabed-filter.js');
+
+var _filterSeabedFilterJs2 = _interopRequireDefault(_filterSeabedFilterJs);
+
+var Ending = (function (_Seabed) {
+  function Ending() {
+    _classCallCheck(this, Ending);
+
+    _get(Object.getPrototypeOf(Ending.prototype), 'constructor', this).call(this);
+  }
+
+  _inherits(Ending, _Seabed);
+
+  _createClass(Ending, [{
+    key: 'preload',
+    value: function preload() {
+      _get(Object.getPrototypeOf(Ending.prototype), 'preload', this).call(this);
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      _get(Object.getPrototypeOf(Ending.prototype), 'create', this).call(this);
+
+      var text = this.add.text(this.world.centerX, this.world.centerY, {
+        align: 'center',
+        font: 'Arial',
+        fontWeight: 'bold',
+        fontSize: 120 });
+      text.anchor.setTo(0.5, 0.5);
+      text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
+      text.text = '任务完成! Mission Complete!';
+
+      var grd = text.context.createLinearGradient(0, 0, 0, text.height);
+      grd.addColorStop(0, '#8ED6FF');
+      grd.addColorStop(1, '#004CB3');
+      text.fill = grd;
+
+      // let y = this.game.device.iPad ? 20 : 0;
+      //
+      // let sprite = this.sprite = this.add.sprite(0, y);
+      //
+      // sprite.width = this.world.width;
+      // sprite.height = this.world.height - y;
+      // sprite.filters = [new SeabedFilter(this.game)];
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      _get(Object.getPrototypeOf(Ending.prototype), 'update', this).call(this);
+
+      // this.sprite.filters[0].update();
+    }
+  }, {
+    key: 'shutdown',
+    value: function shutdown() {
+      _get(Object.getPrototypeOf(Ending.prototype), 'shutdown', this).call(this);
+    }
+  }]);
+
+  return Ending;
+})(_seabed2['default']);
+
+exports['default'] = Ending;
+module.exports = exports['default'];
+
+},{"./filter/seabed-filter.js":108,"./seabed":113}],107:[function(require,module,exports){
+module.exports = '// http://glslsandbox.com/e#20193.0\n\nprecision mediump float;\n\nuniform float time;\nuniform vec2 resolution;\nuniform vec2 mouse;\n\nfloat length2(vec2 p) {\n  return dot(p, p);\n}\n\nfloat noise(vec2 p) {\n  return fract(sin(fract(sin(p.x) * (43.13311)) + p.y) * 31.0011);\n}\n\nfloat worley(vec2 p) {\n  float d = 1e30;\n  for (int xo = -1; xo <= 1; ++xo) {\n    for (int yo = -1; yo <= 1; ++yo) {\n      vec2 tp = floor(p) + vec2(xo, yo);\n      d = min(d, length2(p - tp - vec2(noise(tp))));\n    }\n  }\n  return 3.0 * exp(-4.0 * abs(2.0 * d - 1.0));\n}\n\nfloat fworley(vec2 p) {\n  return sqrt(sqrt(sqrt(\n    1.1 * // light\n    worley(p * 5. + .3 + time * .0525) *\n    sqrt(worley(p * 50. + 0.3 + time * -0.15)) *\n    sqrt(sqrt(worley(p * -10. + 9.3))))));\n}\n\nvoid main() {\n  vec2 uv = gl_FragCoord.xy / resolution.xy;\n  float t = fworley(uv * resolution.xy / 1500.0);\n  t *= exp(-length2(abs(0.7 * uv - 1.0)));\n  gl_FragColor = vec4(t * vec3(0.1, 1.5 * t, 1.2 * t + pow(t, 0.5 - t)), 1.0);\n}\n';
+},{}],108:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _bacteriaShader = require('./bacteria.shader');
+
+var _bacteriaShader2 = _interopRequireDefault(_bacteriaShader);
+
+var SeabedFilter = (function (_Phaser$Filter) {
+  function SeabedFilter(game, uniforms) {
+    _classCallCheck(this, SeabedFilter);
+
+    _get(Object.getPrototypeOf(SeabedFilter.prototype), 'constructor', this).call(this, game, uniforms, [_bacteriaShader2['default']]);
+  }
+
+  _inherits(SeabedFilter, _Phaser$Filter);
+
+  _createClass(SeabedFilter, [{
+    key: 'init',
+    value: function init() {
+      _get(Object.getPrototypeOf(SeabedFilter.prototype), 'init', this).call(this);
+
+      // let {
+      //   width, height
+      // } = this.game.world;
+      //
+      // this.setResolution(width, height);
+    }
+  }]);
+
+  return SeabedFilter;
+})(Phaser.Filter);
+
+exports['default'] = SeabedFilter;
+module.exports = exports['default'];
+
+},{"./bacteria.shader":107}],109:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -6636,20 +6756,32 @@ var Game = (function (_Phaser$Game) {
   function Game() {
     _classCallCheck(this, Game);
 
-    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768); // 1.0
-    // super(768, 576); // 0.75
-    // super(512, 384); // 0.5
+    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768);
 
-    this.levels = [];
-    this.fadeColor = 16777215;
+    this.levelCound = 0;
+    // this.fadeColor = 0xffffff;
   }
 
   _inherits(Game, _Phaser$Game);
 
   _createClass(Game, [{
+    key: 'boot',
+    value: function boot() {
+      var _this = this;
+
+      _get(Object.getPrototypeOf(Game.prototype), 'boot', this).call(this);
+
+      this.onPause.add(function () {
+        return _this.sound.pauseAll();
+      });
+      this.onResume.add(function () {
+        return _this.sound.resumeAll();
+      });
+    }
+  }, {
     key: 'env',
     get: function () {
-      return process.env.BROWSER_ENV;
+      return window.cordova && cordova.compileTime.env || process.env.BROWSER_ENV;
     }
   }, {
     key: 'fitScreen',
@@ -6663,27 +6795,29 @@ var Game = (function (_Phaser$Game) {
   }, {
     key: 'previousStateKey',
     get: function () {
-      if (this.state.current == 'cover') {
+      var current = this.state.current;
+
+      if (current == 'cover') {
         return;
-      } else if (this.state.current == this.levels[0]) {
+      } else if (current == 'ending') {
+        return this.levelCount - 1;
+      } else if (current == '0') {
         return 'cover';
       } else {
-        var index = this.levels.indexOf(this.state.current);
-
-        return this.levels[index - 1];
+        return '' + (parseInt(current, 10) - 1);
       }
     }
   }, {
     key: 'previous',
     value: function previous() {
-      var _this = this;
+      var _this2 = this;
 
       var previousStateKey = this.previousStateKey;
 
       if (previousStateKey) {
         this.add.tween(this.camera).to({
           x: -this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
-          _this.state.start(previousStateKey);
+          _this2.state.start(previousStateKey);
         });
       } else {
         this.add.tween(this.camera).to({
@@ -6693,30 +6827,29 @@ var Game = (function (_Phaser$Game) {
   }, {
     key: 'nextStateKey',
     get: function () {
-      if (this.state.current == 'cover') {
-        return this.levels[0];
-      } else {
-        var index = this.levels.indexOf(this.state.current);
-        var state = this.levels[index + 1];
+      var current = this.state.current;
 
-        if (this.state.checkState(state)) {
-          return state;
-        } else {
-          return;
-        }
+      if (current == 'cover') {
+        return '0';
+      } else if (current == 'ending') {
+        return;
+      } else if (!this.state.states[parseInt(current, 10) + 1]) {
+        return 'ending';
+      } else {
+        return '' + (parseInt(current, 10) + 1);
       }
     }
   }, {
     key: 'next',
     value: function next() {
-      var _this2 = this;
+      var _this3 = this;
 
       var nextStateKey = this.nextStateKey;
 
       if (nextStateKey) {
         this.add.tween(this.camera).to({
           x: this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
-          _this2.state.start(nextStateKey);
+          _this3.state.start(nextStateKey);
         });
       } else {
         this.add.tween(this.camera).to({
@@ -6736,7 +6869,7 @@ var Game = (function (_Phaser$Game) {
 
     // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
     value: function fade(state) {
-      var _this3 = this;
+      var _this4 = this;
 
       var mask = this.add.graphics(0, 0);
 
@@ -6747,7 +6880,7 @@ var Game = (function (_Phaser$Game) {
 
       this.add.tween(mask).to({
         alpha: 0.5 }, 200, Phaser.Easing.Default, true).onComplete.addOnce(function (graphic, tween) {
-        _this3.state.start(state);
+        _this4.state.start(state);
         tween.to({
           alpha: 0 }, 500, Phaser.Easing.Default, true, 500);
       });
@@ -6762,7 +6895,7 @@ module.exports = exports['default'];
 
 }).call(this,require('_process'))
 
-},{"_process":91}],107:[function(require,module,exports){
+},{"_process":91}],110:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -6894,7 +7027,7 @@ exports['default'] = I18n;
 
 // jscs: enable
 
-},{"assert":89}],108:[function(require,module,exports){
+},{"assert":89}],111:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -6919,6 +7052,8 @@ Level
 var _seabed = require('./seabed');
 
 var _seabed2 = _interopRequireDefault(_seabed);
+
+// import SeabedFilter from './filter/seabed-filter.js';
 
 var colorIndex = 0;
 var colors = Phaser.Color.HSLColorWheel();
@@ -6957,8 +7092,15 @@ var Level = (function (_Seabed) {
 
       var code = this.data.code;
 
-      this.load.image('img1', 'img/' + code + '1.png');
-      this.load.image('img2', 'img/' + code + '2.png');
+      this.load.image('img1', 'img/' + code + '1.jpg');
+      this.load.image('img2', 'img/' + code + '2.jpg');
+
+      if (this.game.device.iPad) {
+        this.load.image('whale', 'img/whale.png');
+        // this.load.image('img3', 'img/1003.png');
+        this.load.image('girl', 'img/1005.png');
+        // this.load.image('img5', 'img/1006.png');
+      }
 
       [1, 2].forEach(function (i) {
         _this.data.difference[i - 1].forEach(function (_ref, j) {
@@ -6989,43 +7131,73 @@ var Level = (function (_Seabed) {
 
       _get(Object.getPrototypeOf(Level.prototype), 'create', this).call(this);
 
-      this.img1 = this.add.image(0, 0, 'img1');
-      this.img2 = this.add.image(this.world.centerX, 0, 'img2');
+      // let bgSprite = this.bgSprite = this.add.sprite();
+      // bgSprite.width = this.world.width;
+      // bgSprite.height = this.world.height;
+      // bgSprite.filters = [new SeabedFilter(this.game)];
+
+      var y = this.game.device.iPad ? this.iPadTop : 0;
+
+      // background images
+      this.img1 = this.add.image(0, y, 'img1');
+      this.img2 = this.add.image(this.world.centerX, y, 'img2');
       // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
       // this.img1.smoothed = this.img2.smoothed = false;
 
+      if (this.game.device.iPad) {
+        var whale = this.add.image(0, this.iPadBottom, 'whale');
+        whale.scale.setTo(0.5);
+
+        var girl = this.add.image(this.world.width, this.iPadStatusBarHeight, 'girl');
+        girl.anchor.setTo(1.5, 0);
+
+        //   let img3 = this.add.image(this.world.centerX, this.img1.bottom, 'img3');
+        //   img3.anchor.setTo(0.5, -0.5);
+        //
+        //   let img4 = this.add.image(0, this.img1.bottom, 'img4');
+        //   img4.anchor.setTo(-1, -0.1);
+        //
+        //   let img5 = this.add.image(this.world.width, this.img1.bottom, 'img5');
+        //   img5.anchor.setTo(3, -2);
+        //
+        [whale, girl].forEach(function (image) {
+          image.sendToBack();
+
+          var duration = _this2.rnd.between(2000, 3000); // animate speed
+          var distance = _this2.rnd.between(4, 8); // animate offset
+
+          _this2.add.tween(image).to({
+            y: image.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+        });
+      }
+
       // show spliter
-      var spliter = this.add.graphics(this.world.centerX, 0);
+      var spliter = this.add.graphics(this.world.centerX, y);
       spliter.lineStyle(this.world.width / 500, 16777215);
-      spliter.lineTo(0, this.img1.bottom);
+      spliter.lineTo(0, this.img1.height);
 
       // level up progress
       this.levelup = this.add.graphics(this.world.centerX, this.img1.bottom);
 
       // show level number
       var level = parseInt(this.data.code) - 100;
-      var text = this.add.text(this.world.centerX, 0, ' ' + level + ' ', {
+      var text = this.add.text(this.world.centerX, y, ' ' + level + ' ', {
         align: 'center',
         font: 'Arial',
         fontWeight: 'bold',
         fontSize: this.world.width / 20 });
       text.anchor.setTo(0.5, 0);
       text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
+      if (this.game.device.iPad) {
+        text.y = this.iPadStatusBarHeight;
+      }
 
       var grd = text.context.createLinearGradient(0, 0, 0, text.height);
       grd.addColorStop(0, '#8ED6FF');
       grd.addColorStop(1, '#004CB3');
       text.fill = grd;
 
-      // a crab indicator for game progress.
-      // let crab = this.crab = this.add.image(
-      //   this.world.centerX,
-      //   this.img1.top + this.img1.height,
-      //   'img7'
-      // );
-      // crab.anchor.setTo(0.5, 0.5);
-      // crab.scale.setTo(0.5, 0.5);
-
+      // different items
       [0, 1].forEach(function (i) {
         _this2.data.difference[i].forEach(function (_ref2, j) {
           var h = _ref2.h;
@@ -7043,6 +7215,7 @@ var Level = (function (_Seabed) {
             var _item = _this2.add.graphics(_x, _y);
 
             _item.index = j;
+            // this.found[j].items[i] = item;
 
             _item.hitArea = _this2.inputCircle;
 
@@ -7058,7 +7231,7 @@ var Level = (function (_Seabed) {
           var item = _this2[key] = _this2.add.image(x, y, key);
 
           item.index = j;
-          _this2.found[item.index].items[i] = item;
+          _this2.found[j].items[i] = item;
 
           item.anchor.setTo(0.5, 0.5);
 
@@ -7069,7 +7242,7 @@ var Level = (function (_Seabed) {
           item.inputEnabled = true;
           item.events.onInputUp.add(_this2.onInputUp, _this2);
 
-          if (_this2.env == 'development') {
+          if (_this2.env == 'development' && _this2.game.device.chrome) {
             item.input.enableDrag();
             item.events.onDragStop.add(_this2.onDragStop, _this2);
           }
@@ -7077,13 +7250,28 @@ var Level = (function (_Seabed) {
       });
 
       var previousArrow = this.add.image(0, this.world.centerY, 'submarine');
-      // previousArrow.position.x -= previousArrow.width * 0.3;
       previousArrow.anchor.setTo(-0.3, 0.5);
       previousArrow.scale.x = -1;
 
       var nextArrow = this.add.image(this.world.width, this.world.centerY, 'submarine');
-      // nextArrow.position.x += nextArrow.width * 0.3;
       nextArrow.anchor.setTo(-0.3, 0.5);
+
+      [previousArrow, nextArrow].forEach(function (image) {
+        image.sendToBack();
+
+        var duration = _this2.rnd.between(2000, 3000); // animate speed
+        var distance = _this2.rnd.between(4, 8); // animate offset
+
+        _this2.add.tween(image).to({
+          y: image.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
+      });
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      _get(Object.getPrototypeOf(Level.prototype), 'update', this).call(this);
+
+      // this.bgSprite.filters[0].update();
     }
   }, {
     key: 'shine',
@@ -7160,6 +7348,10 @@ var Level = (function (_Seabed) {
 
       // shine and scale animate for both item.
       found.items.forEach(function (item) {
+        // if (item.type == Phaser.GRAPHICS) {
+        //   item.lineStyle(this.inputCircle.radius / 20, 0xffffff);
+        //   item.drawCircle(0, 0, this.inputCircle.radius);
+        // }
         if (item) {
           _this3.shine(item);
         }
@@ -7197,7 +7389,7 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./seabed":110}],109:[function(require,module,exports){
+},{"./seabed":113}],112:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7231,7 +7423,7 @@ window.onerror = function (msg, url, line, column, err) {
 exports['default'] = log;
 module.exports = exports['default'];
 
-},{}],110:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7257,6 +7449,9 @@ var _state = require('./state');
 
 var _state2 = _interopRequireDefault(_state);
 
+var bgMusic = {};
+var soundEffect = {};
+
 var Seabed = (function (_State) {
   function Seabed() {
     _classCallCheck(this, Seabed);
@@ -7267,16 +7462,75 @@ var Seabed = (function (_State) {
   _inherits(Seabed, _State);
 
   _createClass(Seabed, [{
+    key: 'init',
+    value: function init() {
+      _get(Object.getPrototypeOf(Seabed.prototype), 'init', this).call(this);
+
+      this.stage.backgroundColor = '#aaddf2';
+    }
+  }, {
     key: 'preload',
     value: function preload() {
       _get(Object.getPrototypeOf(Seabed.prototype), 'preload', this).call(this);
 
       // http://magnatune.com/artists/albums/fulton-once?song=4
       this.loadAudio('bg', 'music/Romanesca.m4a');
+      this.loadAudio('water', 'music/Water Lake.m4a');
+      this.loadAudio('ed', 'music/Laureate.m4a');
+    }
+  }, {
+    key: 'create',
+    value: function create() {
+      _get(Object.getPrototypeOf(Seabed.prototype), 'create', this).call(this);
 
-      this.loadAudio('water', 'sounds/Water Lake.m4a');
-      this.loadAudio('whale', 'sounds/Whale Sounds.m4a');
-      this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
+      this.playMusic();
+    }
+  }, {
+    key: 'playMusic',
+    value: function playMusic() {
+      var play = function play() {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        args.forEach(function (sound) {
+          return sound && !sound.isPlaying && sound.play();
+        });
+      };
+      var stop = function stop() {
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        args.forEach(function (sound) {
+          return sound && sound.stop();
+        });
+      };
+
+      if (this.key != 'ending') {
+        stop(bgMusic.ed);
+
+        bgMusic.bg = bgMusic.bg || this.playAudio('bg', 0.5);
+        play(bgMusic.bg);
+
+        bgMusic.water = bgMusic.water || this.playAudio('water', 0.2);
+        play(bgMusic.water);
+      } else {
+        stop(bgMusic.bg, bgMusic.water);
+
+        bgMusic.ed = bgMusic.ed || this.playAudio('ed', 0.8);
+        play(bgMusic.ed);
+      }
+    }
+  }], [{
+    key: 'bgMusic',
+    get: function () {
+      return bgMusic;
+    }
+  }, {
+    key: 'soundEffect',
+    get: function () {
+      return soundEffect;
     }
   }]);
 
@@ -7286,7 +7540,7 @@ var Seabed = (function (_State) {
 exports['default'] = Seabed;
 module.exports = exports['default'];
 
-},{"./state":111}],111:[function(require,module,exports){
+},{"./state":114}],114:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7322,12 +7576,39 @@ var State = (function (_Phaser$State) {
   _inherits(State, _Phaser$State);
 
   _createClass(State, [{
+    key: 'inputCircle',
+
+    // min finger tip size. 44 is for 480*320 screen.
+    // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+    get: function () {
+      return new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
+    }
+  }, {
+    key: 'iPadStatusBarHeight',
+
+    // iPad status bar height is 20px;
+    // http://forums.macrumors.com/showthread.php?t=937836
+    get: function () {
+      return 20;
+    }
+  }, {
+    key: 'differenceImageHeight',
+    get: function () {
+      return 576;
+    }
+  }, {
+    key: 'iPadTop',
+    get: function () {
+      return (this.world.height - this.differenceImageHeight) / 2;
+    }
+  }, {
+    key: 'iPadBottom',
+    get: function () {
+      return this.iPadTop + this.differenceImageHeight;
+    }
+  }, {
     key: 'init',
     value: function init() {
-      // min finger tip size. 44 is for 480*320 screen.
-      // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
-      this.inputCircle = new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
-
       this.game.fitScreen();
 
       // remove camera bounds for slide.
@@ -7467,8 +7748,9 @@ var State = (function (_Phaser$State) {
       if (!this.renderFpsThrottle) {
         var renderFps = function renderFps() {
           var fps = _this2.game.time.fps;
+          var x = _this2.game.device.iPad ? 50 : 0;
 
-          _this2.game.debug.text(fps, 0, 12);
+          _this2.game.debug.text(fps, x, 14);
         };
 
         this.renderFpsThrottle = (0, _lodashFunctionThrottle2['default'])(renderFps, 500);
@@ -7478,9 +7760,12 @@ var State = (function (_Phaser$State) {
     }
   }, {
     key: 'onFileComplete',
-    value: function onFileComplete(progress, key, success, loaded, total) {
+
+    // progress, key, success, loaded, total
+    value: function onFileComplete(progress) {
       if (!this.progress) {
-        var bar = this.add.graphics(0, 0);
+        var y = this.game.device.iPad ? this.world.height : 0;
+        var bar = this.add.graphics(0, y);
         var fontSize = this.world.height / 50;
         var text = this.add.text(this.world.centerX, fontSize, '', {
           align: 'center',
@@ -7494,9 +7779,9 @@ var State = (function (_Phaser$State) {
           bar: bar, text: text };
       }
 
-      this.progress.bar.lineStyle(this.height / 100, 43520);
+      this.progress.bar.lineStyle(this.height / 50, 43520);
       this.progress.bar.lineTo(this.world.width * progress / 100, 0);
-      this.progress.text.text = '' + key + ' (' + loaded + '/' + total + ')';
+      // this.progress.text.text = `${key} (${loaded}/${total})`;
 
       if (progress >= 100) {
         this.progress.bar.destroy();
@@ -7522,9 +7807,7 @@ var State = (function (_Phaser$State) {
 
     // slide camera left or right. down is first time.
     value: function onMove(pointer, x, y, down) {
-      var distance = Math.abs(x - pointer.positionDown.x);
-
-      if (pointer.isDown && !down && distance > this.inputCircle.radius) {
+      if (pointer.isDown && !down && (Math.abs(x - pointer.positionDown.x) > this.inputCircle.radius || !pointer.justPressed())) {
         // BUGFIX On iOS right landscape. Press then drag right out of screen(Power side). onUp event will not fire.
         if (x > this.camera.width - this.camera.width / 100) {
           this.onUp();

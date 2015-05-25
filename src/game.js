@@ -5,16 +5,21 @@ Phaser game
 
 class Game extends Phaser.Game {
   constructor() {
-    super(1024, 768); // 1.0
-    // super(768, 576); // 0.75
-    // super(512, 384); // 0.5
+    super(1024, 768);
 
-    this.levels = [];
-    this.fadeColor = 0xffffff;
+    this.levelCound = 0;
+    // this.fadeColor = 0xffffff;
+  }
+
+  boot() {
+    super.boot();
+
+    this.onPause.add(() => this.sound.pauseAll());
+    this.onResume.add(() => this.sound.resumeAll());
   }
 
   get env() {
-    return process.env.BROWSER_ENV;
+    return window.cordova && cordova.compileTime.env || process.env.BROWSER_ENV;
   }
 
   fitScreen() {
@@ -26,14 +31,16 @@ class Game extends Phaser.Game {
   }
 
   get previousStateKey() {
-    if (this.state.current == 'cover') {
+    let current = this.state.current;
+
+    if (current == 'cover') {
       return;
-    } else if (this.state.current == this.levels[0]) {
+    } else if (current == 'ending') {
+      return this.levelCount - 1;
+    } else if (current == '0') {
       return 'cover';
     } else {
-      let index = this.levels.indexOf(this.state.current);
-
-      return this.levels[index - 1];
+      return `${parseInt(current, 10) - 1}`;
     }
   }
 
@@ -57,17 +64,16 @@ class Game extends Phaser.Game {
   }
 
   get nextStateKey() {
-    if (this.state.current == 'cover') {
-      return this.levels[0];
-    } else {
-      let index = this.levels.indexOf(this.state.current);
-      let state = this.levels[index + 1];
+    let current = this.state.current;
 
-      if (this.state.checkState(state)) {
-        return state;
-      } else {
-        return;
-      }
+    if (current == 'cover') {
+      return '0';
+    } else if (current == 'ending') {
+      return;
+    } else if (!this.state.states[parseInt(current, 10) + 1]) {
+      return 'ending';
+    } else {
+      return `${parseInt(current, 10) + 1}`;
     }
   }
 

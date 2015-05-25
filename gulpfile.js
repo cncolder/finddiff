@@ -5,6 +5,7 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 var babelify = require('babelify');
+var partialify = require('partialify/custom');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('default', ['pm2:start', 'pm2:logs', 'watch']);
@@ -21,6 +22,7 @@ gulp.task('browserify', function(cb) {
     .transform(babelify.configure({
       // blacklist: ['regenerator'],
     }))
+    .transform(partialify.alsoAllow('shader'))
     .require('./src/index.js', {
       entry: true,
     })
