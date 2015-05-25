@@ -4,7 +4,6 @@ Level
 */
 
 import Seabed from './seabed';
-// import SeabedFilter from './filter/seabed-filter.js';
 
 var colorIndex = 0;
 const colors = Phaser.Color.HSLColorWheel();
@@ -40,9 +39,7 @@ class Level extends Seabed {
 
     if (this.game.device.iPad) {
       this.load.image('whale', 'img/whale.png');
-      // this.load.image('img3', 'img/1003.png');
       this.load.image('girl', 'img/1005.png');
-      // this.load.image('img5', 'img/1006.png');
     }
 
     [1, 2].forEach(i => {
@@ -64,24 +61,19 @@ class Level extends Seabed {
 
     this.load.image('submarine', 'img/1008.png');
 
-    this.loadAudio('bell', 'sounds/Bell Transition.m4a');
+    this.load.audio('bell', 'sounds/Bell Transition.m4a');
   }
 
   create() {
     super.create();
-
-    // let bgSprite = this.bgSprite = this.add.sprite();
-    // bgSprite.width = this.world.width;
-    // bgSprite.height = this.world.height;
-    // bgSprite.filters = [new SeabedFilter(this.game)];
 
     let y = this.game.device.iPad ? this.iPadTop : 0;
 
     // background images
     this.img1 = this.add.image(0, y, 'img1');
     this.img2 = this.add.image(this.world.centerX, y, 'img2');
-    // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
     // this.img1.smoothed = this.img2.smoothed = false;
+    // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
 
     if (this.game.device.iPad) {
       let whale = this.add.image(0, this.iPadBottom, 'whale');
@@ -92,15 +84,6 @@ class Level extends Seabed {
       );
       girl.anchor.setTo(1.5, 0);
 
-      //   let img3 = this.add.image(this.world.centerX, this.img1.bottom, 'img3');
-      //   img3.anchor.setTo(0.5, -0.5);
-      //
-      //   let img4 = this.add.image(0, this.img1.bottom, 'img4');
-      //   img4.anchor.setTo(-1, -0.1);
-      //
-      //   let img5 = this.add.image(this.world.width, this.img1.bottom, 'img5');
-      //   img5.anchor.setTo(3, -2);
-      //
       [whale, girl].forEach(image => {
         image.sendToBack();
 
@@ -184,7 +167,7 @@ class Level extends Seabed {
         item.inputEnabled = true;
         item.events.onInputUp.add(this.onInputUp, this);
 
-        if (this.env == 'development' && this.game.device.chrome) {
+        if (this.game.env == 'development' && this.game.device.chrome) {
           item.input.enableDrag();
           item.events.onDragStop.add(this.onDragStop, this);
         }
@@ -206,7 +189,7 @@ class Level extends Seabed {
       image.sendToBack();
 
       let duration = this.rnd.between(2000, 3000); // animate speed
-      let distance = this.rnd.between(4, 8); // animate offset
+      let distance = this.rnd.between(5, 10); // animate offset
 
       this.add.tween(image).to({
         y: image.position.y + distance,
@@ -214,10 +197,17 @@ class Level extends Seabed {
     });
   }
 
-  update() {
-    super.update();
+  shutdown() {
+    super.shutdown();
 
-    // this.bgSprite.filters[0].update();
+    Object.keys(this).forEach(key => {
+      if (/^img\d+$/.test(key)) {
+        this[key] = null;
+      }
+    });
+
+    this.found = null;
+    this.levelup = null;
   }
 
   shine(image) {
@@ -240,10 +230,9 @@ class Level extends Seabed {
       1.01;
 
     // scale large
-    this.shineTweens = this.shineTweens || [];
-    this.shineTweens.push(this.add.tween(image.scale).to({
+    this.add.tween(image.scale).to({
       x, y,
-    }, 1000, Phaser.Easing.Default, true, 0, -1, true));
+    }, 1000, Phaser.Easing.Default, true, 0, -1, true);
   }
 
   colorFromWheel() {
@@ -304,7 +293,7 @@ class Level extends Seabed {
     });
 
     // play a success sound.
-    this.playAudio('bell');
+    this.sound.play('bell');
 
     // game progress.
     let checked = this.found.filter(found => found.checked).length;

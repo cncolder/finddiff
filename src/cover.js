@@ -27,10 +27,10 @@ class Cover extends Seabed {
       this.load.image(`img${i}`, `img/${code}${i}.png`);
     });
 
-    this.loadImage('bubble', 'img/bubble.png');
+    this.load.image('bubble', 'img/bubble.png');
 
-    this.loadAudio('whale', 'sounds/Whale Sounds.m4a');
-    this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
+    this.load.audio('whale', 'sounds/Whale Sounds.m4a');
+    this.load.audio('sweep', 'sounds/Sweep Motion.m4a');
   }
 
   create() {
@@ -71,15 +71,22 @@ class Cover extends Seabed {
     this.addBubbleEmitter();
 
     this.soundEffect = {
-      whale: this.playAudio('whale', 0.4),
-      sweep: this.playAudio('sweep', 0.6),
+      whale: this.sound.play('whale', 0.4),
+      sweep: this.sound.play('sweep', 0.6),
     };
   }
 
   shutdown() {
     super.shutdown();
 
+    Object.keys(this).forEach(key => {
+      if (/^img\d+$/.test(key)) {
+        this[key] = null;
+      }
+    });
+
     Object.entries(this.soundEffect).forEach(([key, value]) => value.stop());
+    this.soundEffect = null;
   }
 
   addTextScaleTweens() {

@@ -2,7 +2,7 @@
     "background": {
         "color": "#aaddf2",
         "music": "music/Romanesca.m4a",
-        "sound": "sounds/Water Lake.m4a"
+        "environment": "sounds/Water Lake.m4a"
     },
     "cover": {
         "code": "100",

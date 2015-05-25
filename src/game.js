@@ -1,35 +1,67 @@
 /*
-Phaser game
-  it will handle cordova deviceready event by itself.
+Game
+  Phaser game will handle cordova deviceready event by itself.
 */
 
-class Game extends Phaser.Game {
-  constructor() {
-    super(1024, 768);
+import Loader from './loader'; // jshint ignore:line
+import SoundManager from './sound-manager'; // jshint ignore:line
+import Cover from './cover';
+import Level from './level';
+import seabedData from './data/seabed';
 
-    this.levelCound = 0;
+export default class Game extends Phaser.Game {
+  constructor() {
+    let width = 1024;
+    let height = width / window.innerWidth * window.innerHeight;
+    // let enableDebug = env != 'production';
+
+    super({
+      width, height,
+    });
+
+    this.levelCount = seabedData.levels.length;
     // this.fadeColor = 0xffffff;
+
+    return this;
   }
 
   boot() {
+    console.log('[Game] boot');
+
     super.boot();
 
+    this.load = new Loader(this);
+    this.sound = new SoundManager(this);
+    this.sound.boot();
+
+    // pause all sound when game is deactived.
     this.onPause.add(() => this.sound.pauseAll());
     this.onResume.add(() => this.sound.resumeAll());
+
+    this.state.add('cover', new Cover(seabedData.cover));
+    seabedData.levels.forEach((level, index) => {
+      game.state.add(index, new Level(level));
+    });
+    this.state.start('cover');
   }
 
+  // compile time env on mobile. or localhost in browser.
   get env() {
     return window.cordova && cordova.compileTime.env || process.env.BROWSER_ENV;
   }
 
+  // scale width to fit screen.
   fitScreen() {
     if (this.scale.scaleMode != Phaser.ScaleManager.USER_SCALE) {
+      console.log('[Game] fit screen');
+
       this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
       this.scale.setUserScale(window.innerWidth / this.world.width);
       this.scale.pageAlignHorizontally = this.scale.pageAlignVertically = true;
     }
   }
 
+  // pages loop: cover -> levels -> cover
   get previousStateKey() {
     let current = this.state.current;
 
@@ -42,7 +74,11 @@ class Game extends Phaser.Game {
     }
   }
 
+  // slide left then start previous state.
   previous() {
+    console.log('[Game] previous page');
+
+
     let previousStateKey = this.previousStateKey;
 
     if (previousStateKey) {
@@ -50,9 +86,7 @@ class Game extends Phaser.Game {
         .to({
           x: -this.world.width,
         }, 200, Phaser.Easing.Quadratic.InOut, true)
-        .onComplete.addOnce(() => {
-          this.state.start(previousStateKey);
-        });
+        .onComplete.addOnce(() => this.state.start(previousStateKey));
     } else {
       this.add.tween(this.camera)
         .to({
@@ -73,7 +107,10 @@ class Game extends Phaser.Game {
     }
   }
 
+  // slide right then start previous state.
   next() {
+    console.log('[Game] next page');
+
     let nextStateKey = this.nextStateKey;
 
     if (nextStateKey) {
@@ -81,25 +118,16 @@ class Game extends Phaser.Game {
         .to({
           x: this.world.width,
         }, 200, Phaser.Easing.Quadratic.InOut, true)
-        .onComplete.addOnce(() => {
-          this.state.start(nextStateKey);
-        });
+        .onComplete.addOnce(() => this.state.start(nextStateKey));
     } else {
       this.add.tween(this.camera)
         .to({
           x: 0,
         }, 100, Phaser.Easing.Quadratic.InOut, true);
-
-      // let t = app.t;
-      //
-      // navigator.notification.alert(
-      //   t `Game complete page is working out.`, () => {
-      //     console.log('[Game] levels complete');
-      //   }, t `Nothing else`
-      // );
     }
   }
 
+  // fade effect between state switch.
   // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
   fade(state) {
     let mask = this.add.graphics(0, 0);
@@ -120,5 +148,3 @@ class Game extends Phaser.Game {
       });
   }
 }
-
-export default Game;

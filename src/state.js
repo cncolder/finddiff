@@ -5,9 +5,47 @@ State
 
 import throttle from 'lodash/function/throttle';
 
+let renderFpsThrottle;
+
 class State extends Phaser.State {
   constructor() {
     super();
+  }
+
+  init() {
+    this.game.fitScreen();
+
+    // remove camera bounds for slide.
+    if (this.camera.bounds) {
+      this.camera.bounds = null;
+    }
+
+    if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
+      this.load.onFileComplete.add(this.onFileComplete, this);
+    }
+
+    this.moveCallbackIndex = this.input.addMoveCallback(this.onMove, this);
+
+    if (!this.input.onUp.has(this.onUp, this)) {
+      this.input.onUp.add(this.onUp, this);
+    }
+  }
+
+  // render() {
+  //   if (
+  //     this.game.env != 'production' &&
+  //     this.game.enableDebug &&
+  //     !this.game.paused &&
+  //     !this.game.device.cocoonJSApp // CocoonJS lancher show fps itself.
+  //   ) {
+  //     this.renderFps();
+  //   }
+  // }
+
+  shutdown() {
+    this.load.onFileComplete.remove(this.onFileComplete, this);
+    this.input.deleteMoveCallback(this.moveCallbackIndex);
+    this.input.onUp.remove(this.onUp, this);
   }
 
   // min finger tip size. 44 is for 480*320 screen.
@@ -34,139 +72,26 @@ class State extends Phaser.State {
     return this.iPadTop + this.differenceImageHeight;
   }
 
-  init() {
-    this.game.fitScreen();
-
-    // remove camera bounds for slide.
-    this.camera.bounds = null;
-
-    if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
-      this.load.onFileComplete.add(this.onFileComplete, this);
-    }
-
-    this.moveCallbackIndex = this.input.addMoveCallback(this.onMove, this);
-
-    if (!this.input.onUp.has(this.onUp, this)) {
-      this.input.onUp.add(this.onUp, this);
-    }
-  }
-
-  render() {
-    if (!this.game.paused && !this.game.device.cocoonJSApp) {
-      this.renderFps();
-    }
-  }
-
-  shutdown() {
-    this.load.onFileComplete.remove(this.onFileComplete, this);
-    this.input.deleteMoveCallback(this.moveCallbackIndex);
-    this.input.onUp.remove(this.onUp, this);
-  }
-
-  get env() {
-    return this.game.env;
-  }
-
-  assign(obj) {
-    Object.assign(this, obj);
-  }
-
-  loadImage(key, path) {
-    if (!this.cache.checkImageKey(key)) {
-      this.load.image(key, path);
-    }
-  }
-
-  loadAudio(key, path) {
-    if (!this.cache.checkSoundKey(key)) {
-      let device = this.game.device;
-
-      if (device.android && !device.webAudio) {
-        return this.loadMedia(key, path);
-      }
-
-      this.load.audio(key, path, false);
-    }
-  }
-
-  loadMedia(key, path) {
-    console.log('[Media]', 'cache', `${key} (${path})`);
-
-    this.cache.addSound(key, '', {
-      path,
-    });
-  }
-
-  playAudio(key, volume = 1, loop = false) {
-    let device = this.game.device;
-
-    if (device.android && !device.webAudio) {
-      return this.playMedia(key, volume, loop);
-    } else {
-      return this.sound.play(key, volume, loop);
-    }
-  }
-
-  playMedia(key, volume = 1, loop = false) {
-    if (!window.Media) {
-      console.log('[Media] need cordova-plugin-media to play');
-      return;
-    }
-
-    let data = this.cache.getSoundData(key);
-
-    // 10 is the length of 'index.html'
-    let root = location.href.substr(0, location.href.length - 10);
-
-    // file:///android_asset/www/asset/xxx.mp3
-    let path = root + data.path;
-
-    let media = new Media(path, () => {
-      console.log('[Media]', 'finish', `${key} (${path})`);
-
-      if (!this.game.paused) {
-        if (loop) {
-          console.log('[Media]', 'loop', `${key} (${path})`);
-
-          media.play();
-        } else {
-          console.log('[Media]', 'release', `${key} (${path})`);
-
-          media.release();
-        }
-      }
-    }, err => {
-      console.log('[Media]', 'error', err.message);
-    });
-
-    media.setVolume(volume);
-    media.play();
-
-    media.resume = media.play.bind(media);
-
-    return media;
-  }
-
   renderFps() {
-    if (!this.time.advancedTiming) {
-      this.time.advancedTiming = true;
-    }
-
-    if (!this.renderFpsThrottle) {
+    if (!renderFpsThrottle) {
       let renderFps = () => {
         let fps = this.game.time.fps;
         let x = this.game.device.iPad ? 50 : 0;
 
+        if (!this.time.advancedTiming) {
+          this.time.advancedTiming = true;
+        }
+
         this.game.debug.text(fps, x, 14);
       };
 
-      this.renderFpsThrottle = throttle(renderFps, 500);
+      renderFpsThrottle = throttle(renderFps, 500);
     }
 
-    this.renderFpsThrottle();
+    renderFpsThrottle();
   }
 
-  // progress, key, success, loaded, total
+  // show assets load progress bar. (progress, key, success, loaded, total)
   onFileComplete(progress) {
     if (!this.progress) {
       let y = this.game.device.iPad ? this.world.height : 0;

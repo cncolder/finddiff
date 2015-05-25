@@ -4,12 +4,6 @@
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _whatwgFetch = require('whatwg-fetch');
-
-var _whatwgFetch2 = _interopRequireDefault(_whatwgFetch);
-
-// jshint ignore:line
-
 var _log = require('./log');
 
 var _log2 = _interopRequireDefault(_log);
@@ -24,36 +18,16 @@ var _game = require('./game');
 
 var _game2 = _interopRequireDefault(_game);
 
-var _cover = require('./cover');
-
-var _cover2 = _interopRequireDefault(_cover);
-
-var _level = require('./level');
-
-var _level2 = _interopRequireDefault(_level);
-
-var _dataSeabed = require('./data/seabed');
-
-var _dataSeabed2 = _interopRequireDefault(_dataSeabed);
-
 process.env.BROWSER_ENV = location.host == 'localhost:3000' ? 'development' : 'production';
 
 require('babelify/node_modules/babel-core/polyfill');
 
 window.app = new _app2['default']();
-
-var game = window.game = new _game2['default']();
-
-game.state.add('cover', new _cover2['default'](_dataSeabed2['default'].cover), true);
-
-_dataSeabed2['default'].levels.forEach(function (level, index) {
-  game.state.add(index, new _level2['default'](level));
-});
-game.levelCount = _dataSeabed2['default'].levels.length;
+window.game = new _game2['default']();
 
 }).call(this,require('_process'))
 
-},{"./app":103,"./cover":104,"./data/seabed":105,"./game":106,"./level":108,"./log":109,"_process":91,"babelify/node_modules/babel-core/polyfill":88,"whatwg-fetch":102}],2:[function(require,module,exports){
+},{"./app":103,"./game":106,"./log":110,"_process":91,"babelify/node_modules/babel-core/polyfill":88}],2:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -5331,6 +5305,10 @@ Cordova
   webview shell.
  */
 
+var _whatwgFetch = require('whatwg-fetch');
+
+var _whatwgFetch2 = _interopRequireDefault(_whatwgFetch);
+
 var _i18n = require('./i18n');
 
 var _i18n2 = _interopRequireDefault(_i18n);
@@ -5342,9 +5320,6 @@ var App = (function () {
     _classCallCheck(this, App);
 
     this.bindEvents();
-
-    // Phaser game.input.doubleTapRate is 300ms.
-    this.doubleTapRate = 300;
   }
 
   _createClass(App, [{
@@ -5368,7 +5343,7 @@ var App = (function () {
           if (platform == 'android') {
             var url = '' + updateUrl + '&platform=' + platform;
 
-            fetch(url).then(function (res) {
+            (0, _whatwgFetch2['default'])(url).then(function (res) {
               return res.json();
             }).then(function (json) {
               var latest = json.latest;
@@ -5474,7 +5449,7 @@ var App = (function () {
       var now = Date.now();
       var gap = now - (this.previousBackbuttonTimestamp || 0);
 
-      if (gap < this.doubleTapRate) {
+      if (gap < game.input.doubleTapRate) {
         navigator.app.exitApp();
       } else {
         this.previousBackbuttonTimestamp = now;
@@ -5488,7 +5463,7 @@ var App = (function () {
 exports['default'] = App;
 module.exports = exports['default'];
 
-},{"./i18n":107}],104:[function(require,module,exports){
+},{"./i18n":107,"whatwg-fetch":102}],104:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -5547,10 +5522,10 @@ var Cover = (function (_Seabed) {
         _this.load.image('img' + i, 'img/' + code + '' + i + '.png');
       });
 
-      this.loadImage('bubble', 'img/bubble.png');
+      this.load.image('bubble', 'img/bubble.png');
 
-      this.loadAudio('whale', 'sounds/Whale Sounds.m4a');
-      this.loadAudio('sweep', 'sounds/Sweep Motion.m4a');
+      this.load.audio('whale', 'sounds/Whale Sounds.m4a');
+      this.load.audio('sweep', 'sounds/Sweep Motion.m4a');
     }
   }, {
     key: 'create',
@@ -5596,13 +5571,21 @@ var Cover = (function (_Seabed) {
       this.addBubbleEmitter();
 
       this.soundEffect = {
-        whale: this.playAudio('whale', 0.4),
-        sweep: this.playAudio('sweep', 0.6) };
+        whale: this.sound.play('whale', 0.4),
+        sweep: this.sound.play('sweep', 0.6) };
     }
   }, {
     key: 'shutdown',
     value: function shutdown() {
+      var _this3 = this;
+
       _get(Object.getPrototypeOf(Cover.prototype), 'shutdown', this).call(this);
+
+      Object.keys(this).forEach(function (key) {
+        if (/^img\d+$/.test(key)) {
+          _this3[key] = null;
+        }
+      });
 
       Object.entries(this.soundEffect).forEach(function (_ref3) {
         var _ref32 = _slicedToArray(_ref3, 2);
@@ -5611,6 +5594,7 @@ var Cover = (function (_Seabed) {
         var value = _ref32[1];
         return value.stop();
       });
+      this.soundEffect = null;
     }
   }, {
     key: 'addTextScaleTweens',
@@ -5626,14 +5610,14 @@ var Cover = (function (_Seabed) {
 
     // up down animate, like swiming.
     value: function addWaveTweens() {
-      var _this3 = this;
+      var _this4 = this;
 
       [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (i) {
-        var img = _this3['img' + i];
-        var duration = _this3.rnd.between(1000, 2000); // animate speed
-        var distance = _this3.rnd.between(3, 5); // animate offset
+        var img = _this4['img' + i];
+        var duration = _this4.rnd.between(1000, 2000); // animate speed
+        var distance = _this4.rnd.between(3, 5); // animate offset
 
-        _this3.add.tween(img).to({
+        _this4.add.tween(img).to({
           y: img.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
       });
     }
@@ -5740,12 +5724,12 @@ var Cover = (function (_Seabed) {
 exports['default'] = Cover;
 module.exports = exports['default'];
 
-},{"./seabed":110}],105:[function(require,module,exports){
+},{"./seabed":111}],105:[function(require,module,exports){
 module.exports={
     "background": {
         "color": "#aaddf2",
         "music": "music/Romanesca.m4a",
-        "sound": "sounds/Water Lake.m4a"
+        "environment": "sounds/Water Lake.m4a"
     },
     "cover": {
         "code": "100",
@@ -6615,23 +6599,56 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
 /*
-Phaser game
-  it will handle cordova deviceready event by itself.
+Game
+  Phaser game will handle cordova deviceready event by itself.
 */
+
+var _loader = require('./loader');
+
+var _loader2 = _interopRequireDefault(_loader);
+
+// jshint ignore:line
+
+var _soundManager = require('./sound-manager');
+
+var _soundManager2 = _interopRequireDefault(_soundManager);
+
+// jshint ignore:line
+
+var _cover = require('./cover');
+
+var _cover2 = _interopRequireDefault(_cover);
+
+var _level = require('./level');
+
+var _level2 = _interopRequireDefault(_level);
+
+var _dataSeabed = require('./data/seabed');
+
+var _dataSeabed2 = _interopRequireDefault(_dataSeabed);
 
 var Game = (function (_Phaser$Game) {
   function Game() {
     _classCallCheck(this, Game);
 
-    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, 1024, 768);
+    var width = 1024;
+    var height = width / window.innerWidth * window.innerHeight;
+    // let enableDebug = env != 'production';
 
-    this.levelCound = 0;
+    _get(Object.getPrototypeOf(Game.prototype), 'constructor', this).call(this, {
+      width: width, height: height });
+
+    this.levelCount = _dataSeabed2['default'].levels.length;
     // this.fadeColor = 0xffffff;
+
+    return this;
   }
 
   _inherits(Game, _Phaser$Game);
@@ -6641,24 +6658,43 @@ var Game = (function (_Phaser$Game) {
     value: function boot() {
       var _this = this;
 
+      console.log('[Game] boot');
+
       _get(Object.getPrototypeOf(Game.prototype), 'boot', this).call(this);
 
+      this.load = new _loader2['default'](this);
+      this.sound = new _soundManager2['default'](this);
+      this.sound.boot();
+
+      // pause all sound when game is deactived.
       this.onPause.add(function () {
         return _this.sound.pauseAll();
       });
       this.onResume.add(function () {
         return _this.sound.resumeAll();
       });
+
+      this.state.add('cover', new _cover2['default'](_dataSeabed2['default'].cover));
+      _dataSeabed2['default'].levels.forEach(function (level, index) {
+        game.state.add(index, new _level2['default'](level));
+      });
+      this.state.start('cover');
     }
   }, {
     key: 'env',
+
+    // compile time env on mobile. or localhost in browser.
     get: function () {
       return window.cordova && cordova.compileTime.env || process.env.BROWSER_ENV;
     }
   }, {
     key: 'fitScreen',
+
+    // scale width to fit screen.
     value: function fitScreen() {
       if (this.scale.scaleMode != Phaser.ScaleManager.USER_SCALE) {
+        console.log('[Game] fit screen');
+
         this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
         this.scale.setUserScale(window.innerWidth / this.world.width);
         this.scale.pageAlignHorizontally = this.scale.pageAlignVertically = true;
@@ -6666,6 +6702,8 @@ var Game = (function (_Phaser$Game) {
     }
   }, {
     key: 'previousStateKey',
+
+    // pages loop: cover -> levels -> cover
     get: function () {
       var current = this.state.current;
 
@@ -6679,15 +6717,19 @@ var Game = (function (_Phaser$Game) {
     }
   }, {
     key: 'previous',
+
+    // slide left then start previous state.
     value: function previous() {
       var _this2 = this;
+
+      console.log('[Game] previous page');
 
       var previousStateKey = this.previousStateKey;
 
       if (previousStateKey) {
         this.add.tween(this.camera).to({
           x: -this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
-          _this2.state.start(previousStateKey);
+          return _this2.state.start(previousStateKey);
         });
       } else {
         this.add.tween(this.camera).to({
@@ -6709,32 +6751,29 @@ var Game = (function (_Phaser$Game) {
     }
   }, {
     key: 'next',
+
+    // slide right then start previous state.
     value: function next() {
       var _this3 = this;
+
+      console.log('[Game] next page');
 
       var nextStateKey = this.nextStateKey;
 
       if (nextStateKey) {
         this.add.tween(this.camera).to({
           x: this.world.width }, 200, Phaser.Easing.Quadratic.InOut, true).onComplete.addOnce(function () {
-          _this3.state.start(nextStateKey);
+          return _this3.state.start(nextStateKey);
         });
       } else {
         this.add.tween(this.camera).to({
           x: 0 }, 100, Phaser.Easing.Quadratic.InOut, true);
-
-        // let t = app.t;
-        //
-        // navigator.notification.alert(
-        //   t `Game complete page is working out.`, () => {
-        //     console.log('[Game] levels complete');
-        //   }, t `Nothing else`
-        // );
       }
     }
   }, {
     key: 'fade',
 
+    // fade effect between state switch.
     // http://www.html5gamedevs.com/topic/2016-rectangle-fade/
     value: function fade(state) {
       var _this4 = this;
@@ -6763,7 +6802,7 @@ module.exports = exports['default'];
 
 }).call(this,require('_process'))
 
-},{"_process":91}],107:[function(require,module,exports){
+},{"./cover":104,"./data/seabed":105,"./level":108,"./loader":109,"./sound-manager":112,"_process":91}],107:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -6921,8 +6960,6 @@ var _seabed = require('./seabed');
 
 var _seabed2 = _interopRequireDefault(_seabed);
 
-// import SeabedFilter from './filter/seabed-filter.js';
-
 var colorIndex = 0;
 var colors = Phaser.Color.HSLColorWheel();
 
@@ -6965,9 +7002,7 @@ var Level = (function (_Seabed) {
 
       if (this.game.device.iPad) {
         this.load.image('whale', 'img/whale.png');
-        // this.load.image('img3', 'img/1003.png');
         this.load.image('girl', 'img/1005.png');
-        // this.load.image('img5', 'img/1006.png');
       }
 
       [1, 2].forEach(function (i) {
@@ -6990,7 +7025,7 @@ var Level = (function (_Seabed) {
 
       this.load.image('submarine', 'img/1008.png');
 
-      this.loadAudio('bell', 'sounds/Bell Transition.m4a');
+      this.load.audio('bell', 'sounds/Bell Transition.m4a');
     }
   }, {
     key: 'create',
@@ -6999,18 +7034,13 @@ var Level = (function (_Seabed) {
 
       _get(Object.getPrototypeOf(Level.prototype), 'create', this).call(this);
 
-      // let bgSprite = this.bgSprite = this.add.sprite();
-      // bgSprite.width = this.world.width;
-      // bgSprite.height = this.world.height;
-      // bgSprite.filters = [new SeabedFilter(this.game)];
-
       var y = this.game.device.iPad ? this.iPadTop : 0;
 
       // background images
       this.img1 = this.add.image(0, y, 'img1');
       this.img2 = this.add.image(this.world.centerX, y, 'img2');
-      // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
       // this.img1.smoothed = this.img2.smoothed = false;
+      // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
 
       if (this.game.device.iPad) {
         var whale = this.add.image(0, this.iPadBottom, 'whale');
@@ -7019,15 +7049,6 @@ var Level = (function (_Seabed) {
         var girl = this.add.image(this.world.width, this.iPadStatusBarHeight, 'girl');
         girl.anchor.setTo(1.5, 0);
 
-        //   let img3 = this.add.image(this.world.centerX, this.img1.bottom, 'img3');
-        //   img3.anchor.setTo(0.5, -0.5);
-        //
-        //   let img4 = this.add.image(0, this.img1.bottom, 'img4');
-        //   img4.anchor.setTo(-1, -0.1);
-        //
-        //   let img5 = this.add.image(this.world.width, this.img1.bottom, 'img5');
-        //   img5.anchor.setTo(3, -2);
-        //
         [whale, girl].forEach(function (image) {
           image.sendToBack();
 
@@ -7110,7 +7131,7 @@ var Level = (function (_Seabed) {
           item.inputEnabled = true;
           item.events.onInputUp.add(_this2.onInputUp, _this2);
 
-          if (_this2.env == 'development' && _this2.game.device.chrome) {
+          if (_this2.game.env == 'development' && _this2.game.device.chrome) {
             item.input.enableDrag();
             item.events.onDragStop.add(_this2.onDragStop, _this2);
           }
@@ -7128,18 +7149,27 @@ var Level = (function (_Seabed) {
         image.sendToBack();
 
         var duration = _this2.rnd.between(2000, 3000); // animate speed
-        var distance = _this2.rnd.between(4, 8); // animate offset
+        var distance = _this2.rnd.between(5, 10); // animate offset
 
         _this2.add.tween(image).to({
           y: image.position.y + distance }, duration, Phaser.Easing.Quadratic.InOut, true, 0, -1, true);
       });
     }
   }, {
-    key: 'update',
-    value: function update() {
-      _get(Object.getPrototypeOf(Level.prototype), 'update', this).call(this);
+    key: 'shutdown',
+    value: function shutdown() {
+      var _this3 = this;
 
-      // this.bgSprite.filters[0].update();
+      _get(Object.getPrototypeOf(Level.prototype), 'shutdown', this).call(this);
+
+      Object.keys(this).forEach(function (key) {
+        if (/^img\d+$/.test(key)) {
+          _this3[key] = null;
+        }
+      });
+
+      this.found = null;
+      this.levelup = null;
     }
   }, {
     key: 'shine',
@@ -7157,9 +7187,8 @@ var Level = (function (_Seabed) {
       x = y = d < 44 ? 1.4 : d < 100 ? 1.2 : d < 200 ? 1.05 : 1.01;
 
       // scale large
-      this.shineTweens = this.shineTweens || [];
-      this.shineTweens.push(this.add.tween(image.scale).to({
-        x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true));
+      this.add.tween(image.scale).to({
+        x: x, y: y }, 1000, Phaser.Easing.Default, true, 0, -1, true);
     }
   }, {
     key: 'colorFromWheel',
@@ -7197,7 +7226,7 @@ var Level = (function (_Seabed) {
   }, {
     key: 'onInputUp',
     value: function onInputUp(image, pointer, over) {
-      var _this3 = this;
+      var _this4 = this;
 
       var distance = pointer.position.distance(pointer.positionDown);
 
@@ -7221,12 +7250,12 @@ var Level = (function (_Seabed) {
         //   item.drawCircle(0, 0, this.inputCircle.radius);
         // }
         if (item) {
-          _this3.shine(item);
+          _this4.shine(item);
         }
       });
 
       // play a success sound.
-      this.playAudio('bell');
+      this.sound.play('bell');
 
       // game progress.
       var checked = this.found.filter(function (found) {
@@ -7257,7 +7286,80 @@ var Level = (function (_Seabed) {
 exports['default'] = Level;
 module.exports = exports['default'];
 
-},{"./seabed":110}],109:[function(require,module,exports){
+},{"./seabed":111}],109:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+/*
+Loader
+  Handle audio load. Only load once.
+*/
+
+var Loader = (function (_Phaser$Loader) {
+  function Loader() {
+    _classCallCheck(this, Loader);
+
+    if (_Phaser$Loader != null) {
+      _Phaser$Loader.apply(this, arguments);
+    }
+  }
+
+  _inherits(Loader, _Phaser$Loader);
+
+  _createClass(Loader, [{
+    key: 'image',
+    value: function image(key, url) {
+      var overwrite = arguments[2] === undefined ? true : arguments[2];
+
+      _get(Object.getPrototypeOf(Loader.prototype), 'image', this).call(this, key, url, overwrite);
+
+      return this;
+    }
+  }, {
+    key: 'audio',
+    value: function audio(key, urls, autoDecode) {
+      if (this.game.cache.checkSoundKey(key)) {
+        return this;
+      } else if (!this.game.device.webAudio) {
+        return this.media(key, urls);
+      }
+
+      _get(Object.getPrototypeOf(Loader.prototype), 'audio', this).call(this, key, urls, autoDecode);
+
+      return this;
+    }
+  }, {
+    key: 'media',
+
+    // load media if without web audio.
+    value: function media(key, path) {
+      console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
+
+      this.game.cache.addSound(key, '', {
+        path: path }, false, false);
+    }
+  }]);
+
+  return Loader;
+})(Phaser.Loader);
+
+exports['default'] = Loader;
+module.exports = exports['default'];
+
+// Phaser.Loader = Loader;
+
+},{}],110:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7291,7 +7393,7 @@ window.onerror = function (msg, url, line, column, err) {
 exports['default'] = log;
 module.exports = exports['default'];
 
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7303,6 +7405,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -7318,7 +7422,6 @@ var _state = require('./state');
 var _state2 = _interopRequireDefault(_state);
 
 var bgMusic = {};
-var soundEffect = {};
 
 var Seabed = (function (_State) {
   function Seabed() {
@@ -7332,6 +7435,8 @@ var Seabed = (function (_State) {
   _createClass(Seabed, [{
     key: 'init',
     value: function init() {
+      console.log('[State]', this.key, 'init');
+
       _get(Object.getPrototypeOf(Seabed.prototype), 'init', this).call(this);
 
       this.stage.backgroundColor = '#aaddf2';
@@ -7339,66 +7444,38 @@ var Seabed = (function (_State) {
   }, {
     key: 'preload',
     value: function preload() {
+      console.log('[State]', this.key, 'preload');
+
       _get(Object.getPrototypeOf(Seabed.prototype), 'preload', this).call(this);
 
       // http://magnatune.com/artists/albums/fulton-once?song=4
-      this.loadAudio('bg', 'music/Romanesca.m4a');
-      this.loadAudio('water', 'music/Water Lake.m4a');
-      this.loadAudio('ed', 'music/Laureate.m4a');
+      this.load.audio('bg', 'music/Romanesca.m4a');
+
+      this.load.audio('water', 'music/Water Lake.m4a');
     }
   }, {
     key: 'create',
     value: function create() {
+      console.log('[State]', this.key, 'create');
+
       _get(Object.getPrototypeOf(Seabed.prototype), 'create', this).call(this);
 
-      this.playMusic();
-    }
-  }, {
-    key: 'playMusic',
-    value: function playMusic() {
-      var play = function play() {
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
+      bgMusic.bg = bgMusic.bg || this.sound.play('bg', 0.5);
+      bgMusic.water = bgMusic.water || this.sound.play('water', 0.2);
 
-        args.forEach(function (sound) {
-          return sound && !sound.isPlaying && sound.play();
-        });
-      };
-      var stop = function stop() {
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
+      Object.entries(bgMusic).forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2);
 
-        args.forEach(function (sound) {
-          return sound && sound.stop();
-        });
-      };
+        var key = _ref2[0];
+        var sound = _ref2[1];
 
-      if (this.key != 'ending') {
-        stop(bgMusic.ed);
-
-        bgMusic.bg = bgMusic.bg || this.playAudio('bg', 0.5);
-        play(bgMusic.bg);
-
-        bgMusic.water = bgMusic.water || this.playAudio('water', 0.2);
-        play(bgMusic.water);
-      } else {
-        stop(bgMusic.bg, bgMusic.water);
-
-        bgMusic.ed = bgMusic.ed || this.playAudio('ed', 0.8);
-        play(bgMusic.ed);
-      }
+        return !sound.isPlaying && sound.play();
+      });
     }
   }], [{
     key: 'bgMusic',
     get: function () {
       return bgMusic;
-    }
-  }, {
-    key: 'soundEffect',
-    get: function () {
-      return soundEffect;
     }
   }]);
 
@@ -7408,7 +7485,7 @@ var Seabed = (function (_State) {
 exports['default'] = Seabed;
 module.exports = exports['default'];
 
-},{"./state":111}],111:[function(require,module,exports){
+},{"./state":113}],112:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -7417,146 +7494,35 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x5, _x6, _x7) { var _again = true; _function: while (_again) { var object = _x5, property = _x6, receiver = _x7; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x5 = parent; _x6 = property; _x7 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
 /*
-State
-  game state base class.
+SoundManager
 */
 
-var _lodashFunctionThrottle = require('lodash/function/throttle');
+var SoundManager = (function (_Phaser$SoundManager) {
+  function SoundManager() {
+    _classCallCheck(this, SoundManager);
 
-var _lodashFunctionThrottle2 = _interopRequireDefault(_lodashFunctionThrottle);
-
-var State = (function (_Phaser$State) {
-  function State() {
-    _classCallCheck(this, State);
-
-    _get(Object.getPrototypeOf(State.prototype), 'constructor', this).call(this);
+    if (_Phaser$SoundManager != null) {
+      _Phaser$SoundManager.apply(this, arguments);
+    }
   }
 
-  _inherits(State, _Phaser$State);
+  _inherits(SoundManager, _Phaser$SoundManager);
 
-  _createClass(State, [{
-    key: 'inputCircle',
-
-    // min finger tip size. 44 is for 480*320 screen.
-    // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
-    get: function () {
-      return new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
-    }
-  }, {
-    key: 'iPadStatusBarHeight',
-
-    // iPad status bar height is 20px;
-    // http://forums.macrumors.com/showthread.php?t=937836
-    get: function () {
-      return 20;
-    }
-  }, {
-    key: 'differenceImageHeight',
-    get: function () {
-      return 576;
-    }
-  }, {
-    key: 'iPadTop',
-    get: function () {
-      return (this.world.height - this.differenceImageHeight) / 2;
-    }
-  }, {
-    key: 'iPadBottom',
-    get: function () {
-      return this.iPadTop + this.differenceImageHeight;
-    }
-  }, {
-    key: 'init',
-    value: function init() {
-      this.game.fitScreen();
-
-      // remove camera bounds for slide.
-      this.camera.bounds = null;
-
-      if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
-        this.load.onFileComplete.add(this.onFileComplete, this);
-      }
-
-      this.moveCallbackIndex = this.input.addMoveCallback(this.onMove, this);
-
-      if (!this.input.onUp.has(this.onUp, this)) {
-        this.input.onUp.add(this.onUp, this);
-      }
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      if (!this.game.paused && !this.game.device.cocoonJSApp) {
-        this.renderFps();
-      }
-    }
-  }, {
-    key: 'shutdown',
-    value: function shutdown() {
-      this.load.onFileComplete.remove(this.onFileComplete, this);
-      this.input.deleteMoveCallback(this.moveCallbackIndex);
-      this.input.onUp.remove(this.onUp, this);
-    }
-  }, {
-    key: 'env',
-    get: function () {
-      return this.game.env;
-    }
-  }, {
-    key: 'assign',
-    value: function assign(obj) {
-      Object.assign(this, obj);
-    }
-  }, {
-    key: 'loadImage',
-    value: function loadImage(key, path) {
-      if (!this.cache.checkImageKey(key)) {
-        this.load.image(key, path);
-      }
-    }
-  }, {
-    key: 'loadAudio',
-    value: function loadAudio(key, path) {
-      if (!this.cache.checkSoundKey(key)) {
-        var device = this.game.device;
-
-        if (device.android && !device.webAudio) {
-          return this.loadMedia(key, path);
-        }
-
-        this.load.audio(key, path, false);
-      }
-    }
-  }, {
-    key: 'loadMedia',
-    value: function loadMedia(key, path) {
-      console.log('[Media]', 'cache', '' + key + ' (' + path + ')');
-
-      this.cache.addSound(key, '', {
-        path: path });
-    }
-  }, {
-    key: 'playAudio',
-    value: function playAudio(key) {
-      var volume = arguments[1] === undefined ? 1 : arguments[1];
-      var loop = arguments[2] === undefined ? false : arguments[2];
-
-      var device = this.game.device;
-
-      if (device.android && !device.webAudio) {
+  _createClass(SoundManager, [{
+    key: 'play',
+    value: function play(key, volume, loop) {
+      if (!this.game.device.webAudio) {
         return this.playMedia(key, volume, loop);
-      } else {
-        return this.sound.play(key, volume, loop);
       }
+
+      return _get(Object.getPrototypeOf(SoundManager.prototype), 'play', this).call(this, key, volume, loop);
     }
   }, {
     key: 'playMedia',
@@ -7571,7 +7537,7 @@ var State = (function (_Phaser$State) {
         return;
       }
 
-      var data = this.cache.getSoundData(key);
+      var data = this.game.cache.getSoundData(key);
 
       // 10 is the length of 'index.html'
       var root = location.href.substr(0, location.href.length - 10);
@@ -7604,32 +7570,147 @@ var State = (function (_Phaser$State) {
 
       return media;
     }
+  }]);
+
+  return SoundManager;
+})(Phaser.SoundManager);
+
+exports['default'] = SoundManager;
+module.exports = exports['default'];
+
+},{}],113:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+/*
+State
+  game state base class.
+*/
+
+var _lodashFunctionThrottle = require('lodash/function/throttle');
+
+var _lodashFunctionThrottle2 = _interopRequireDefault(_lodashFunctionThrottle);
+
+var renderFpsThrottle = undefined;
+
+var State = (function (_Phaser$State) {
+  function State() {
+    _classCallCheck(this, State);
+
+    _get(Object.getPrototypeOf(State.prototype), 'constructor', this).call(this);
+  }
+
+  _inherits(State, _Phaser$State);
+
+  _createClass(State, [{
+    key: 'init',
+    value: function init() {
+      this.game.fitScreen();
+
+      // remove camera bounds for slide.
+      if (this.camera.bounds) {
+        this.camera.bounds = null;
+      }
+
+      if (!this.load.onFileComplete.has(this.onFileComplete, this)) {
+        this.load.onFileComplete.add(this.onFileComplete, this);
+      }
+
+      this.moveCallbackIndex = this.input.addMoveCallback(this.onMove, this);
+
+      if (!this.input.onUp.has(this.onUp, this)) {
+        this.input.onUp.add(this.onUp, this);
+      }
+    }
+  }, {
+    key: 'shutdown',
+
+    // render() {
+    //   if (
+    //     this.game.env != 'production' &&
+    //     this.game.enableDebug &&
+    //     !this.game.paused &&
+    //     !this.game.device.cocoonJSApp // CocoonJS lancher show fps itself.
+    //   ) {
+    //     this.renderFps();
+    //   }
+    // }
+
+    value: function shutdown() {
+      this.load.onFileComplete.remove(this.onFileComplete, this);
+      this.input.deleteMoveCallback(this.moveCallbackIndex);
+      this.input.onUp.remove(this.onUp, this);
+    }
+  }, {
+    key: 'inputCircle',
+
+    // min finger tip size. 44 is for 480*320 screen.
+    // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+    get: function () {
+      return new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
+    }
+  }, {
+    key: 'iPadStatusBarHeight',
+
+    // iPad status bar height is 20px;
+    // http://forums.macrumors.com/showthread.php?t=937836
+    get: function () {
+      return 20;
+    }
+  }, {
+    key: 'differenceImageHeight',
+    get: function () {
+      return 576;
+    }
+  }, {
+    key: 'iPadTop',
+    get: function () {
+      return (this.world.height - this.differenceImageHeight) / 2;
+    }
+  }, {
+    key: 'iPadBottom',
+    get: function () {
+      return this.iPadTop + this.differenceImageHeight;
+    }
   }, {
     key: 'renderFps',
     value: function renderFps() {
-      var _this2 = this;
+      var _this = this;
 
-      if (!this.time.advancedTiming) {
-        this.time.advancedTiming = true;
-      }
-
-      if (!this.renderFpsThrottle) {
+      if (!renderFpsThrottle) {
         var renderFps = function renderFps() {
-          var fps = _this2.game.time.fps;
-          var x = _this2.game.device.iPad ? 50 : 0;
+          var fps = _this.game.time.fps;
+          var x = _this.game.device.iPad ? 50 : 0;
 
-          _this2.game.debug.text(fps, x, 14);
+          if (!_this.time.advancedTiming) {
+            _this.time.advancedTiming = true;
+          }
+
+          _this.game.debug.text(fps, x, 14);
         };
 
-        this.renderFpsThrottle = (0, _lodashFunctionThrottle2['default'])(renderFps, 500);
+        renderFpsThrottle = (0, _lodashFunctionThrottle2['default'])(renderFps, 500);
       }
 
-      this.renderFpsThrottle();
+      renderFpsThrottle();
     }
   }, {
     key: 'onFileComplete',
 
-    // progress, key, success, loaded, total
+    // show assets load progress bar. (progress, key, success, loaded, total)
     value: function onFileComplete(progress) {
       if (!this.progress) {
         var y = this.game.device.iPad ? this.world.height : 0;

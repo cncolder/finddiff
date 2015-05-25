@@ -3,15 +3,13 @@ Cordova
   webview shell.
  */
 
+import fetch from 'whatwg-fetch';
 import I18n from './i18n';
 
 class App {
   // Application Constructor
   constructor() {
     this.bindEvents();
-
-    // Phaser game.input.doubleTapRate is 300ms.
-    this.doubleTapRate = 300;
   }
 
   // check new version. if there is, return apk download link.
@@ -142,7 +140,7 @@ class App {
     let now = Date.now();
     let gap = now - (this.previousBackbuttonTimestamp || 0);
 
-    if (gap < this.doubleTapRate) {
+    if (gap < game.input.doubleTapRate) {
       navigator.app.exitApp();
     } else {
       this.previousBackbuttonTimestamp = now;
