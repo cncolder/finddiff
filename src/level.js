@@ -67,7 +67,7 @@ class Level extends Seabed {
   create() {
     super.create();
 
-    let y = this.iPad ? this.top : 0;
+    let y = this.iPhone4 || this.iPad ? this.top : 0;
 
     // background images
     this.img1 = this.add.image(0, y, 'img1');
@@ -115,7 +115,9 @@ class Level extends Seabed {
     text.anchor.setTo(0.5, 0);
     text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
 
-    if (this.iPad) {
+    if (this.iPhone4) {
+      text.y = 0;
+    } else if (this.iPad) {
       text.y = this.statusBarHeight;
     }
 

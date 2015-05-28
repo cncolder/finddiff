@@ -79,6 +79,10 @@ class State extends Phaser.State {
     return 20;
   }
 
+  get iPhone4() {
+    return this.game.device.iPhone4;
+  }
+
   get iPad() {
     return this.game.device.iPad;
   }
