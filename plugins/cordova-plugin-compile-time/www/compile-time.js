@@ -1,0 +1,1 @@
+module.exports={"id":"com.vitarn.finddiff","version":"1.1.0","name":"FindDiff","description":"A children book to find difference between two images.","author":"ViTarn.com","env":"production"}

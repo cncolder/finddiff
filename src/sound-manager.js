@@ -8,6 +8,8 @@ export default class SoundManager extends Phaser.SoundManager {
       return this.playMedia(key, volume, loop);
     }
 
+    // return this.playMedia(key, volume, loop);
+
     return super.play(key, volume, loop);
   }
 
@@ -18,33 +20,42 @@ export default class SoundManager extends Phaser.SoundManager {
     }
 
     let data = this.game.cache.getSoundData(key);
+    let path = data.path;
 
-    // 10 is the length of 'index.html'
-    let root = location.href.substr(0, location.href.length - 10);
+    if (this.game.device.android) {
+      // 10 is the length of 'index.html'
+      let root = location.href.substr(0, location.href.length - 10);
 
-    // file:///android_asset/www/asset/xxx.mp3
-    let path = root + data.path;
+      // file:///android_asset/www/asset/xxx.mp3
+      path = root + path;
+    }
 
     let media = new Media(path, () => {
-      console.log('[Media]', 'finish', `${key} (${path})`);
+      media.isPlaying = false;
 
       if (!this.game.paused) {
         if (loop) {
-          console.log('[Media]', 'loop', `${key} (${path})`);
-
           media.play();
         } else {
-          console.log('[Media]', 'release', `${key} (${path})`);
-
-          media.release();
+          // media.release();
         }
       }
     }, err => {
       console.log('[Media]', 'error', err.message);
+    }, status => {
+      media.isPlaying =
+        status == Media.MEDIA_STARTING ||
+        status == Media.MEDIA_RUNNING;
     });
 
     media.setVolume(volume);
-    media.play();
+
+    // https://issues.apache.org/jira/browse/CB-7599?focusedCommentId=14374824&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14374824
+    // setTimeout(() => media.stop(), (media.getDuration() * 1000 - 100));
+
+    media.play({
+      playAudioWhenScreenIsLocked: false, // iOS only
+    });
 
     media.resume = media.play.bind(media);
 

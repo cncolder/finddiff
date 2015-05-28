@@ -40,11 +40,7 @@ class Cover extends Seabed {
       i, h, v
     }) => {
       let x = this.world.width * h;
-      let y = this.world.height * v;
-
-      if (this.game.device.iPad) {
-        y += this.iPadTop;
-      }
+      let y = this.maxHeight * v + this.top;
 
       let item = this[`img${i}`] = this.add.image(x, y, `img${i}`);
 
@@ -121,11 +117,10 @@ class Cover extends Seabed {
     emitter.makeParticles('bubble');
     emitter.minParticleScale = 0.1;
     emitter.maxParticleScale = 1;
+    emitter.setXSpeed(0, 0);
     emitter.setYSpeed(-300, -500);
-    emitter.setXSpeed(-5, 5);
-    emitter.minRotation = 0;
-    emitter.maxRotation = 0;
-    emitter.start(false, 2500, 200, 0);
+    emitter.setRotation(0, 0);
+    emitter.start(false, 2500);
   }
 
   mute() {

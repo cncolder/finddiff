@@ -37,7 +37,7 @@ class Level extends Seabed {
     this.load.image('img1', `img/${code}1.jpg`);
     this.load.image('img2', `img/${code}2.jpg`);
 
-    if (this.game.device.iPad) {
+    if (this.iPad) {
       this.load.image('whale', 'img/whale.png');
       this.load.image('girl', 'img/1005.png');
     }
@@ -67,7 +67,7 @@ class Level extends Seabed {
   create() {
     super.create();
 
-    let y = this.game.device.iPad ? this.iPadTop : 0;
+    let y = this.iPad ? this.top : 0;
 
     // background images
     this.img1 = this.add.image(0, y, 'img1');
@@ -75,12 +75,12 @@ class Level extends Seabed {
     // this.img1.smoothed = this.img2.smoothed = false;
     // this.img1.cacheAsBitmap = this.img2.cacheAsBitmap = true;
 
-    if (this.game.device.iPad) {
-      let whale = this.add.image(0, this.iPadBottom, 'whale');
+    if (this.iPad) {
+      let whale = this.add.image(0, this.bottom, 'whale');
       whale.scale.setTo(0.5);
 
       let girl = this.add.image(
-        this.world.width, this.iPadStatusBarHeight, 'girl'
+        this.world.width, this.statusBarHeight, 'girl'
       );
       girl.anchor.setTo(1.5, 0);
 
@@ -114,8 +114,9 @@ class Level extends Seabed {
     });
     text.anchor.setTo(0.5, 0);
     text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
-    if (this.game.device.iPad) {
-      text.y = this.iPadStatusBarHeight;
+
+    if (this.iPad) {
+      text.y = this.statusBarHeight;
     }
 
     let grd = text.context.createLinearGradient(0, 0, 0, text.height);

@@ -34,7 +34,7 @@ export default class Ending extends Seabed {
     grd.addColorStop(1, '#004CB3');
     text.fill = grd;
 
-    // let y = this.game.device.iPad ? 20 : 0;
+    // let y = this.iPad ? 20 : 0;
     //
     // let sprite = this.sprite = this.add.sprite(0, y);
     //

@@ -3,7 +3,6 @@ Cordova
   webview shell.
  */
 
-import fetch from 'whatwg-fetch';
 import I18n from './i18n';
 
 class App {
@@ -14,13 +13,15 @@ class App {
 
   // check new version. if there is, return apk download link.
   checkVersion() {
+    let appId = cordova.compileTime.id;
     let appVersion = cordova.compileTime.version;
 
     console.log('[App] current version', appVersion);
 
     if (navigator.connection.type == Connection.WIFI) {
       let updateServer = 'http://haoduo.vitarn.com';
-      let updateUrl = `${updateServer}/update.json?version=${appVersion}`;
+      let updateUrl =
+        `${updateServer}/update.json?id=${appId}&version=${appVersion}`;
       let platform = device.platform.toLowerCase();
       let t = this.t;
 

@@ -14,6 +14,8 @@ app.use(stat('./www', {
 app.use(stat('./merges/ios'));
 app.use(stat('./platforms/android/build/outputs/apk'));
 
+app.use(require('koa-cors')());
+
 app.use(function*(next) {
   var version = this.query.version;
   var latest = '1.0.0';

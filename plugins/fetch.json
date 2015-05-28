@@ -97,8 +97,9 @@
     },
     "cordova-plugin-compile-time": {
         "source": {
-            "type": "local",
-            "path": "../cordova_compile_time_plugin"
+            "type": "git",
+            "url": "https://github.com/cncolder/cordova_compile_time_plugin",
+            "subdir": "."
         },
         "is_top_level": true,
         "variables": {}

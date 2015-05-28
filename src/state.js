@@ -5,7 +5,7 @@ State
 
 import throttle from 'lodash/function/throttle';
 
-let renderFpsThrottle;
+let renderFpsThrottle, inputCircle;
 
 class State extends Phaser.State {
   constructor() {
@@ -48,35 +48,46 @@ class State extends Phaser.State {
     this.input.onUp.remove(this.onUp, this);
   }
 
-  // min finger tip size. 44 is for 480*320 screen.
-  // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
-  get inputCircle() {
-    return new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
-  }
-
-  // iPad status bar height is 20px;
-  // http://forums.macrumors.com/showthread.php?t=937836
-  get iPadStatusBarHeight() {
-    return 20;
+  get maxHeight() {
+    return 768;
   }
 
   get differenceImageHeight() {
     return 576;
   }
 
-  get iPadTop() {
+  get top() {
     return (this.world.height - this.differenceImageHeight) / 2;
   }
 
-  get iPadBottom() {
-    return this.iPadTop + this.differenceImageHeight;
+  get bottom() {
+    return this.top + this.differenceImageHeight;
+  }
+
+  // min finger tip size. 44 is for 480*320 screen.
+  // Give tappable controls a hit target of about 44 x 44 points. https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/LayoutandAppearance.html
+  get inputCircle() {
+    if (!inputCircle) {
+      inputCircle = new Phaser.Circle(0, 0, 44 / 480 * this.world.width);
+    }
+    return inputCircle;
+  }
+
+  // iPhone and iPad status bar height is 20px;
+  // http://forums.macrumors.com/showthread.php?t=937836
+  get statusBarHeight() {
+    return 20;
+  }
+
+  get iPad() {
+    return this.game.device.iPad;
   }
 
   renderFps() {
     if (!renderFpsThrottle) {
       let renderFps = () => {
         let fps = this.game.time.fps;
-        let x = this.game.device.iPad ? 50 : 0;
+        let x = this.iPad ? 50 : 0;
 
         if (!this.time.advancedTiming) {
           this.time.advancedTiming = true;
@@ -94,7 +105,7 @@ class State extends Phaser.State {
   // show assets load progress bar. (progress, key, success, loaded, total)
   onFileComplete(progress) {
     if (!this.progress) {
-      let y = this.game.device.iPad ? this.world.height : 0;
+      let y = this.iPad ? this.world.height : 0;
       let bar = this.add.graphics(0, y);
       let fontSize = this.world.height / 50;
       let text = this.add.text(this.world.centerX, fontSize, '', {

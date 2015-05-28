@@ -1,9 +1,11 @@
 process.env.BROWSER_ENV = location.host == 'localhost:3000' ?
   'development' : 'production';
 
-require('babelify/node_modules/babel-core/polyfill');
-
-import log from './log'; // jshint ignore:line
+// jshint ignore:start
+import polyfill from 'babelify/node_modules/babel-core/polyfill';
+import fetch from 'whatwg-fetch';
+import log from './log';
+// jshint ignore:end
 import App from './app';
 import Game from './game';
 

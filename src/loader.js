@@ -18,6 +18,7 @@ export default class Loader extends Phaser.Loader {
     }
 
     super.audio(key, urls, autoDecode);
+    // return this.media(key, urls);
 
     return this;
   }
@@ -29,6 +30,8 @@ export default class Loader extends Phaser.Loader {
     this.game.cache.addSound(key, '', {
       path,
     }, false, false);
+
+    return this;
   }
 }
 
