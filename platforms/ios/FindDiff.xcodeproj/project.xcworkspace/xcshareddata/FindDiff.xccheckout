@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>AE52AF0D-9FF8-4892-94AC-5D0828D146FF</string>
 	<key>IDESourceControlProjectName</key>
-	<string>FindDiff</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>420A3B1C3CA2A185C91DB95FA8C6ABBFFB2C0F98</key>
 		<string>github.com:cncolder/finddiff.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>platforms/ios/FindDiff.xcodeproj</string>
+	<string>platforms/ios/FindDiff.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>420A3B1C3CA2A185C91DB95FA8C6ABBFFB2C0F98</key>

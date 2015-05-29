@@ -23,6 +23,16 @@ CFBundleDisplayName = "找不同";
 
 For android: Copy `platforms/android/res/values` to `values-zh-rCN`. Then modify `strings.xml`.
 
+### Version number.
+
+iOS: version is 1.1, and build is 1.1.2.
+
+Android: version name is 1.1, version code is 2. so version is 1.1.2.
+
+```xml
+<widget version="1.1" android-versionCode="2" ios-CFBundleVersion="1.1.2">
+```
+
 
 [crosswalk]: https://crosswalk-project.org/documentation/cordova/crosswalk_with_cordova4.html
 [blacklist]: https://crosswalk-project.org/documentation/about/faq.html#Canvas-and-WebGL-support
