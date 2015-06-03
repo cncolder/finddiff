@@ -7430,16 +7430,15 @@ var Loader = (function (_Phaser$Loader) {
   }, {
     key: 'audio',
     value: function audio(key, urls, autoDecode) {
-      if (this.game.cache.checkSoundKey(key)) {
-        return this;
-      } else if (!this.game.device.webAudio) {
-        return this.media(key, urls);
-      }
+      // if (this.game.cache.checkSoundKey(key)) {
+      // return this;
+      // } else if (!this.game.device.webAudio) {
+      return this.media(key, urls);
+      // }
 
-      _get(Object.getPrototypeOf(Loader.prototype), 'audio', this).call(this, key, urls, autoDecode);
-      // return this.media(key, urls);
+      // super.audio(key, urls, autoDecode);
 
-      return this;
+      // return this;
     }
   }, {
     key: 'media',
@@ -7602,8 +7601,6 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
@@ -7622,13 +7619,11 @@ var SoundManager = (function (_Phaser$SoundManager) {
   _createClass(SoundManager, [{
     key: 'play',
     value: function play(key, volume, loop) {
-      if (!this.game.device.webAudio) {
-        return this.playMedia(key, volume, loop);
-      }
+      // if (!this.game.device.webAudio) {
+      return this.playMedia(key, volume, loop);
+      // }
 
-      // return this.playMedia(key, volume, loop);
-
-      return _get(Object.getPrototypeOf(SoundManager.prototype), 'play', this).call(this, key, volume, loop);
+      // return super.play(key, volume, loop);
     }
   }, {
     key: 'playMedia',

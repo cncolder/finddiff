@@ -4,13 +4,11 @@ SoundManager
 
 export default class SoundManager extends Phaser.SoundManager {
   play(key, volume, loop) {
-    if (!this.game.device.webAudio) {
+    // if (!this.game.device.webAudio) {
       return this.playMedia(key, volume, loop);
-    }
+    // }
 
-    // return this.playMedia(key, volume, loop);
-
-    return super.play(key, volume, loop);
+    // return super.play(key, volume, loop);
   }
 
   playMedia(key, volume = 1, loop = false) {

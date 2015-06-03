@@ -11,16 +11,15 @@ export default class Loader extends Phaser.Loader {
   }
 
   audio(key, urls, autoDecode) {
-    if (this.game.cache.checkSoundKey(key)) {
-      return this;
-    } else if (!this.game.device.webAudio) {
+    // if (this.game.cache.checkSoundKey(key)) {
+      // return this;
+    // } else if (!this.game.device.webAudio) {
       return this.media(key, urls);
-    }
+    // }
 
-    super.audio(key, urls, autoDecode);
-    // return this.media(key, urls);
+    // super.audio(key, urls, autoDecode);
 
-    return this;
+    // return this;
   }
 
   // load media if without web audio.
